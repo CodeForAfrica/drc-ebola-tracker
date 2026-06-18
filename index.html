@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRC · Uganda — Ebola Bundibugyo 2026 · Interactive Dashboard</title>
+<meta name="description" content="Interactive map dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. WHO Disease Outbreak News DON607, as of 10–11 June 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0a131f;--panel:#0f1d2e;--panel-2:#13263b;--line:#22384f;
+  --line-2:#2c465f;--text:#e7eef5;--muted:#8ba0b4;--dim:#5f768c;
+  --blue:#3d8bff;--teal:#2bb3a3;
+  --r1:#fee5d9;--r2:#fcae91;--r3:#fb6a4a;--r4:#de2d26;--r5:#a50f15;--r6:#67000d;
+  --accent:#ff5a3c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);
+  overflow:hidden;-webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1.08}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* ---------- top bar ---------- */
+#topbar{
+  position:absolute;top:0;left:0;right:0;height:58px;z-index:1200;
+  background:linear-gradient(180deg,rgba(8,18,30,.96),rgba(8,18,30,.82));
+  border-bottom:1px solid var(--line);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:16px;
+}
+#topbar .title{display:flex;align-items:center;gap:13px;min-width:0}
+#topbar .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:0 0 auto;box-shadow:0 0 0 0 rgba(255,90,60,.6);animation:p 2.4s infinite}
+@keyframes p{0%{box-shadow:0 0 0 0 rgba(255,90,60,.55)}70%{box-shadow:0 0 0 8px rgba(255,90,60,0)}100%{box-shadow:0 0 0 0 rgba(255,90,60,0)}}
+#topbar h1{font-size:1.02rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#topbar h1 span{color:var(--accent)}
+#topbar .sub{font-family:'IBM Plex Mono';font-size:.7rem;color:var(--muted);letter-spacing:.06em;white-space:nowrap}
+#topbar .links{display:flex;gap:8px;flex:0 0 auto}
+.tb-btn{
+  font-family:'IBM Plex Mono';font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:4px;
+  padding:7px 11px;cursor:pointer;transition:.16s;white-space:nowrap;
+}
+.tb-btn:hover{color:#fff;border-color:var(--blue);background:rgba(61,139,255,.08)}
+@media(max-width:720px){#topbar .sub{display:none}#topbar h1{font-size:.86rem}}
+
+/* ---------- map ---------- */
+#map{position:absolute;top:58px;left:0;right:0;bottom:0;background:#0a131f;z-index:1}
+.leaflet-container{background:#0a131f;font-family:'IBM Plex Sans'}
+.leaflet-control-attribution{background:rgba(10,19,31,.8)!important;color:#6f879d!important;font-size:10px!important}
+.leaflet-control-attribution a{color:#8aa6c4!important}
+.leaflet-bar a{background:var(--panel)!important;color:#cfe0f0!important;border-color:var(--line)!important}
+.leaflet-bar a:hover{background:var(--panel-2)!important}
+
+/* marker label tooltip */
+.hz-tip{background:var(--panel)!important;border:1px solid var(--line-2)!important;color:var(--text)!important;border-radius:5px!important;
+  font-family:'IBM Plex Sans'!important;box-shadow:0 8px 26px rgba(0,0,0,.5)!important;padding:9px 12px!important}
+.hz-tip:before{display:none!important}
+.hz-tip b{font-family:'Archivo';font-weight:800}
+.hz-tip .n{font-family:'IBM Plex Mono';font-size:1.25rem;color:#ff7d63;font-weight:600}
+
+/* ---------- floating panels ---------- */
+.panel{
+  position:absolute;z-index:1000;background:rgba(15,29,46,.95);border:1px solid var(--line);
+  border-radius:9px;backdrop-filter:blur(10px);box-shadow:0 16px 40px rgba(0,0,0,.5);
+}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);cursor:pointer}
+.panel-h h3{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono';font-weight:500}
+.panel-h .chev{color:var(--dim);font-size:1.1rem;line-height:1;transition:.2s}
+.panel.collapsed .panel-b{display:none}
+.panel.collapsed .chev{transform:rotate(-90deg)}
+.panel-b{padding:15px}
+
+/* legend (bottom-left) */
+#legend{left:16px;bottom:22px;width:268px}
+.ramp{display:flex;height:13px;border-radius:3px;overflow:hidden;margin:4px 0 6px}
+.ramp i{flex:1}
+.ramp-lab{display:flex;justify-content:space-between;font-family:'IBM Plex Mono';font-size:.64rem;color:var(--dim)}
+.legend-row{display:flex;align-items:center;gap:9px;margin-top:13px}
+.legend-row .lr-l{font-size:.78rem;color:var(--muted)}
+.size-key{display:flex;align-items:flex-end;gap:14px;margin:14px 2px 4px}
+.size-key .sk{display:flex;flex-direction:column;align-items:center;gap:5px}
+.size-key .circ{border-radius:50%;background:rgba(222,45,38,.35);border:1.5px solid #de2d26}
+.size-key .skl{font-family:'IBM Plex Mono';font-size:.62rem;color:var(--dim)}
+.toggle{display:flex;align-items:center;gap:9px;margin-top:13px;cursor:pointer;user-select:none}
+.tg{width:38px;height:21px;border-radius:11px;background:var(--line);position:relative;transition:.18s;flex:0 0 auto}
+.tg::after{content:"";position:absolute;top:2.5px;left:2.5px;width:16px;height:16px;border-radius:50%;background:#7d93a8;transition:.18s}
+.toggle.on .tg{background:rgba(61,139,255,.4)}
+.toggle.on .tg::after{left:19.5px;background:var(--blue)}
+.toggle .tl{font-size:.8rem;color:var(--text)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{font-family:'IBM Plex Mono';font-size:.68rem;padding:5px 11px;background:transparent;color:var(--muted);border:0;cursor:pointer}
+.seg button.active{background:var(--blue);color:#fff}
+.legend-src{font-size:.66rem;color:var(--dim);margin-top:12px;line-height:1.5}
+
+/* zone panel (right) */
+#zone{right:16px;top:74px;width:330px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+#zone .panel-b{overflow-y:auto;padding:0}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;font-family:'IBM Plex Mono';font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;
+  padding:11px 6px;background:transparent;color:var(--muted);border:0;border-bottom:2px solid transparent;cursor:pointer;transition:.15s}
+.tabs button.active{color:#fff;border-bottom-color:var(--accent)}
+.tabpane{display:none;padding:16px}
+.tabpane.active{display:block}
+.zone-empty{color:var(--dim);font-size:.86rem;line-height:1.6;padding:24px 16px;text-align:center}
+.zone-name{font-family:'Archivo';font-weight:800;font-size:1.5rem;color:#fff}
+.zone-meta{font-family:'IBM Plex Mono';font-size:.7rem;color:var(--muted);margin-top:2px;letter-spacing:.04em}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px}
+.kpi .k{background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:12px}
+.kpi .k .v{font-family:'Archivo';font-weight:800;font-size:1.55rem;color:#fff;line-height:1}
+.kpi .k .v.red{color:#ff6a4d}
+.kpi .k .l{font-size:.7rem;color:var(--muted);margin-top:6px}
+.bar-wrap{margin-top:8px}
+.bar-wrap .bl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:5px}
+.bar{height:8px;background:var(--line);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#fb6a4a,#a50f15)}
+.ctx{font-size:.86rem;color:#c5d4e2;line-height:1.65}
+.ctx .tag{display:inline-block;font-family:'IBM Plex Mono';font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;
+  color:#ffb09c;border:1px solid #5a2a22;background:rgba(255,90,60,.08);border-radius:4px;padding:3px 8px;margin-bottom:10px}
+.mini{position:relative;height:150px;margin-top:6px}
+.note{font-size:.72rem;color:var(--dim);margin-top:10px;line-height:1.5}
+
+/* response panel (bottom-right) */
+#response{right:16px;bottom:22px;width:330px}
+.resp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.resp-grid .c{background:var(--panel-2);padding:11px 12px}
+.resp-grid .c .v{font-family:'Archivo';font-weight:800;font-size:1.3rem;color:#fff}
+.resp-grid .c .v.red{color:#ff6a4d}
+.resp-grid .c .l{font-size:.66rem;color:var(--muted);margin-top:4px}
+.risk-list{margin-top:13px;display:flex;flex-direction:column;gap:7px}
+.risk{display:flex;align-items:center;justify-content:space-between;font-size:.78rem}
+.risk .rg{color:#c5d4e2}
+.pill{font-family:'IBM Plex Mono';font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:20px;font-weight:600}
+.pill.vh{background:rgba(165,15,21,.25);color:#ff8a72;border:1px solid #7a2118}
+.pill.h{background:rgba(222,45,38,.18);color:#ff9d86;border:1px solid #6a2018}
+.pill.l{background:rgba(43,179,163,.16);color:#5fd6c6;border:1px solid #1c5b53}
+
+@media(max-width:1080px){
+  #zone{display:none}
+  #response{display:none}
+}
+@media(max-width:560px){
+  #legend{width:calc(100vw - 32px)}
+}
+
+/* ---------- modals ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(5,11,19,.74);z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:680px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.modal-h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
+.modal-h h2{font-size:1.25rem;color:#fff;font-weight:800}
+.modal-x{background:transparent;border:0;color:var(--muted);font-size:1.5rem;cursor:pointer;line-height:1}
+.modal-x:hover{color:#fff}
+.modal-b{padding:22px 24px}
+.modal-b h4{color:#fff;font-size:.95rem;margin:18px 0 7px}
+.modal-b h4:first-child{margin-top:0}
+.modal-b p,.modal-b li{font-size:.9rem;color:#bccbd9;line-height:1.65}
+.modal-b ul{margin:6px 0 6px 18px}
+.modal-b a{color:#6fb0ff;text-decoration:none;word-break:break-word}
+.modal-b a:hover{text-decoration:underline}
+.modal-b .src-line{font-family:'IBM Plex Mono';font-size:.78rem}
+.dlrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
+.dlbtn{font-family:'IBM Plex Mono';font-size:.7rem;letter-spacing:.04em;text-transform:uppercase;background:var(--panel-2);
+  border:1px solid var(--line);border-radius:5px;color:#cfe0f0;padding:8px 12px;cursor:pointer;text-decoration:none;transition:.15s}
+.dlbtn:hover{border-color:var(--blue);color:#fff}
+.fig{width:100%;border:1px solid var(--line);border-radius:8px;margin-top:12px}
+.figcap{font-size:.76rem;color:var(--dim);margin-top:7px;line-height:1.5}
+
+/* intro hint */
+#hint{position:absolute;left:50%;top:72px;transform:translateX(-50%);z-index:1100;
+  background:rgba(15,29,46,.95);border:1px solid var(--line-2);border-radius:30px;padding:9px 18px;
+  font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:9px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+#hint .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+@media(prefers-reduced-motion:reduce){#topbar .dot{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="title">
+    <span class="dot"></span>
+    <div style="min-width:0">
+      <h1>Ebola <span>Bundibugyo</span> 2026 · DRC &amp; Uganda</h1>
+      <div class="sub">Interactive outbreak dashboard · WHO DON607 · as of 10–11 Jun 2026</div>
+    </div>
+  </div>
+  <div class="links">
+    <button class="tb-btn" id="openData">Contributors, Data &amp; Methods</button>
+    <button class="tb-btn" id="openTerms">Terms of Use</button>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<div id="hint"><span class="d"></span> Click a marker to inspect a health zone · scroll to zoom</div>
+
+<!-- LEGEND / LAYER -->
+<div class="panel" id="legend">
+  <div class="panel-h" data-toggle><h3>Layer · Confirmed cases</h3><span class="chev">▾</span></div>
+  <div class="panel-b">
+    <div class="ramp"><i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i><i style="background:var(--r6)"></i></div>
+    <div class="ramp-lab"><span>fewer</span><span>more cases</span></div>
+
+    <div class="size-key">
+      <div class="sk"><span class="circ" style="width:14px;height:14px"></span><span class="skl">33</span></div>
+      <div class="sk"><span class="circ" style="width:26px;height:26px"></span><span class="skl">130</span></div>
+      <div class="sk"><span class="circ" style="width:38px;height:38px"></span><span class="skl">185</span></div>
+      <div class="sk" style="margin-left:4px"><span class="skl" style="max-width:80px">circle area ∝ confirmed cases</span></div>
+    </div>
+
+    <div class="legend-row">
+      <span class="lr-l">Color scale</span>
+      <span class="seg"><button id="scLog" class="active">log</button><button id="scLin">linear</button></span>
+    </div>
+    <div class="toggle on" id="tgMarkers"><span class="tg"></span><span class="tl">Show active-case markers</span></div>
+
+    <div class="legend-src">Confirmed cases (cumulative), by Ituri health zone. Transcribed from WHO Disease Outbreak News (DON607). Marker positions are approximate health-zone centroids. As of 10 Jun 2026.</div>
+  </div>
+</div>
+
+<!-- ZONE PANEL -->
+<div class="panel" id="zone">
+  <div class="panel-h" data-toggle><h3>Health zone</h3><span class="chev">▾</span></div>
+  <div class="panel-b">
+    <div class="tabs">
+      <button data-tab="snap" class="active">Current snapshot</button>
+      <button data-tab="trend">Trends</button>
+      <button data-tab="ctx">Context</button>
+    </div>
+    <div class="tabpane active" id="tab-snap">
+      <div class="zone-empty" id="snapEmpty">Select a health zone on the map to see its current snapshot.</div>
+      <div id="snapBody" style="display:none">
+        <div class="zone-name" id="znName">—</div>
+        <div class="zone-meta" id="znMeta">—</div>
+        <div class="kpi">
+          <div class="k"><div class="v red" id="znCases">—</div><div class="l">Confirmed cases</div></div>
+          <div class="k"><div class="v" id="znShare">—</div><div class="l">Share of Ituri</div></div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bl"><span id="znBarLab">Share of Ituri confirmed</span><span id="znBarVal">—</span></div>
+          <div class="bar"><i id="znBar" style="width:0%"></i></div>
+        </div>
+        <p class="note" id="znNote"></p>
+      </div>
+    </div>
+    <div class="tabpane" id="tab-trend">
+      <div class="ctx"><span class="tag">National cumulative</span></div>
+      <p class="ctx" style="margin-bottom:8px">Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published in DON607.</p>
+      <div class="mini"><canvas id="trendChart"></canvas></div>
+      <p class="note">DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun). Uganda flat at 19 since 8 Jun (no new cases in 6 days).</p>
+    </div>
+    <div class="tabpane" id="tab-ctx">
+      <div class="zone-empty" id="ctxEmpty">Select a health zone for response context.</div>
+      <div id="ctxBody" style="display:none">
+        <div class="ctx"><span class="tag" id="ctxTag">Context</span></div>
+        <p class="ctx" id="ctxText"></p>
+        <p class="note" id="ctxNote"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESPONSE PANEL -->
+<div class="panel" id="response">
+  <div class="panel-h" data-toggle><h3>National &amp; provincial response</h3><span class="chev">▾</span></div>
+  <div class="panel-b">
+    <div class="resp-grid">
+      <div class="c"><div class="v red">695</div><div class="l">Confirmed (both countries)</div></div>
+      <div class="c"><div class="v red">138</div><div class="l">Deaths · CFR ~20% (DRC)</div></div>
+      <div class="c"><div class="v">29</div><div class="l">Health zones with cases (DRC)</div></div>
+      <div class="c"><div class="v">71%</div><div class="l">Contact follow-up (Ituri)</div></div>
+    </div>
+    <div class="risk-list">
+      <div class="risk"><span class="rg">DRC</span><span class="pill vh">Very high</span></div>
+      <div class="risk"><span class="rg">Uganda</span><span class="pill h">High</span></div>
+      <div class="risk"><span class="rg">Bordering countries</span><span class="pill h">High</span></div>
+      <div class="risk"><span class="rg">Rest of Africa · global</span><span class="pill l">Low</span></div>
+    </div>
+    <p class="note">159 health zones categorized affected or at risk (risk-stratification, 8 Jun). Candidate-therapeutics trial underway: MBP134, REGN3479 (treatment); obeldesivir (post-exposure prophylaxis). No licensed vaccine or treatment for BVD.</p>
+  </div>
+</div>
+
+<!-- DATA MODAL -->
+<div class="modal-bg" id="dataModal">
+  <div class="modal">
+    <div class="modal-h"><h2>Contributors, Data &amp; Methods</h2><button class="modal-x" data-close>✕</button></div>
+    <div class="modal-b">
+      <h4>Data source</h4>
+      <p>All epidemiological figures are transcribed from the World Health Organization Disease Outbreak News:</p>
+      <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON607" target="_blank" rel="noopener">WHO DON607 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (13 June 2026)</a></p>
+      <p>DRC figures are as of 10 June 2026; Uganda figures as of 11 June 2026. WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.</p>
+
+      <h4>Method</h4>
+      <ul>
+        <li>The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
+        <li>The <strong>log / linear</strong> toggle changes how case counts map onto the color ramp. The marker toggle shows or hides the case symbols.</li>
+        <li>North Kivu (9 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON607 does not disaggregate their case counts. 94 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
+        <li>Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
+        <li>The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June).</li>
+      </ul>
+
+      <h4>WHO figures (view / download at source)</h4>
+      <img class="fig" loading="lazy" src="https://cdn-auth-cms.who.int/media-aut/images/default-source/products/disease-outbreak-news/distribution-of-suspected-and-confirmed-cases1977962894.jpg?sfvrsn=cc4a8c03_3" alt="WHO Figure 1: distribution of confirmed BVD cases, DRC and Uganda">
+      <p class="figcap">WHO Figure 1 — distribution of confirmed cases, DRC (10 Jun) &amp; Uganda (11 Jun). © WHO.</p>
+      <div class="dlrow">
+        <a class="dlbtn" target="_blank" rel="noopener" href="https://cdn-auth-cms.who.int/media-aut/images/default-source/products/disease-outbreak-news/distribution-of-suspected-and-confirmed-cases1977962894.jpg?sfvrsn=cc4a8c03_3">Fig 1 · distribution map</a>
+        <a class="dlbtn" target="_blank" rel="noopener" href="https://cdn.who.int/media/images/default-source/products/disease-outbreak-news/confirmded-cases-and-deaths-in-drccdd4a714-2c27-4788-b06c-866977fe8a91.jpg?sfvrsn=2175c780_3">Fig 2 · DRC epicurve</a>
+        <a class="dlbtn" target="_blank" rel="noopener" href="https://cdn.who.int/media/images/default-source/products/disease-outbreak-news/confirmed-cases-and-deaths-in-ugandace3ade2d-6c61-413b-87fb-ad94df3b6207.jpg?sfvrsn=6d0d41b3_3">Fig 3 · Uganda epicurve</a>
+      </div>
+
+      <h4>Download the data (CSV)</h4>
+      <div class="dlrow">
+        <button class="dlbtn" data-dl="don607_confirmed_by_health_zone.csv">Cases by health zone</button>
+        <button class="dlbtn" data-dl="don607_province_summary.csv">Province summary</button>
+        <button class="dlbtn" data-dl="don607_country_summary.csv">Country summary</button>
+        <button class="dlbtn" data-dl="don607_contacts.csv">Contact tracing</button>
+        <button class="dlbtn" data-dl="don_cumulative_trend.csv">Cumulative trend</button>
+        <button class="dlbtn" data-dl="risk_assessment.csv">WHO risk levels</button>
+      </div>
+
+      <h4>Attribution</h4>
+      <p>Epidemiological data © World Health Organization 2026. Basemap © OpenStreetMap contributors, © CARTO. This dashboard is an independent visualisation for humanitarian information purposes and is not an official WHO product. Inspired by the layout of the INRB-UMIE BDBV 2026 Epidemic Dashboard.</p>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS MODAL -->
+<div class="modal-bg" id="termsModal">
+  <div class="modal">
+    <div class="modal-h"><h2>Terms of Use</h2><button class="modal-x" data-close>✕</button></div>
+    <div class="modal-b">
+      <p>This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.</p>
+      <h4>No warranty</h4>
+      <p>Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (10–11 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
+      <h4>Rights</h4>
+      <p>All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO DON607 source for any onward use.</p>
+      <h4>Sensitive context</h4>
+      <p>This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const HZ=[
+  {name:"Bunia",prov:"Ituri",country:"DRC",cases:185,lat:1.5667,lng:30.2500,
+    tag:"Referral hub",
+    ctx:"Bunia is Ituri's provincial capital and main referral hub, and reports the highest confirmed case count in the province (185). It sits less than 40 km from the Uganda border, making it central to cross-border transmission risk.",
+    note:"Cases migrated here from Mongbwalu to seek medical care."},
+  {name:"Rwampara",prov:"Ituri",country:"DRC",cases:137,lat:1.4800,lng:30.2300,
+    tag:"Care-seeking destination",
+    ctx:"Rwampara is one of the three health zones (with Bunia and Mongbwalu) that together account for the bulk of confirmed cases. Transmission here is linked to care-seeking movement from the outbreak origin.",
+    note:"Among the earliest-declared health zones of the 17th outbreak."},
+  {name:"Mongbwalu",prov:"Ituri",country:"DRC",cases:132,lat:1.9400,lng:30.0300,
+    tag:"Presumed origin",
+    ctx:"Mongbwalu — a high-traffic gold-mining area — is the presumed origin of the outbreak. Four health-worker deaths within four days at Mongbwalu General Referral Hospital signalled critical breaches in infection prevention and control early in the response.",
+    note:"High population mobility tied to mining amplifies transmission risk."},
+  {name:"Nyankunde",prov:"Ituri",country:"DRC",cases:33,lat:1.4000,lng:30.1800,
+    tag:"Care-seeking destination",
+    ctx:"Nyankunde, south of Bunia, is among the Ituri health zones with confirmed cases and is associated with referral and care-seeking movement within the province.",
+    note:"Lower count than the three core zones but part of the active cluster."}
+];
+const CONTEXT=[
+  {name:"North Kivu",prov:"North Kivu",country:"DRC",lat:0.05,lng:29.20,kind:"province",
+    label:"North Kivu",sub:"9 of 35 health zones affected",
+    ctx:"North Kivu reports confirmed cases across 9 health zones. DON607 does not disaggregate North Kivu case counts; they fall within the DRC total alongside 94 cases awaiting health-zone distribution.",
+    note:"Contacts: 841 identified, 71% follow-up."},
+  {name:"South Kivu",prov:"South Kivu",country:"DRC",lat:-2.50,lng:28.85,kind:"province",
+    label:"South Kivu",sub:"1 of 34 health zones affected",
+    ctx:"South Kivu reports confirmed cases in a single health zone — the southern edge of the outbreak's geographic expansion. Counts are not disaggregated in DON607.",
+    note:"Contacts: 224 identified, 83.5% follow-up — the highest rate of the three provinces."},
+  {name:"Kampala Metro",prov:"Kampala / Wakiso",country:"Uganda",lat:0.3476,lng:32.5825,kind:"uganda",
+    label:"Kampala Metropolitan Area",sub:"19 confirmed · 2 deaths",
+    ctx:"Uganda's 19 confirmed cases (14 imported, 5 secondary) are confined to the Kampala Metropolitan Area (Kampala &amp; Wakiso districts), epidemiologically linked to DRC. No new cases in the past six days and no documented community transmission.",
+    note:"820 contacts listed; 409 under active follow-up, 394 completed 21 days."}
+];
+const ITURI_TOTAL=629;
+
+/* ============ MAP ============ */
+const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).setView([0.9,30.4],6.4);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap &copy; CARTO &middot; data: WHO DON607',subdomains:'abcd',maxZoom:19
+}).addTo(map);
+
+const RAMP=['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15','#67000d'];
+let useLog=true, showMarkers=true;
+const maxCases=Math.max(...HZ.map(d=>d.cases));
+const minCases=Math.min(...HZ.map(d=>d.cases));
+
+function colorFor(c){
+  let t;
+  if(useLog){t=(Math.log(c)-Math.log(minCases))/(Math.log(maxCases)-Math.log(minCases));}
+  else{t=(c-minCases)/(maxCases-minCases);}
+  const idx=Math.min(RAMP.length-1,Math.max(0,Math.round(t*(RAMP.length-1))));
+  return RAMP[idx];
+}
+function radiusFor(c){ // area-proportional
+  const rMax=26,rMin=8;
+  const t=Math.sqrt(c)/Math.sqrt(maxCases);
+  return rMin+(rMax-rMin)*t;
+}
+
+let hzLayer=L.layerGroup().addTo(map);
+let ctxLayer=L.layerGroup().addTo(map);
+let selected=null;
+
+function drawHZ(){
+  hzLayer.clearLayers();
+  if(!showMarkers)return;
+  HZ.forEach(d=>{
+    const m=L.circleMarker([d.lat,d.lng],{
+      radius:radiusFor(d.cases),fillColor:colorFor(d.cases),color:'#fff',
+      weight:1.4,opacity:.9,fillOpacity:.82
+    });
+    m.bindTooltip(`<b>${d.name}</b> · ${d.prov}<br><span class="n">${d.cases}</span> confirmed cases`,{className:'hz-tip',sticky:true,direction:'top'});
+    m.on('click',()=>selectZone(d));
+    m.addTo(hzLayer);
+  });
+}
+function drawCtx(){
+  ctxLayer.clearLayers();
+  CONTEXT.forEach(d=>{
+    const isUg=d.kind==='uganda';
+    const m=L.circleMarker([d.lat,d.lng],{
+      radius:isUg?12:11,fillColor:isUg?'#3d8bff':'#2bb3a3',color:'#fff',
+      weight:1.4,opacity:.9,fillOpacity:.55,dashArray:'3 3'
+    });
+    m.bindTooltip(`<b>${d.label}</b><br>${d.sub}`,{className:'hz-tip',sticky:true,direction:'top'});
+    m.on('click',()=>selectContext(d));
+    m.addTo(ctxLayer);
+  });
+}
+drawHZ();drawCtx();
+
+/* ============ PANEL UPDATES ============ */
+const $=s=>document.querySelector(s);
+function setTab(t){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+t));
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+
+function selectZone(d){
+  selected=d;
+  $('#hint').style.display='none';
+  $('#snapEmpty').style.display='none';$('#snapBody').style.display='block';
+  $('#ctxEmpty').style.display='none';$('#ctxBody').style.display='block';
+  $('#znName').textContent=d.name;
+  $('#znMeta').textContent=d.prov+' Province · '+d.country+' · WHO DON607';
+  $('#znCases').textContent=d.cases;
+  const share=(d.cases/ITURI_TOTAL*100);
+  $('#znShare').textContent=share.toFixed(1)+'%';
+  $('#znBarVal').textContent=share.toFixed(1)+'%';
+  $('#znBar').style.width=Math.min(100,share)+'%';
+  $('#znNote').textContent=d.note;
+  $('#ctxTag').textContent=d.tag;
+  $('#ctxText').innerHTML=d.ctx;
+  $('#ctxNote').textContent=d.note;
+  map.panTo([d.lat,d.lng],{animate:true});
+}
+function selectContext(d){
+  selected=d;
+  $('#hint').style.display='none';
+  $('#snapEmpty').style.display='none';$('#snapBody').style.display='block';
+  $('#ctxEmpty').style.display='none';$('#ctxBody').style.display='block';
+  $('#znName').textContent=d.label;
+  $('#znMeta').textContent=d.prov+' · '+d.country+' · WHO DON607';
+  const isUg=d.country==='Uganda';
+  $('#znCases').textContent=isUg?'19':'n/a';
+  $('#znShare').textContent=isUg?'—':d.sub.split(' ')[0];
+  $('#znBarLab').textContent=isUg?'Confirmed in Kampala metro':'Health zones affected';
+  $('#znBarVal').textContent=d.sub;
+  $('#znBar').style.width=isUg?'3%':(d.prov==='North Kivu'?'25%':'3%');
+  $('#znNote').textContent=d.note;
+  $('#ctxTag').textContent=isUg?'Cross-border':'Geographic expansion';
+  $('#ctxText').innerHTML=d.ctx;
+  $('#ctxNote').textContent=d.note;
+  map.panTo([d.lat,d.lng],{animate:true});
+}
+
+/* ============ LEGEND CONTROLS ============ */
+function setScale(log){
+  useLog=log;
+  $('#scLog').classList.toggle('active',log);
+  $('#scLin').classList.toggle('active',!log);
+  drawHZ();
+}
+$('#scLog').addEventListener('click',()=>setScale(true));
+$('#scLin').addEventListener('click',()=>setScale(false));
+$('#tgMarkers').addEventListener('click',function(){
+  showMarkers=!showMarkers;this.classList.toggle('on',showMarkers);
+  drawHZ();
+});
+
+/* collapse panels */
+document.querySelectorAll('[data-toggle]').forEach(h=>{
+  h.addEventListener('click',()=>h.closest('.panel').classList.toggle('collapsed'));
+});
+
+/* ============ TREND CHART ============ */
+const tctx=document.getElementById('trendChart');
+new Chart(tctx,{
+  type:'line',
+  data:{labels:['21 May','8 Jun','10 Jun'],datasets:[
+    {label:'DRC confirmed',data:[83,515,676],borderColor:'#ff5a3c',backgroundColor:'rgba(255,90,60,.12)',fill:true,tension:.25,pointRadius:3,borderWidth:2},
+    {label:'Uganda confirmed',data:[2,19,19],borderColor:'#3d8bff',backgroundColor:'transparent',tension:.25,pointRadius:3,borderWidth:2}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{labels:{color:'#8ba0b4',boxWidth:10,font:{size:9}}}},
+    scales:{
+      y:{ticks:{color:'#5f768c',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'}},
+      x:{ticks:{color:'#5f768c',font:{size:9}},grid:{display:false}}
+    }}
+});
+
+/* ============ MODALS ============ */
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'))}
+$('#openData').addEventListener('click',()=>openModal('dataModal'));
+$('#openTerms').addEventListener('click',()=>openModal('termsModal'));
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',closeModals));
+document.querySelectorAll('.modal-bg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)closeModals()}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
+
+/* ============ CSV DOWNLOADS ============ */
+const CSV={
+"don607_confirmed_by_health_zone.csv":`health_zone,province,country,confirmed_cases,role,latitude,longitude,as_of,source
+Bunia,Ituri,DRC,185,Referral hub; <40km from Uganda border,1.5667,30.2500,2026-06-10,WHO DON607
+Rwampara,Ituri,DRC,137,Care-seeking destination,1.4800,30.2300,2026-06-10,WHO DON607
+Mongbwalu,Ituri,DRC,132,Presumed outbreak origin (gold-mining hub),1.9400,30.0300,2026-06-10,WHO DON607
+Nyankunde,Ituri,DRC,33,Care-seeking destination,1.4000,30.1800,2026-06-10,WHO DON607`,
+"don607_province_summary.csv":`province,country,confirmed_cases,health_zones_affected,health_zones_total,cfr_pct,note,as_of,source
+Ituri,DRC,629,19,36,17.3,Epicentre; 93% of DRC confirmed cases,2026-06-10,WHO DON607
+North Kivu,DRC,not disaggregated,9,35,,Part of remaining DRC cases; counts not split in DON607,2026-06-10,WHO DON607
+South Kivu,DRC,not disaggregated,1,34,,Part of remaining DRC cases; counts not split in DON607,2026-06-10,WHO DON607
+Kampala Metropolitan Area,Uganda,19,2,,,14 imported + 5 secondary; districts Kampala & Wakiso,2026-06-11,WHO DON607`,
+"don607_country_summary.csv":`country,confirmed_cases,deaths,cfr_pct,recovered,health_zones_with_cases,health_worker_cases,as_of,source
+DRC,676,136,20.1,32,29,16,2026-06-10,WHO DON607
+Uganda,19,2,,5,2,,2026-06-11,WHO DON607
+Both countries,695,138,,37,31,,2026-06-11,WHO DON607`,
+"don607_contacts.csv":`location,contacts_identified,contacts_followed_up,follow_up_rate_pct,as_of,source
+Ituri (DRC),4703,,71.4,2026-06-10,WHO DON607
+North Kivu (DRC),841,,71.0,2026-06-10,WHO DON607
+South Kivu (DRC),224,,83.5,2026-06-10,WHO DON607
+DRC total,5768,4141,,2026-06-10,WHO DON607
+Uganda,820,,,2026-06-11,WHO DON607
+Uganda active follow-up,409,,,2026-06-11,WHO DON607
+Uganda completed 21-day,394,,,2026-06-11,WHO DON607`,
+"don_cumulative_trend.csv":`date,don,drc_confirmed,drc_deaths,uganda_confirmed,uganda_deaths,source
+2026-05-21,DON603,83,9,2,1,WHO DON603
+2026-06-08,DON606,515,91,19,2,WHO DON606/607 (derived)
+2026-06-10,DON607,676,136,19,2,WHO DON607`,
+"risk_assessment.csv":`geography,risk_level,reassessed,source
+Democratic Republic of the Congo,Very high,2026-06-06,WHO DON607
+Uganda,High,2026-06-06,WHO DON607
+Countries with land borders adjoining affected countries,High,2026-06-06,WHO DON607
+Rest of Africa region,Low,2026-06-06,WHO DON607
+Global,Low,2026-06-06,WHO DON607`
+};
+document.querySelectorAll('[data-dl]').forEach(b=>b.addEventListener('click',()=>{
+  const f=b.dataset.dl,blob=new Blob([CSV[f]],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=u;a.download=f;a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);
+}));
+</script>
+</body>
+</html>
