@@ -18,6 +18,18 @@
   --blue:#3d8bff;--teal:#2bb3a3;
   --r1:#fee5d9;--r2:#fcae91;--r3:#fb6a4a;--r4:#de2d26;--r5:#a50f15;--r6:#67000d;
   --accent:#ff5a3c;
+  --topbar-bg-top:rgba(8,18,30,.96);--topbar-bg-bot:rgba(8,18,30,.82);
+  --panel-rgba:rgba(15,29,46,.95);--hint-rgba:rgba(15,29,46,.95);
+  --modal-overlay:rgba(5,11,19,.74);--map-bg:#0a131f;
+  --chart-tick:#5f768c;--chart-legend:#8ba0b4;--chart-grid:rgba(255,255,255,.06);
+}
+html[data-theme="light"]{
+  --bg:#edf1f7;--panel:#ffffff;--panel-2:#f3f7fb;--line:#ccd8e6;
+  --line-2:#b4c8d8;--text:#162130;--muted:#50687c;--dim:#7a90a2;
+  --topbar-bg-top:rgba(237,241,247,.97);--topbar-bg-bot:rgba(237,241,247,.88);
+  --panel-rgba:rgba(255,255,255,.97);--hint-rgba:rgba(255,255,255,.97);
+  --modal-overlay:rgba(180,200,220,.65);--map-bg:#d4dfe8;
+  --chart-tick:#3a5268;--chart-legend:#50687c;--chart-grid:rgba(0,0,0,.08);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -31,14 +43,14 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 /* ---------- top bar ---------- */
 #topbar{
   position:absolute;top:0;left:0;right:0;height:58px;z-index:1200;
-  background:linear-gradient(180deg,rgba(8,18,30,.96),rgba(8,18,30,.82));
+  background:linear-gradient(180deg,var(--topbar-bg-top),var(--topbar-bg-bot));
   border-bottom:1px solid var(--line);backdrop-filter:blur(8px);
   display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:16px;
 }
 #topbar .title{display:flex;align-items:center;gap:13px;min-width:0}
 #topbar .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:0 0 auto;box-shadow:0 0 0 0 rgba(255,90,60,.6);animation:p 2.4s infinite}
 @keyframes p{0%{box-shadow:0 0 0 0 rgba(255,90,60,.55)}70%{box-shadow:0 0 0 8px rgba(255,90,60,0)}100%{box-shadow:0 0 0 0 rgba(255,90,60,0)}}
-#topbar h1{font-size:1.02rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#topbar h1{font-size:1.02rem;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #topbar h1 span{color:var(--accent)}
 #topbar .sub{font-family:'IBM Plex Mono';font-size:.7rem;color:var(--muted);letter-spacing:.06em;white-space:nowrap}
 #topbar .links{display:flex;gap:8px;flex:0 0 auto}
@@ -51,8 +63,8 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 @media(max-width:720px){#topbar .sub{display:none}#topbar h1{font-size:.86rem}}
 
 /* ---------- map ---------- */
-#map{position:absolute;top:58px;left:0;right:0;bottom:0;background:#0a131f;z-index:1}
-.leaflet-container{background:#0a131f;font-family:'IBM Plex Sans'}
+#map{position:absolute;top:58px;left:0;right:0;bottom:0;background:var(--map-bg);z-index:1}
+.leaflet-container{background:var(--map-bg);font-family:'IBM Plex Sans'}
 .leaflet-control-attribution{background:rgba(10,19,31,.8)!important;color:#6f879d!important;font-size:10px!important}
 .leaflet-control-attribution a{color:#8aa6c4!important}
 .leaflet-bar a{background:var(--panel)!important;color:#cfe0f0!important;border-color:var(--line)!important}
@@ -67,7 +79,7 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 
 /* ---------- floating panels ---------- */
 .panel{
-  position:absolute;z-index:1000;background:rgba(15,29,46,.95);border:1px solid var(--line);
+  position:absolute;z-index:1000;background:var(--panel-rgba);border:1px solid var(--line);
   border-radius:9px;backdrop-filter:blur(10px);box-shadow:0 16px 40px rgba(0,0,0,.5);
 }
 .panel-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -150,7 +162,7 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 }
 
 /* ---------- modals ---------- */
-.modal-bg{position:fixed;inset:0;background:rgba(5,11,19,.74);z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+.modal-bg{position:fixed;inset:0;background:var(--modal-overlay);z-index:2000;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
 .modal-bg.open{display:flex}
 .modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:680px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.6)}
 .modal-h{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel)}
@@ -174,10 +186,34 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 
 /* intro hint */
 #hint{position:absolute;left:50%;top:72px;transform:translateX(-50%);z-index:1100;
-  background:rgba(15,29,46,.95);border:1px solid var(--line-2);border-radius:30px;padding:9px 18px;
+  background:var(--hint-rgba);border:1px solid var(--line-2);border-radius:30px;padding:9px 18px;
   font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:9px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 #hint .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
 @media(prefers-reduced-motion:reduce){#topbar .dot{animation:none}}
+
+/* ---------- theme toggle button ---------- */
+#themeToggle{font-size:1rem;padding:5px 9px;line-height:1}
+
+/* ---------- light mode overrides ---------- */
+html[data-theme="light"] .leaflet-control-attribution{background:rgba(237,241,247,.88)!important;color:var(--muted)!important}
+html[data-theme="light"] .leaflet-control-attribution a{color:var(--blue)!important}
+html[data-theme="light"] .leaflet-bar a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--line)!important}
+html[data-theme="light"] .leaflet-bar a:hover{background:var(--panel-2)!important}
+html[data-theme="light"] .zone-name{color:var(--text)}
+html[data-theme="light"] .kpi .k .v{color:var(--text)}
+html[data-theme="light"] .resp-grid .c .v{color:var(--text)}
+html[data-theme="light"] .modal-h h2{color:var(--text)}
+html[data-theme="light"] .modal-h{background:var(--panel)}
+html[data-theme="light"] .modal-b p,html[data-theme="light"] .modal-b li{color:#3a5268}
+html[data-theme="light"] .modal-b h4{color:var(--text)}
+html[data-theme="light"] .modal-b a{color:#1a5fb4}
+html[data-theme="light"] .modal-x{color:var(--muted)}
+html[data-theme="light"] .modal-x:hover{color:var(--text)}
+html[data-theme="light"] .ctx{color:#2e4558}
+html[data-theme="light"] .dlbtn{color:var(--text);background:var(--panel-2)}
+html[data-theme="light"] .tabs button.active{color:var(--text)}
+html[data-theme="light"] .tb-btn:hover{color:var(--text)}
+html[data-theme="light"] .seg button.active{color:#fff}
 </style>
 </head>
 <body>
@@ -191,6 +227,7 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
     </div>
   </div>
   <div class="links">
+    <button class="tb-btn" id="themeToggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">🌙</button>
     <button class="tb-btn" id="openData">Contributors, Data &amp; Methods</button>
     <button class="tb-btn" id="openTerms">Terms of Use</button>
   </div>
@@ -384,9 +421,10 @@ const ITURI_TOTAL=629;
 
 /* ============ MAP ============ */
 const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).setView([0.9,30.4],6.4);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-  attribution:'&copy; OpenStreetMap &copy; CARTO &middot; data: WHO DON607',subdomains:'abcd',maxZoom:19
-}).addTo(map);
+const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: WHO DON607';
+const darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
+const lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
+darkTile.addTo(map);
 
 const RAMP=['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15','#67000d'];
 let useLog=true, showMarkers=true;
@@ -505,7 +543,7 @@ document.querySelectorAll('[data-toggle]').forEach(h=>{
 
 /* ============ TREND CHART ============ */
 const tctx=document.getElementById('trendChart');
-new Chart(tctx,{
+const trendChart=new Chart(tctx,{
   type:'line',
   data:{labels:['21 May','8 Jun','10 Jun'],datasets:[
     {label:'DRC confirmed',data:[83,515,676],borderColor:'#ff5a3c',backgroundColor:'rgba(255,90,60,.12)',fill:true,tension:.25,pointRadius:3,borderWidth:2},
@@ -517,6 +555,44 @@ new Chart(tctx,{
       y:{ticks:{color:'#5f768c',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'}},
       x:{ticks:{color:'#5f768c',font:{size:9}},grid:{display:false}}
     }}
+});
+
+function updateChartTheme(light){
+  const tick=light?'#3a5268':'#5f768c';
+  const leg=light?'#50687c':'#8ba0b4';
+  const grid=light?'rgba(0,0,0,.08)':'rgba(255,255,255,.06)';
+  trendChart.options.plugins.legend.labels.color=leg;
+  trendChart.options.scales.y.ticks.color=tick;
+  trendChart.options.scales.y.grid.color=grid;
+  trendChart.options.scales.x.ticks.color=tick;
+  trendChart.update();
+}
+
+/* ============ THEME TOGGLE ============ */
+const html=document.documentElement;
+const themeBtn=document.getElementById('themeToggle');
+
+function applyTheme(light){
+  if(light){
+    html.setAttribute('data-theme','light');
+    themeBtn.textContent='☀️';
+    map.removeLayer(darkTile);lightTile.addTo(map);
+  } else {
+    html.removeAttribute('data-theme');
+    themeBtn.textContent='🌙';
+    map.removeLayer(lightTile);darkTile.addTo(map);
+  }
+  updateChartTheme(light);
+}
+
+const savedTheme=localStorage.getItem('theme');
+const isLight=savedTheme==='light';
+applyTheme(isLight);
+
+themeBtn.addEventListener('click',()=>{
+  const nowLight=!html.hasAttribute('data-theme');
+  localStorage.setItem('theme',nowLight?'light':'dark');
+  applyTheme(nowLight);
 });
 
 /* ============ MODALS ============ */
