@@ -90,16 +90,24 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 .panel-b{padding:15px}
 
 /* legend (bottom-left) */
-#legend{left:16px;bottom:22px;width:268px}
-.ramp{display:flex;height:13px;border-radius:3px;overflow:hidden;margin:4px 0 6px}
+#legend{left:16px;bottom:22px;width:284px}
+.leg-sub{font-family:'IBM Plex Mono';font-size:.6rem;color:var(--dim);margin-top:2px;letter-spacing:.04em}
+.leg-section{font-family:'IBM Plex Mono';font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:13px 0 5px}
+.ramp{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:4px 0 0}
 .ramp i{flex:1}
-.ramp-lab{display:flex;justify-content:space-between;font-family:'IBM Plex Mono';font-size:.64rem;color:var(--dim)}
+.ramp-vals{display:flex;justify-content:space-between;font-family:'IBM Plex Mono';font-size:.63rem;color:var(--muted);margin:4px 0 0;position:relative}
+.ramp-vals span{flex:1;text-align:center}
+.ramp-vals span:first-child{text-align:left}
+.ramp-vals span:last-child{text-align:right}
 .legend-row{display:flex;align-items:center;gap:9px;margin-top:13px}
 .legend-row .lr-l{font-size:.78rem;color:var(--muted)}
-.size-key{display:flex;align-items:flex-end;gap:14px;margin:14px 2px 4px}
-.size-key .sk{display:flex;flex-direction:column;align-items:center;gap:5px}
-.size-key .circ{border-radius:50%;background:rgba(222,45,38,.35);border:1.5px solid #de2d26}
-.size-key .skl{font-family:'IBM Plex Mono';font-size:.62rem;color:var(--dim)}
+.size-key{display:flex;align-items:flex-end;gap:10px;margin:6px 0 2px}
+.size-key .sk{display:flex;flex-direction:column;align-items:center;gap:4px}
+.size-key .circ{border-radius:50%;border:1.5px solid rgba(255,255,255,.6)}
+.size-key .skl{font-family:'IBM Plex Mono';font-size:.6rem;color:var(--muted)}
+.ctx-key{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.ctx-key-row{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--muted)}
+.ctx-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;border:1.5px dashed rgba(255,255,255,.6)}
 .toggle{display:flex;align-items:center;gap:9px;margin-top:13px;cursor:pointer;user-select:none}
 .tg{width:38px;height:21px;border-radius:11px;background:var(--line);position:relative;transition:.18s;flex:0 0 auto}
 .tg::after{content:"";position:absolute;top:2.5px;left:2.5px;width:16px;height:16px;border-radius:50%;background:#7d93a8;transition:.18s}
@@ -109,7 +117,9 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
 .seg button{font-family:'IBM Plex Mono';font-size:.68rem;padding:5px 11px;background:transparent;color:var(--muted);border:0;cursor:pointer}
 .seg button.active{background:var(--blue);color:#fff}
-.legend-src{font-size:.66rem;color:var(--dim);margin-top:12px;line-height:1.5}
+.legend-src{font-size:.63rem;color:var(--dim);margin-top:11px;line-height:1.5;border-top:1px solid var(--line);padding-top:9px}
+/* donut in response panel */
+.donut-wrap{position:relative;height:100px;margin:12px 0 0}
 
 /* zone panel (right) */
 #zone{right:16px;top:74px;width:330px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
@@ -239,25 +249,48 @@ html[data-theme="light"] .seg button.active{color:#fff}
 
 <!-- LEGEND / LAYER -->
 <div class="panel" id="legend">
-  <div class="panel-h" data-toggle><h3>Layer · Confirmed cases</h3><span class="chev">▾</span></div>
-  <div class="panel-b">
-    <div class="ramp"><i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i><i style="background:var(--r6)"></i></div>
-    <div class="ramp-lab"><span>fewer</span><span>more cases</span></div>
-
-    <div class="size-key">
-      <div class="sk"><span class="circ" style="width:14px;height:14px"></span><span class="skl">33</span></div>
-      <div class="sk"><span class="circ" style="width:26px;height:26px"></span><span class="skl">130</span></div>
-      <div class="sk"><span class="circ" style="width:38px;height:38px"></span><span class="skl">185</span></div>
-      <div class="sk" style="margin-left:4px"><span class="skl" style="max-width:80px">circle area ∝ confirmed cases</span></div>
+  <div class="panel-h" data-toggle>
+    <div>
+      <h3>Confirmed cases</h3>
+      <div class="leg-sub">Ituri health zones · WHO DON607 · 10 Jun 2026</div>
     </div>
+    <span class="chev">▾</span>
+  </div>
+  <div class="panel-b">
 
-    <div class="legend-row">
-      <span class="lr-l">Color scale</span>
+    <div class="leg-section">Colour · case intensity</div>
+    <div class="ramp"><i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i><i style="background:var(--r6)"></i></div>
+    <div class="ramp-vals"><span>33</span><span>80</span><span>130</span><span>185</span></div>
+    <div class="legend-row" style="margin-top:7px">
+      <span class="lr-l">Scale</span>
       <span class="seg"><button id="scLog" class="active">log</button><button id="scLin">linear</button></span>
     </div>
-    <div class="toggle on" id="tgMarkers"><span class="tg"></span><span class="tl">Show active-case markers</span></div>
 
-    <div class="legend-src">Confirmed cases (cumulative), by Ituri health zone. Transcribed from WHO Disease Outbreak News (DON607). Marker positions are approximate health-zone centroids. As of 10 Jun 2026.</div>
+    <div class="leg-section">Size · confirmed cases</div>
+    <div class="size-key">
+      <div class="sk">
+        <span class="circ" style="width:15px;height:15px;background:rgba(254,229,217,.55);border-color:#fcae91"></span>
+        <span class="skl">33<br>Nyankunde</span>
+      </div>
+      <div class="sk">
+        <span class="circ" style="width:28px;height:28px;background:rgba(165,15,21,.55);border-color:#a50f15"></span>
+        <span class="skl">132–137<br>Mongbwalu<br>Rwampara</span>
+      </div>
+      <div class="sk">
+        <span class="circ" style="width:36px;height:36px;background:rgba(103,0,13,.65);border-color:#67000d"></span>
+        <span class="skl">185<br>Bunia</span>
+      </div>
+    </div>
+
+    <div class="toggle on" id="tgMarkers"><span class="tg"></span><span class="tl">Show case markers</span></div>
+
+    <div class="leg-section">Context markers</div>
+    <div class="ctx-key">
+      <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(43,179,163,.35);border-color:#2bb3a3"></span>DRC province (cases not disaggregated)</div>
+      <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span>Uganda · Kampala metro (19 confirmed)</div>
+    </div>
+
+    <div class="legend-src">Cumulative confirmed cases by Ituri health zone. Transcribed from WHO Disease Outbreak News DON607. Marker positions are approximate health-zone centroids. ⚠ Verify against WHO before publishing.</div>
   </div>
 </div>
 
@@ -313,6 +346,7 @@ html[data-theme="light"] .seg button.active{color:#fff}
       <div class="c"><div class="v">29</div><div class="l">Health zones with cases (DRC)</div></div>
       <div class="c"><div class="v">71%</div><div class="l">Contact follow-up (Ituri)</div></div>
     </div>
+    <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
     <div class="risk-list">
       <div class="risk"><span class="rg">DRC</span><span class="pill vh">Very high</span></div>
       <div class="risk"><span class="rg">Uganda</span><span class="pill h">High</span></div>
@@ -439,23 +473,44 @@ function colorFor(c){
   return RAMP[idx];
 }
 function radiusFor(c){ // area-proportional
-  const rMax=26,rMin=8;
+  const rMax=32,rMin=10;
   const t=Math.sqrt(c)/Math.sqrt(maxCases);
-  return rMin+(rMax-rMin)*t;
+  return Math.round(rMin+(rMax-rMin)*t);
 }
 
 let hzLayer=L.layerGroup().addTo(map);
 let ctxLayer=L.layerGroup().addTo(map);
 let selected=null;
 
+function makeHZIcon(d){
+  const r=radiusFor(d.cases);
+  const diam=r*2;
+  const fill=colorFor(d.cases);
+  const large=d.cases>=80;
+  const shadow='text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.6)';
+  const circleStyle=`width:${diam}px;height:${diam}px;border-radius:50%;background:${fill};`+
+    `border:1.5px solid rgba(255,255,255,.75);box-shadow:0 2px 10px rgba(0,0,0,.55);`+
+    `display:flex;align-items:center;justify-content:center;flex:0 0 auto;`;
+  if(large){
+    const fs=r>26?13:11;
+    const html=`<div style="${circleStyle}"><span style="font-family:'IBM Plex Mono',monospace;`+
+      `font-size:${fs}px;font-weight:700;color:#fff;${shadow};line-height:1">${d.cases}</span></div>`;
+    return L.divIcon({html,className:'',iconSize:[diam,diam],iconAnchor:[r,r]});
+  } else {
+    // label beside the circle for small markers
+    const html=`<div style="display:flex;align-items:center;gap:5px;">`+
+      `<div style="${circleStyle}"></div>`+
+      `<span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;`+
+      `color:#fff;${shadow};white-space:nowrap;">${d.cases}</span></div>`;
+    return L.divIcon({html,className:'',iconSize:[diam+34,diam],iconAnchor:[r,r]});
+  }
+}
+
 function drawHZ(){
   hzLayer.clearLayers();
   if(!showMarkers)return;
   HZ.forEach(d=>{
-    const m=L.circleMarker([d.lat,d.lng],{
-      radius:radiusFor(d.cases),fillColor:colorFor(d.cases),color:'#fff',
-      weight:1.4,opacity:.9,fillOpacity:.82
-    });
+    const m=L.marker([d.lat,d.lng],{icon:makeHZIcon(d)});
     m.bindTooltip(`<b>${d.name}</b> · ${d.prov}<br><span class="n">${d.cases}</span> confirmed cases`,{className:'hz-tip',sticky:true,direction:'top'});
     m.on('click',()=>selectZone(d));
     m.addTo(hzLayer);
@@ -557,6 +612,41 @@ const trendChart=new Chart(tctx,{
     }}
 });
 
+/* ============ OUTCOMES DONUT ============ */
+// Both countries: confirmed 695, deaths 138, recovered 37, active = 695-138-37 = 520
+const outCtx=document.getElementById('outcomesChart');
+const outcomesChart=new Chart(outCtx,{
+  type:'doughnut',
+  data:{
+    labels:['Active','Recovered','Deaths'],
+    datasets:[{
+      data:[520,37,138],
+      backgroundColor:['#ff5a3c','#2bb3a3','#67000d'],
+      borderColor:'transparent',
+      borderWidth:0,
+      hoverOffset:4
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,cutout:'60%',
+    plugins:{
+      legend:{position:'right',labels:{color:'#8ba0b4',boxWidth:10,padding:8,font:{size:9},
+        generateLabels:(chart)=>{
+          const ds=chart.data.datasets[0];
+          return chart.data.labels.map((lbl,i)=>({
+            text:`${lbl}  ${ds.data[i]}`,
+            fillStyle:ds.backgroundColor[i],
+            hidden:false,index:i
+          }));
+        }
+      }},
+      tooltip:{callbacks:{
+        label:(ctx)=>` ${ctx.label}: ${ctx.parsed} (${(ctx.parsed/695*100).toFixed(1)}%)`
+      }}
+    }
+  }
+});
+
 function updateChartTheme(light){
   const tick=light?'#3a5268':'#5f768c';
   const leg=light?'#50687c':'#8ba0b4';
@@ -566,6 +656,8 @@ function updateChartTheme(light){
   trendChart.options.scales.y.grid.color=grid;
   trendChart.options.scales.x.ticks.color=tick;
   trendChart.update();
+  outcomesChart.options.plugins.legend.labels.color=leg;
+  outcomesChart.update();
 }
 
 /* ============ THEME TOGGLE ============ */
