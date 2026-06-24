@@ -99,8 +99,6 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 .ramp-vals span{flex:1;text-align:center}
 .ramp-vals span:first-child{text-align:left}
 .ramp-vals span:last-child{text-align:right}
-.legend-row{display:flex;align-items:center;gap:9px;margin-top:13px}
-.legend-row .lr-l{font-size:.78rem;color:var(--muted)}
 .size-key{display:flex;align-items:flex-end;gap:10px;margin:6px 0 2px}
 .size-key .sk{display:flex;flex-direction:column;align-items:center;gap:4px}
 .size-key .circ{border-radius:50%;border:1.5px solid rgba(255,255,255,.6)}
@@ -108,15 +106,6 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 .ctx-key{display:flex;flex-direction:column;gap:5px;margin-top:4px}
 .ctx-key-row{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--muted)}
 .ctx-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;border:1.5px dashed rgba(255,255,255,.6)}
-.toggle{display:flex;align-items:center;gap:9px;margin-top:13px;cursor:pointer;user-select:none}
-.tg{width:38px;height:21px;border-radius:11px;background:var(--line);position:relative;transition:.18s;flex:0 0 auto}
-.tg::after{content:"";position:absolute;top:2.5px;left:2.5px;width:16px;height:16px;border-radius:50%;background:#7d93a8;transition:.18s}
-.toggle.on .tg{background:rgba(61,139,255,.4)}
-.toggle.on .tg::after{left:19.5px;background:var(--blue)}
-.toggle .tl{font-size:.8rem;color:var(--text)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
-.seg button{font-family:'IBM Plex Mono';font-size:.68rem;padding:5px 11px;background:transparent;color:var(--muted);border:0;cursor:pointer}
-.seg button.active{background:var(--blue);color:#fff}
 .legend-src{font-size:.63rem;color:var(--dim);margin-top:11px;line-height:1.5;border-top:1px solid var(--line);padding-top:9px}
 /* donut in response panel */
 .donut-wrap{position:relative;height:100px;margin:12px 0 0}
@@ -223,7 +212,6 @@ html[data-theme="light"] .ctx{color:#2e4558}
 html[data-theme="light"] .dlbtn{color:var(--text);background:var(--panel-2)}
 html[data-theme="light"] .tabs button.active{color:var(--text)}
 html[data-theme="light"] .tb-btn:hover{color:var(--text)}
-html[data-theme="light"] .seg button.active{color:#fff}
 </style>
 </head>
 <body>
@@ -261,10 +249,6 @@ html[data-theme="light"] .seg button.active{color:#fff}
     <div class="leg-section">Colour · case intensity</div>
     <div class="ramp"><i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i><i style="background:var(--r6)"></i></div>
     <div class="ramp-vals"><span>33</span><span>80</span><span>130</span><span>185</span></div>
-    <div class="legend-row" style="margin-top:7px">
-      <span class="lr-l">Scale</span>
-      <span class="seg"><button id="scLog" class="active">log</button><button id="scLin">linear</button></span>
-    </div>
 
     <div class="leg-section">Size · confirmed cases</div>
     <div class="size-key">
@@ -281,8 +265,6 @@ html[data-theme="light"] .seg button.active{color:#fff}
         <span class="skl">185<br>Bunia</span>
       </div>
     </div>
-
-    <div class="toggle on" id="tgMarkers"><span class="tg"></span><span class="tl">Show case markers</span></div>
 
     <div class="leg-section">Context markers</div>
     <div class="ctx-key">
@@ -370,7 +352,6 @@ html[data-theme="light"] .seg button.active{color:#fff}
       <h4>Method</h4>
       <ul>
         <li>The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
-        <li>The <strong>log / linear</strong> toggle changes how case counts map onto the color ramp. The marker toggle shows or hides the case symbols.</li>
         <li>North Kivu (9 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON607 does not disaggregate their case counts. 94 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li>Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
         <li>The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June).</li>
@@ -461,14 +442,11 @@ const lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}
 darkTile.addTo(map);
 
 const RAMP=['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15','#67000d'];
-let useLog=true, showMarkers=true;
 const maxCases=Math.max(...HZ.map(d=>d.cases));
 const minCases=Math.min(...HZ.map(d=>d.cases));
 
 function colorFor(c){
-  let t;
-  if(useLog){t=(Math.log(c)-Math.log(minCases))/(Math.log(maxCases)-Math.log(minCases));}
-  else{t=(c-minCases)/(maxCases-minCases);}
+  const t=(c-minCases)/(maxCases-minCases);
   const idx=Math.min(RAMP.length-1,Math.max(0,Math.round(t*(RAMP.length-1))));
   return RAMP[idx];
 }
@@ -508,7 +486,6 @@ function makeHZIcon(d){
 
 function drawHZ(){
   hzLayer.clearLayers();
-  if(!showMarkers)return;
   HZ.forEach(d=>{
     const m=L.marker([d.lat,d.lng],{icon:makeHZIcon(d)});
     m.bindTooltip(`<b>${d.name}</b> · ${d.prov}<br><span class="n">${d.cases}</span> confirmed cases`,{className:'hz-tip',sticky:true,direction:'top'});
@@ -576,20 +553,6 @@ function selectContext(d){
   $('#ctxNote').textContent=d.note;
   map.panTo([d.lat,d.lng],{animate:true});
 }
-
-/* ============ LEGEND CONTROLS ============ */
-function setScale(log){
-  useLog=log;
-  $('#scLog').classList.toggle('active',log);
-  $('#scLin').classList.toggle('active',!log);
-  drawHZ();
-}
-$('#scLog').addEventListener('click',()=>setScale(true));
-$('#scLin').addEventListener('click',()=>setScale(false));
-$('#tgMarkers').addEventListener('click',function(){
-  showMarkers=!showMarkers;this.classList.toggle('on',showMarkers);
-  drawHZ();
-});
 
 /* collapse panels */
 document.querySelectorAll('[data-toggle]').forEach(h=>{
