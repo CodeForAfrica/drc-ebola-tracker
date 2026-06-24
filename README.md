@@ -1,6 +1,6 @@
 # DRC · Uganda — Ebola Bundibugyo 2026 Tracker
 
-An interactive, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in the Democratic Republic of the Congo and Uganda. It shows confirmed cases by Ituri health zone on a Leaflet map, with a log/linear color scale, active-case markers, side panels (current snapshot, trends, context), and a national/provincial response summary.
+An interactive, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in the Democratic Republic of the Congo and Uganda. It shows confirmed cases by Ituri health zone on a Leaflet map, with a log/linear color scale, active-case markers, side panels (current snapshot, trends, context), and a national/provincial response summary. The interface is bilingual (English / French) with a 🌐 toggle in the header that remembers your choice.
 
 ## Run it
 
@@ -24,3 +24,5 @@ drc-ebola-tracker/
 ## Before publishing
 
 Outbreak figures change rapidly and are frequently revised in later reports. **Verify all numbers against the latest WHO Disease Outbreak News before publishing or sharing this dashboard.** This is an independent visualisation for humanitarian information purposes and is not an official WHO product.
+
+The French translations (in the `I18N` object in `index.html`) are AI-assisted drafts. **Have a Francophone reviewer check them before publishing** — especially medical and epidemiological terms, against WHO French (OMS) usage. Place names, figures, and the CSV downloads are intentionally left untranslated.
