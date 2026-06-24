@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "drc-ebola-tracker",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "3737"],
       "port": 3737
     }
