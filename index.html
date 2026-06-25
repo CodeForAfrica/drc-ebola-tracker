@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/chartjs/chart.umd.js"></script>
 <style>
 :root{
   --bg:#0a131f;--panel:#0f1d2e;--panel-2:#13263b;--line:#22384f;
@@ -693,6 +693,8 @@ const provName=p=>(PROV_I18N[p]&&PROV_I18N[p][lang])||p;
 const countryName=c=>(COUNTRY_I18N[c]&&COUNTRY_I18N[c][lang])||c;
 
 /* ============ MAP ============ */
+// Locally vendored Leaflet: point default marker icons at the bundled images/ folder.
+L.Icon.Default.imagePath='vendor/leaflet/images/';
 const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).setView([0.9,30.4],6.4);
 const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: WHO DON608';
 const darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
