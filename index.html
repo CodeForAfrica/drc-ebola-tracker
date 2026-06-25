@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DRC · Uganda — Ebola Bundibugyo 2026 · Interactive Dashboard</title>
-<meta name="description" content="Interactive map dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. WHO Disease Outbreak News DON607, as of 10–11 June 2026.">
+<meta name="description" content="Interactive map dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. WHO Disease Outbreak News DON608, as of 17–18 June 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -221,7 +221,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <span class="dot"></span>
     <div style="min-width:0">
       <h1>Ebola <span>Bundibugyo</span> 2026 · DRC &amp; Uganda</h1>
-      <div class="sub">Interactive outbreak dashboard · WHO DON607 · as of 10–11 Jun 2026</div>
+      <div class="sub">Interactive outbreak dashboard · WHO DON608 · as of 17–18 Jun 2026</div>
     </div>
   </div>
   <div class="links">
@@ -272,7 +272,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span>Uganda · Kampala metro (19 confirmed)</div>
     </div>
 
-    <div class="legend-src">Cumulative confirmed cases by Ituri health zone. Transcribed from WHO Disease Outbreak News DON607. Marker positions are approximate health-zone centroids. ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src">Cumulative confirmed cases by Ituri health zone. Transcribed from WHO Disease Outbreak News DON607. Marker positions are approximate health-zone centroids. Zone counts are DON607 (10 Jun) and predate — and do not sum to — the 915 confirmed headline (DON608, 17–18 Jun). ⚠ Verify against WHO before publishing.</div>
   </div>
 </div>
 
@@ -305,7 +305,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <div class="ctx"><span class="tag">National cumulative</span></div>
       <p class="ctx" style="margin-bottom:8px">Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published in DON607.</p>
       <div class="mini"><canvas id="trendChart"></canvas></div>
-      <p class="note">DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun). Uganda flat at 19 since 8 Jun (no new cases in 6 days).</p>
+      <p class="note">DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun) → 896 (17 Jun). Uganda flat at 19 since 8 Jun.</p>
     </div>
     <div class="tabpane" id="tab-ctx">
       <div class="zone-empty" id="ctxEmpty">Select a health zone for response context.</div>
@@ -320,14 +320,21 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 
 <!-- RESPONSE PANEL -->
 <div class="panel" id="response">
-  <div class="panel-h" data-toggle><h3>National &amp; provincial response</h3><span class="chev">▾</span></div>
+  <div class="panel-h" data-toggle>
+    <div>
+      <h3>National &amp; provincial response</h3>
+      <div class="leg-sub">Cases · deaths · recovered — as of 17 Jun 2026 (WHO DON608)</div>
+    </div>
+    <span class="chev">▾</span>
+  </div>
   <div class="panel-b">
     <div class="resp-grid">
-      <div class="c"><div class="v red">695</div><div class="l">Confirmed (both countries)</div></div>
-      <div class="c"><div class="v red">138</div><div class="l">Deaths · CFR ~20% (DRC)</div></div>
-      <div class="c"><div class="v">29</div><div class="l">Health zones with cases (DRC)</div></div>
-      <div class="c"><div class="v">71%</div><div class="l">Contact follow-up (Ituri)</div></div>
+      <div class="c"><div class="v red">915</div><div class="l">Confirmed (both countries)</div></div>
+      <div class="c"><div class="v red">234</div><div class="l">Deaths (both countries)</div></div>
+      <div class="c"><div class="v">29</div><div class="l">Health zones with cases (DRC) · DON607 (10 Jun)</div></div>
+      <div class="c"><div class="v">71%</div><div class="l">Contact follow-up (Ituri) · DON607 (10 Jun)</div></div>
     </div>
+    <p class="note">DRC case-fatality ratio <strong>≈26%</strong> — confirmed deaths ÷ confirmed cases (provisional). Not comparable to earlier suspected-case-based CFRs (different case definition), and unstable while most confirmed cases remain unresolved.</p>
     <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
     <div class="risk-list">
       <div class="risk"><span class="rg">DRC</span><span class="pill vh">Very high</span></div>
@@ -346,15 +353,15 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-b">
       <h4>Data source</h4>
       <p>All epidemiological figures are transcribed from the World Health Organization Disease Outbreak News:</p>
-      <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON607" target="_blank" rel="noopener">WHO DON607 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (13 June 2026)</a></p>
-      <p>DRC figures are as of 10 June 2026; Uganda figures as of 11 June 2026. WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.</p>
+      <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON608" target="_blank" rel="noopener">WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (19 June 2026)</a></p>
+      <p>DRC headline figures are as of 17 June 2026; Uganda figures as of 18 June 2026. WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source. DON608 reports confirmed cases only; the case-fatality ratio shown (≈26%) is provisional (confirmed deaths ÷ confirmed cases) and not comparable to earlier suspected-case-based figures. The per–health-zone breakdown, the count of health zones with cases (29), and the health-worker case count (16) are carried from DON607 (data as of 10 June), as DON608 publishes no zone-level disaggregation; these predate the DON608 headline and should be read against the 10 June date.</p>
 
       <h4>Method</h4>
       <ul>
         <li>The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
         <li>North Kivu (9 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON607 does not disaggregate their case counts. 94 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li>Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
-        <li>The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June).</li>
+        <li>The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).</li>
       </ul>
 
       <h4>WHO figures (view / download at source)</h4>
@@ -370,7 +377,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <div class="dlrow">
         <button class="dlbtn" data-dl="don607_confirmed_by_health_zone.csv">Cases by health zone</button>
         <button class="dlbtn" data-dl="don607_province_summary.csv">Province summary</button>
-        <button class="dlbtn" data-dl="don607_country_summary.csv">Country summary</button>
+        <button class="dlbtn" data-dl="don608_country_summary.csv">Country summary</button>
         <button class="dlbtn" data-dl="don607_contacts.csv">Contact tracing</button>
         <button class="dlbtn" data-dl="don_cumulative_trend.csv">Cumulative trend</button>
         <button class="dlbtn" data-dl="risk_assessment.csv">WHO risk levels</button>
@@ -389,9 +396,9 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-b">
       <p>This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.</p>
       <h4>No warranty</h4>
-      <p>Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (10–11 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
+      <p>Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (17–18 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
       <h4>Rights</h4>
-      <p>All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO DON607 source for any onward use.</p>
+      <p>All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO DON608 source for any onward use.</p>
       <h4>Sensitive context</h4>
       <p>This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.</p>
     </div>
@@ -563,9 +570,9 @@ document.querySelectorAll('[data-toggle]').forEach(h=>{
 const tctx=document.getElementById('trendChart');
 const trendChart=new Chart(tctx,{
   type:'line',
-  data:{labels:['21 May','8 Jun','10 Jun'],datasets:[
-    {label:'DRC confirmed',data:[83,515,676],borderColor:'#ff5a3c',backgroundColor:'rgba(255,90,60,.12)',fill:true,tension:.25,pointRadius:3,borderWidth:2},
-    {label:'Uganda confirmed',data:[2,19,19],borderColor:'#3d8bff',backgroundColor:'transparent',tension:.25,pointRadius:3,borderWidth:2}
+  data:{labels:['21 May','8 Jun','10 Jun','17 Jun'],datasets:[
+    {label:'DRC confirmed',data:[83,515,676,896],borderColor:'#ff5a3c',backgroundColor:'rgba(255,90,60,.12)',fill:true,tension:.25,pointRadius:3,borderWidth:2},
+    {label:'Uganda confirmed',data:[2,19,19,19],borderColor:'#3d8bff',backgroundColor:'transparent',tension:.25,pointRadius:3,borderWidth:2}
   ]},
   options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{labels:{color:'#8ba0b4',boxWidth:10,font:{size:9}}}},
@@ -576,14 +583,14 @@ const trendChart=new Chart(tctx,{
 });
 
 /* ============ OUTCOMES DONUT ============ */
-// Both countries: confirmed 695, deaths 138, recovered 37, active = 695-138-37 = 520
+// Both countries: confirmed 915, deaths 234, recovered 88, active = 915-234-88 = 593
 const outCtx=document.getElementById('outcomesChart');
 const outcomesChart=new Chart(outCtx,{
   type:'doughnut',
   data:{
     labels:['Active','Recovered','Deaths'],
     datasets:[{
-      data:[520,37,138],
+      data:[593,88,234],
       backgroundColor:['#ff5a3c','#2bb3a3','#67000d'],
       borderColor:'transparent',
       borderWidth:0,
@@ -604,7 +611,7 @@ const outcomesChart=new Chart(outCtx,{
         }
       }},
       tooltip:{callbacks:{
-        label:(ctx)=>` ${ctx.label}: ${ctx.parsed} (${(ctx.parsed/695*100).toFixed(1)}%)`
+        label:(ctx)=>` ${ctx.label}: ${ctx.parsed} (${(ctx.parsed/915*100).toFixed(1)}%)`
       }}
     }
   }
@@ -671,10 +678,10 @@ Ituri,DRC,629,19,36,17.3,Epicentre; 93% of DRC confirmed cases,2026-06-10,WHO DO
 North Kivu,DRC,not disaggregated,9,35,,Part of remaining DRC cases; counts not split in DON607,2026-06-10,WHO DON607
 South Kivu,DRC,not disaggregated,1,34,,Part of remaining DRC cases; counts not split in DON607,2026-06-10,WHO DON607
 Kampala Metropolitan Area,Uganda,19,2,,,14 imported + 5 secondary; districts Kampala & Wakiso,2026-06-11,WHO DON607`,
-"don607_country_summary.csv":`country,confirmed_cases,deaths,cfr_pct,recovered,health_zones_with_cases,health_worker_cases,as_of,source
-DRC,676,136,20.1,32,29,16,2026-06-10,WHO DON607
-Uganda,19,2,,5,2,,2026-06-11,WHO DON607
-Both countries,695,138,,37,31,,2026-06-11,WHO DON607`,
+"don608_country_summary.csv":`country,confirmed_cases,deaths,cfr_pct,recovered,health_zones_with_cases,health_worker_cases,as_of,source
+DRC,896,232,25.9,78,29,16,2026-06-17,WHO DON608
+Uganda,19,2,,10,2,,2026-06-18,WHO DON608
+Both countries,915,234,,88,31,,2026-06-18,WHO DON608`,
 "don607_contacts.csv":`location,contacts_identified,contacts_followed_up,follow_up_rate_pct,as_of,source
 Ituri (DRC),4703,,71.4,2026-06-10,WHO DON607
 North Kivu (DRC),841,,71.0,2026-06-10,WHO DON607
@@ -686,7 +693,8 @@ Uganda completed 21-day,394,,,2026-06-11,WHO DON607`,
 "don_cumulative_trend.csv":`date,don,drc_confirmed,drc_deaths,uganda_confirmed,uganda_deaths,source
 2026-05-21,DON603,83,9,2,1,WHO DON603
 2026-06-08,DON606,515,91,19,2,WHO DON606/607 (derived)
-2026-06-10,DON607,676,136,19,2,WHO DON607`,
+2026-06-10,DON607,676,136,19,2,WHO DON607
+2026-06-17,DON608,896,232,19,2,WHO DON608`,
 "risk_assessment.csv":`geography,risk_level,reassessed,source
 Democratic Republic of the Congo,Very high,2026-06-06,WHO DON607
 Uganda,High,2026-06-06,WHO DON607

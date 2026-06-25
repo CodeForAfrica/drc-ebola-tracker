@@ -1,0 +1,4 @@
+country,confirmed_cases,deaths,cfr_pct,recovered,health_zones_with_cases,health_worker_cases,as_of,source
+DRC,896,232,25.9,78,29,16,2026-06-17,WHO DON608
+Uganda,19,2,,10,2,,2026-06-18,WHO DON608
+Both countries,915,234,,88,31,,2026-06-18,WHO DON608
