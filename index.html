@@ -9,7 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="vendor/leaflet.markercluster/MarkerCluster.css">
+<link rel="stylesheet" href="vendor/leaflet.markercluster/MarkerCluster.Default.css">
 <script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/leaflet.markercluster/leaflet.markercluster.js"></script>
 <script src="vendor/chartjs/chart.umd.js"></script>
 <style>
 :root{
@@ -76,6 +79,9 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 .hz-tip:before{display:none!important}
 .hz-tip b{font-family:'Archivo';font-weight:800}
 .hz-tip .n{font-family:'IBM Plex Mono';font-size:1.25rem;color:#ff7d63;font-weight:600}
+/* uniform clustered zone marker (one small red dot per health zone) */
+.zone-dot{background:transparent;border:0}
+.zone-dot .zone-dot-i{display:block;width:12px;height:12px;border-radius:50%;background:#e2342a;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.55)}
 
 /* ---------- floating panels ---------- */
 .panel{
@@ -247,38 +253,17 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   </div>
   <div class="panel-b">
 
-    <div class="leg-section" data-i18n="legend_size">Size &amp; colour · confirmed cases</div>
-    <div class="size-key">
-      <div class="sk">
-        <span class="circ" style="width:11px;height:11px;background:rgba(254,229,217,.6);border-color:#fcae91"></span>
-        <span class="skl">1</span>
-      </div>
-      <div class="sk">
-        <span class="circ" style="width:17px;height:17px;background:rgba(252,174,145,.6);border-color:#fb6a4a"></span>
-        <span class="skl">30</span>
-      </div>
-      <div class="sk">
-        <span class="circ" style="width:25px;height:25px;background:rgba(222,45,38,.6);border-color:#de2d26"></span>
-        <span class="skl">100</span>
-      </div>
-      <div class="sk">
-        <span class="circ" style="width:33px;height:33px;background:rgba(165,15,21,.62);border-color:#a50f15"></span>
-        <span class="skl">200</span>
-      </div>
-      <div class="sk">
-        <span class="circ" style="width:40px;height:40px;background:rgba(103,0,13,.68);border-color:#67000d"></span>
-        <span class="skl">296</span>
-      </div>
-    </div>
+    <div class="leg-section" data-i18n="legend_choropleth">Choropleth · confirmed cases</div>
+    <div class="ramp"><i style="background:#e8e8e8"></i><i style="background:#cccccc"></i><i style="background:#a6a6a6"></i><i style="background:#7c7c7c"></i><i style="background:#525252"></i><i style="background:#272727"></i></div>
+    <div class="ramp-vals"><span>1</span><span>10</span><span>50</span><span>150</span><span>296</span></div>
 
-    <div class="leg-section" data-i18n="legend_tiers">Marker tiers</div>
+    <div class="leg-section" data-i18n="legend_markers">Markers</div>
     <div class="ctx-key">
-      <div class="ctx-key-row"><span class="ctx-dot" style="background:#a50f15;border-style:solid;border-color:rgba(255,255,255,.75)"></span><span data-i18n="legend_tier_detailed">Detailed zone (≥20 cases) — numbered marker, click for detail</span></div>
-      <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(124,138,160,.5);border-style:solid;border-color:#7c8aa0"></span><span data-i18n="legend_tier_dot">Also-reporting zone (&lt;20 cases) — small faded dot, hover for figures</span></div>
+      <div class="ctx-key-row"><span class="ctx-dot" style="background:#e2342a;border-style:solid;border-color:#fff"></span><span data-i18n="legend_marker_dot">Red dots = health zones (cluster when zoomed out)</span></div>
       <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span><span data-i18n="legend_ctx_uga">Uganda · Kampala metro (19 confirmed)</span></div>
     </div>
 
-    <div class="legend-src" data-i18n="legend_src">Confirmed cases by health zone across DRC — 9 detailed zones (≥20 cases, numbered) and 25 also-reporting zones (&lt;20, small faded dots). Marker positions are approximate health-zone centroids. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only) and are more recent than the WHO DON608 headline (17 Jun, incl. Uganda). The two use different sources, dates and case definitions and are not directly comparable; the mapped zones sum to more than the headline total. 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential grey ramp (light = few, dark = many). Red markers sit at approximate zone centroids and cluster when zoomed out — click a polygon or a marker for zone detail. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only); Uganda (Kampala) is a separate WHO DON608 context marker (17 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.</div>
   </div>
 </div>
 
@@ -331,12 +316,14 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   <div class="panel-h" data-toggle><h3 data-i18n="resp_title">National &amp; provincial response</h3><span class="chev">▾</span></div>
   <div class="panel-b">
     <div class="resp-grid">
-      <div class="c"><div class="v red">915</div><div class="l" data-i18n="resp_confirmed_both">Confirmed (both countries)</div></div>
-      <div class="c"><div class="v red">234</div><div class="l" data-i18n="resp_deaths">Deaths · CFR ≈26%*</div></div>
-      <div class="c"><div class="v">33</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · per DON608 · 17 Jun</div></div>
+      <div class="c"><div class="v red" id="respConfirmed">—</div><div class="l" data-i18n="resp_confirmed_both">Confirmed (both countries)</div></div>
+      <div class="c"><div class="v red" id="respDeaths">—</div><div class="l" data-i18n="resp_deaths">Deaths · CFR ≈25.3%*</div></div>
+      <div class="c"><div class="v" id="respHz">—</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · INSP SitRep N°39</div></div>
+      <div class="c"><div class="v" id="respRecovered">—</div><div class="l" data-i18n="resp_recovered">Recovered (DRC) · INSP SitRep N°39</div></div>
       <div class="c"><div class="v">70.8%</div><div class="l" data-i18n="resp_followup">Contact follow-up (Ituri) · per DON608 · 17 Jun</div></div>
     </div>
-    <p class="note" data-i18n="resp_cfr_note">* Provisional — confirmed deaths ÷ confirmed cases (234/915). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.</p>
+    <p class="note" data-i18n="resp_source_note">DRC figures INSP SitRep N°39 (22 Jun 2026); Uganda figures WHO DON608 (17 Jun). Composite of two sources/dates.</p>
+    <p class="note" data-i18n="resp_cfr_note">* Provisional — DRC case-fatality is confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.</p>
     <p class="note" data-i18n="resp_ituri_note">Ituri province (epicentre): 817 confirmed · 186 deaths · CFR 22.7% (WHO DON608, 17 Jun).</p>
     <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
     <div class="risk-list">
@@ -361,12 +348,12 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 
       <h4 data-i18n="md_h_method">Method</h4>
       <ul>
-        <li data-i18n-html="md_method_1">The map is a <strong>proportional-symbol layer</strong>: each circle is a DRC health zone reporting confirmed Bundibugyo cases across Ituri, North Kivu and South Kivu. Circle <em>area</em> is proportional to confirmed cases (square-root scale) and <em>colour</em> follows a sequential red ramp. The most-affected zones are labelled with their count (e.g. Bunia 296, Mongbwalu 237, Rwampara 225).</li>
-        <li data-i18n-html="md_method_2">Markers are shown in <strong>two tiers</strong>: the nine zones with 20 or more confirmed cases appear as larger, numbered, fully-opaque circles you can click for zone detail; the remaining zones appear as small faded dots ('also reporting') that show their figures on hover only.</li>
+        <li data-i18n-html="md_method_1">The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential ramp (light = few, dark = many). Red markers mark zone centroids and cluster when zoomed out; click a zone polygon or a marker for detail.</li>
+        <li data-i18n-html="md_method_2">Zone markers use <strong>marker clustering</strong>: when zoomed out, nearby zones merge into a single numbered cluster; zoom in or click a cluster to split it into individual zones, then click a zone for its snapshot. Uganda (Kampala) stays a separate context marker, outside the cluster.</li>
         <li data-i18n-html="md_method_3">All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li data-i18n-html="md_method_4">Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
         <li data-i18n-html="md_method_5">The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).</li>
-        <li>The map is a <strong>proportional-symbol layer</strong>: each circle is a DRC health zone reporting confirmed Bundibugyo cases across Ituri, North Kivu and South Kivu. Circle <em>area</em> is proportional to confirmed cases (square-root scale) and <em>colour</em> follows a sequential red ramp. The most-affected zones are labelled with their count (e.g. Bunia 296, Mongbwalu 237, Rwampara 225).</li>
+        <li>The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential ramp (light = few, dark = many). Red markers mark zone centroids and cluster when zoomed out; click a zone polygon or a marker for detail.</li>
         <li>All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li>Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
         <li>The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).</li>
@@ -502,9 +489,10 @@ const CONTEXT=[
         ctx:"Les 19 cas confirmés en Ouganda (14 importés, 5 secondaires) sont confinés à l'aire métropolitaine de Kampala (districts de Kampala et Wakiso), épidémiologiquement liés à la RDC. Source : OMS DON608 / ministère ougandais de la Santé (17 juin) — distincte des données par zone de l'INSP, qui ne couvrent que la RDC. À la date de ce rapport, aucun nouveau cas au cours des six derniers jours et aucune transmission communautaire documentée.",
         note:"820 contacts répertoriés ; 409 sous suivi actif, 394 ayant achevé les 21 jours."}}}
 ];
-/* "Also-reporting" tail: the 25 zones with <20 confirmed cases (INSP SitRep N°39).
-   Rendered as small non-interactive dots by drawTail() — NOT routed through
-   selectZone(), so they carry no tag/ctx/note and can never break the panel. */
+/* The 25 lower-burden zones (<20 confirmed cases, INSP SitRep N°39). These carry no
+   curated i18n (tag/ctx/note); they are merged into HZ below so every one of the 34
+   zones gets a clustered marker and a clickable choropleth polygon. selectZone()
+   shows figures only and hides the narrative blocks for these (no "undefined"). */
 const TAIL=[
   {name:"Bambu",prov:"Ituri",cases:14,deaths:2,lat:1.87176,lng:30.22046},
   {name:"Mangala",prov:"Ituri",cases:14,deaths:6,lat:1.96698,lng:30.41024},
@@ -532,7 +520,30 @@ const TAIL=[
   {name:"Vuhovi",prov:"Nord-Kivu",cases:1,deaths:1,lat:0.25118,lng:29.25411},
   {name:"Mabalako",prov:"Nord-Kivu",cases:1,deaths:0,lat:0.46812,lng:29.21145}
 ];
-const DRC_CONFIRMED_TOTAL=1094; // INSP SitRep N°39 national confirmed total for DRC (data as of 22 Jun 2026)
+// Merge the 25 lower-burden zones into HZ → one 34-zone array (all DRC).
+TAIL.forEach(z=>{z.country="DRC";});
+HZ.push(...TAIL);
+
+// Figures that aren't broken out by health zone, kept as named constants.
+const UGANDA={confirmed:19,deaths:2};   // WHO DON608 (17 Jun) — separate source/date
+const AWAITING_CASES=17;                // DRC cases awaiting health-zone assignment (INSP SitRep N°39)
+const DRC_RECOVERED=115;                // INSP SitRep N°39
+
+// National totals COMPUTED from the data (single source of truth) rather than hardcoded.
+const drcCases=HZ.reduce((s,z)=>s+z.cases,0)+AWAITING_CASES; // 1077 mapped + 17 awaiting = 1094
+const drcDeaths=HZ.reduce((s,z)=>s+z.deaths,0);              // 277
+const totalConfirmed=drcCases+UGANDA.confirmed;             // 1113
+const totalDeaths=drcDeaths+UGANDA.deaths;                 // 279
+const zonesWithCases=HZ.length;                            // 34
+function injectTotals(){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('respConfirmed',totalConfirmed);
+  set('respDeaths',totalDeaths);
+  set('respHz',zonesWithCases);
+  set('respRecovered',DRC_RECOVERED);
+}
+
+const DRC_CONFIRMED_TOTAL=drcCases; // 1094 — DRC national confirmed total (computed), used for per-zone share
 
 /* ============ I18N ============
    French strings below are AI-assisted and MUST be reviewed by a Francophone
@@ -569,15 +580,11 @@ const I18N={
     legend_scale:"Scale",
     seg_log:"log",
     seg_linear:"linear",
-    legend_size:"Size & colour · confirmed cases",
-    legend_show_markers:"Show case markers",
-    legend_context:"Context markers",
-    legend_tiers:"Marker tiers",
-    legend_tier_detailed:"Detailed zone (≥20 cases) — numbered marker, click for detail",
-    legend_tier_dot:"Also-reporting zone (<20 cases) — small faded dot, hover for figures",
-    legend_ctx_drc:"DRC province (cases not disaggregated)",
+    legend_choropleth:"Choropleth · confirmed cases",
+    legend_markers:"Markers",
+    legend_marker_dot:"Red dots = health zones (cluster when zoomed out)",
     legend_ctx_uga:"Uganda · Kampala metro (19 confirmed)",
-    legend_src:"Confirmed cases by health zone across DRC — 9 detailed zones (≥20 cases, numbered) and 25 also-reporting zones (<20, small faded dots). Marker positions are approximate health-zone centroids. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only) and are more recent than the WHO DON608 headline (17 Jun, incl. Uganda). The two use different sources, dates and case definitions and are not directly comparable; the mapped zones sum to more than the headline total. 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.",
+    legend_src:"Each DRC health-zone polygon is shaded by confirmed cases on a sequential grey ramp (light = few, dark = many). Red markers sit at approximate zone centroids and cluster when zoomed out — click a polygon or a marker for zone detail. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only); Uganda (Kampala) is a separate WHO DON608 context marker (17 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.",
     zone_title:"Health zone",
     tab_snap:"Current snapshot",
     tab_trend:"Trends",
@@ -594,12 +601,15 @@ const I18N={
     trend_desc:"Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published by WHO.",
     trend_note:"DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun) → 896 (17 Jun). Uganda flat at 19 since 8 Jun.",
     ctx_empty:"Select a health zone for response context.",
+    ctx_none:"No curated context for this zone — confirmed figures only. ⚠ Verify against WHO before publishing.",
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
-    resp_deaths:"Deaths · CFR ≈26%*",
-    resp_hz:"Health zones with cases (DRC) · per DON608 · 17 Jun",
+    resp_deaths:"Deaths · CFR ≈25.3%*",
+    resp_hz:"Health zones with cases (DRC) · INSP SitRep N°39",
+    resp_recovered:"Recovered (DRC) · INSP SitRep N°39",
     resp_followup:"Contact follow-up (Ituri) · per DON608 · 17 Jun",
-    resp_cfr_note:"* Provisional — confirmed deaths ÷ confirmed cases (234/915). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.",
+    resp_source_note:"DRC figures INSP SitRep N°39 (22 Jun 2026); Uganda figures WHO DON608 (17 Jun). Composite of two sources/dates.",
+    resp_cfr_note:"* Provisional — DRC case-fatality is confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.",
     resp_ituri_note:"Ituri province (epicentre): 817 confirmed · 186 deaths · CFR 22.7% (WHO DON608, 17 Jun).",
     risk_drc:"DRC",
     risk_uganda:"Uganda",
@@ -615,8 +625,8 @@ const I18N={
     who_link_text:"WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC & Uganda (19 June 2026)",
     md_asof_p:"DRC figures are as of 17 June 2026; Uganda figures as of 18 June 2026, including the Ituri health-zone breakdown (DON608, 17 June). WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.",
     md_h_method:"Method",
-    md_method_1:"The map is a <strong>proportional-symbol layer</strong>: each circle is a DRC health zone reporting confirmed Bundibugyo cases across Ituri, North Kivu and South Kivu. Circle <em>area</em> is proportional to confirmed cases (square-root scale) and <em>colour</em> follows a sequential red ramp. The most-affected zones are labelled with their count (e.g. Bunia 296, Mongbwalu 237, Rwampara 225).",
-    md_method_2:"Markers are shown in <strong>two tiers</strong>: the nine zones with 20 or more confirmed cases appear as larger, numbered, fully-opaque circles you can click for zone detail; the remaining zones appear as small faded dots ('also reporting') that show their figures on hover only.",
+    md_method_1:"The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential ramp (light = few, dark = many). Red markers mark zone centroids and cluster when zoomed out; click a zone polygon or a marker for detail.",
+    md_method_2:"Zone markers use <strong>marker clustering</strong>: when zoomed out, nearby zones merge into a single numbered cluster; zoom in or click a cluster to split it into individual zones, then click a zone for its snapshot. Uganda (Kampala) stays a separate context marker, outside the cluster.",
     md_method_3:"All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.",
     md_method_4:"Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.",
     md_method_5:"The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).",
@@ -674,15 +684,11 @@ const I18N={
     legend_scale:"Échelle",
     seg_log:"log",
     seg_linear:"linéaire",
-    legend_size:"Taille et couleur · cas confirmés",
-    legend_show_markers:"Afficher les marqueurs de cas",
-    legend_context:"Marqueurs contextuels",
-    legend_ctx_drc:"Province de la RDC (cas non désagrégés)",
-    legend_tiers:"Niveaux de marqueurs",
-    legend_tier_detailed:"Zone détaillée (≥20 cas) — marqueur numéroté, cliquez pour le détail",
-    legend_tier_dot:"Zone également touchée (<20 cas) — petit point estompé, survol pour les chiffres",
+    legend_choropleth:"Choroplèthe · cas confirmés",
+    legend_markers:"Marqueurs",
+    legend_marker_dot:"Points rouges = zones de santé (regroupées au dézoom)",
     legend_ctx_uga:"Ouganda · agglomération de Kampala (19 confirmés)",
-    legend_src:"Cas confirmés par zone de santé en RDC — 9 zones détaillées (≥20 cas, numérotées) et 25 zones également touchées (<20, petits points estompés). Les positions des marqueurs sont des centroïdes approximatifs des zones de santé. Les chiffres par zone proviennent du SitRep N°39 de l'INSP (22 juin 2026, RDC uniquement) et sont plus récents que le titre OMS DON608 (17 juin, Ouganda inclus). Les deux reposent sur des sources, dates et définitions de cas différentes et ne sont pas directement comparables ; la somme des zones cartographiées dépasse le total du titre. 17 cas en attente d'attribution à une zone de santé (INSP SitRep N°39, 22 juin). ⚠ Vérifier auprès de l'OMS avant publication.",
+    legend_src:"Chaque polygone de zone de santé de la RDC est coloré selon le nombre de cas confirmés sur un dégradé de gris séquentiel (clair = peu, foncé = beaucoup). Des marqueurs rouges sont placés aux centroïdes approximatifs des zones et se regroupent au dézoom — cliquez sur un polygone ou un marqueur pour le détail de la zone. Les chiffres par zone proviennent du SitRep N°39 de l'INSP (22 juin 2026, RDC uniquement) ; l'Ouganda (Kampala) est un marqueur contextuel distinct (OMS DON608, 17 juin). 17 cas en attente d'attribution à une zone de santé (INSP SitRep N°39, 22 juin). ⚠ Vérifier auprès de l'OMS avant publication.",
     zone_title:"Zone de santé",
     tab_snap:"Aperçu actuel",
     tab_trend:"Tendances",
@@ -699,12 +705,15 @@ const I18N={
     trend_desc:"Cas confirmés rapportés dans les Bulletins d'information sur les flambées épidémiques de l'OMS. Les séries chronologiques par zone de santé ne sont pas publiées par l'OMS.",
     trend_note:"RDC : 83 (21 mai) → 515 (8 juin) → 676 (10 juin) → 896 (17 juin). Ouganda stable à 19 depuis le 8 juin.",
     ctx_empty:"Sélectionnez une zone de santé pour le contexte de la riposte.",
+    ctx_none:"Aucun contexte détaillé pour cette zone — chiffres confirmés uniquement. ⚠ Vérifier auprès de l'OMS avant publication.",
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
-    resp_deaths:"Décès · TL ≈26 %*",
-    resp_hz:"Zones de santé avec des cas (RDC) · selon le DON608 · 17 juin",
+    resp_deaths:"Décès · TL ≈25,3 %*",
+    resp_hz:"Zones de santé avec des cas (RDC) · INSP SitRep N°39",
+    resp_recovered:"Guéris (RDC) · INSP SitRep N°39",
     resp_followup:"Suivi des contacts (Ituri) · selon le DON608 · 17 juin",
-    resp_cfr_note:"* Provisoire — décès confirmés ÷ cas confirmés (234/915). Non comparable aux DON précédents, qui utilisaient une définition de cas différente ; la létalité est instable tant que la plupart des cas ne sont pas résolus.",
+    resp_source_note:"Chiffres RDC : INSP SitRep N°39 (22 juin 2026) ; chiffres Ouganda : OMS DON608 (17 juin). Composite de deux sources/dates.",
+    resp_cfr_note:"* Provisoire — la létalité en RDC correspond aux décès confirmés ÷ cas confirmés (277/1094 ≈ 25,3 %, INSP SitRep N°39). Non comparable aux DON précédents, qui utilisaient une définition de cas différente ; la létalité est instable tant que la plupart des cas ne sont pas résolus.",
     resp_ituri_note:"Province de l'Ituri (épicentre) : 817 confirmés · 186 décès · TL 22,7 % (OMS DON608, 17 juin).",
     risk_drc:"RDC",
     risk_uganda:"Ouganda",
@@ -720,8 +729,8 @@ const I18N={
     who_link_text:"OMS DON608 — Maladie à virus Ebola Bundibugyo, RDC et Ouganda (19 juin 2026)",
     md_asof_p:"Les chiffres de la RDC sont arrêtés au 17 juin 2026 ; ceux de l'Ouganda au 18 juin 2026, y compris la répartition par zone de santé de l'Ituri (DON608, 17 juin). L'OMS cite le Centre des opérations d'urgences de santé publique (COUSP-RDC) comme source des données pour la RDC.",
     md_h_method:"Méthode",
-    md_method_1:"La carte est une <strong>couche de symboles proportionnels</strong> : chaque cercle représente une zone de santé de la RDC déclarant des cas confirmés de Bundibugyo, en Ituri, au Nord-Kivu et au Sud-Kivu. L'<em>aire</em> du cercle est proportionnelle au nombre de cas confirmés (échelle en racine carrée) et la <em>couleur</em> suit un dégradé rouge séquentiel. Les zones les plus touchées sont annotées de leur nombre de cas (p. ex. Bunia 296, Mongbwalu 237, Rwampara 225).",
-    md_method_2:"Les marqueurs sont affichés en <strong>deux niveaux</strong> : les neuf zones comptant 20 cas confirmés ou plus apparaissent sous forme de cercles numérotés, plus grands et opaques, cliquables pour le détail de la zone ; les autres zones sont représentées par de petits points estompés (« également touchées »), dont les chiffres s'affichent uniquement au survol.",
+    md_method_1:"La carte est une <strong>choroplèthe</strong> : chaque polygone de zone de santé est coloré selon le nombre de cas confirmés sur un dégradé séquentiel (clair = peu, foncé = beaucoup). Des marqueurs rouges indiquent les centroïdes des zones et se regroupent au dézoom ; cliquez sur un polygone de zone ou un marqueur pour le détail.",
+    md_method_2:"Les marqueurs de zones utilisent l'<strong>agrégation (clustering)</strong> : au dézoom, les zones proches fusionnent en un cluster numéroté ; zoomez ou cliquez sur un cluster pour le séparer en zones individuelles, puis cliquez sur une zone pour son aperçu. L'Ouganda (Kampala) demeure un marqueur contextuel distinct, hors du cluster.",
     md_method_3:"Les trois provinces touchées — Ituri, Nord-Kivu et Sud-Kivu — sont désormais cartographiées au <strong>niveau des zones de santé</strong> d'après le SitRep N°39 de l'INSP (22 juin 2026) ; les anciens marqueurs contextuels provinciaux du Nord- et du Sud-Kivu ont été retirés. Seul l'Ouganda (aire métropolitaine de Kampala) demeure un marqueur contextuel distinct, car il provient d'une source différente. 17 cas en RDC étaient en attente de répartition par zone de santé au moment du rapport.",
     md_method_4:"Les coordonnées des marqueurs sont des <strong>centroïdes approximatifs des zones de santé</strong> destinés au placement visuel, et non des limites officielles.",
     md_method_5:"Le graphique de tendance utilise les cas confirmés cumulés issus des DON successifs de l'OMS (21 mai, 8 juin, 10 juin, 17 juin).",
@@ -765,7 +774,7 @@ const I18N={
     chart_deaths:"Décès"
   }
 };
-const tr=d=>d.i18n[lang];
+const tr=d=>d.i18n?d.i18n[lang]:null; // null for the 25 uncurated zones (figures-only)
 const provName=p=>(PROV_I18N[p]&&PROV_I18N[p][lang])||p;
 const countryName=c=>(COUNTRY_I18N[c]&&COUNTRY_I18N[c][lang])||c;
 
@@ -778,66 +787,70 @@ const darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{
 const lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
 darkTile.addTo(map);
 
-const RAMP=['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15','#67000d'];
-// Scale spans the full INSP SitRep 39 zone range (1..296), so the detailed
-// markers don't wash out now that most zones are small.
-const maxCases=296,minCases=1;
-const TAIL_COLOR='#7c8aa0'; // one muted neutral colour for the "also-reporting" tail dots
-
-function colorFor(c){
-  // sqrt transform (same as radiusFor) keeps the red ramp from saturating
-  const t=Math.sqrt(c)/Math.sqrt(maxCases);
-  const idx=Math.min(RAMP.length-1,Math.max(0,Math.round(t*(RAMP.length-1))));
-  return RAMP[idx];
-}
-function radiusFor(c){ // area-proportional
-  const rMax=32,rMin=6;
-  const t=Math.sqrt(c)/Math.sqrt(maxCases);
-  return Math.round(rMin+(rMax-rMin)*t);
+/* Choropleth fill ramp — sequential GREY (light = few cases, dark = many).
+   This is a SINGLE array: swap it for a red ramp later to change the scheme.
+   Domain 1..296; sqrt transform keeps the long tail of small zones readable. */
+const FILL_RAMP=['#e8e8e8','#cccccc','#a6a6a6','#7c7c7c','#525252','#272727'];
+function fillColorFor(cases){
+  if(cases==null||cases<=0) return null;            // zones with no cases get no fill
+  const t=Math.sqrt(cases)/Math.sqrt(296);
+  const idx=Math.min(FILL_RAMP.length-1,Math.max(0,Math.round(t*(FILL_RAMP.length-1))));
+  return FILL_RAMP[idx];
 }
 
-let tailLayer=L.layerGroup().addTo(map);
-let hzLayer=L.layerGroup().addTo(map);
 let ctxLayer=L.layerGroup().addTo(map);
 let selected=null;
 
-function makeHZIcon(d){
-  // Detailed tier only: every one of the 9 markers is numbered (label driven by
-  // the tier, not a case threshold). Tail dots are drawn separately by drawTail().
-  const r=radiusFor(d.cases);
-  const diam=r*2;
-  const fill=colorFor(d.cases);
-  const shadow='text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.6)';
-  const fs=r>26?13:11;
-  const circleStyle=`width:${diam}px;height:${diam}px;border-radius:50%;background:${fill};`+
-    `border:1.5px solid rgba(255,255,255,.75);box-shadow:0 2px 10px rgba(0,0,0,.55);`+
-    `display:flex;align-items:center;justify-content:center;flex:0 0 auto;`;
-  const html=`<div style="${circleStyle}"><span style="font-family:'IBM Plex Mono',monospace;`+
-    `font-size:${fs}px;font-weight:700;color:#fff;${shadow};line-height:1">${d.cases}</span></div>`;
-  return L.divIcon({html,className:'',iconSize:[diam,diam],iconAnchor:[r,r]});
-}
-
-function drawHZ(){
-  hzLayer.clearLayers();
-  HZ.forEach(d=>{
-    const m=L.marker([d.lat,d.lng],{icon:makeHZIcon(d)});
-    m.bindTooltip(`<b>${d.name}</b> · ${provName(d.prov)}<br><span class="n">${d.cases}</span> ${I18N[lang].tip_confirmed_cases}`,{className:'hz-tip',sticky:true,direction:'top'});
-    m.on('click',()=>selectZone(d));
-    m.addTo(hzLayer);
-  });
-}
-function drawTail(){
-  // Small faded, non-interactive dots for the <20-case zones. One muted neutral
-  // colour (not the red ramp, not province-coloured); hover tooltip only, no click.
-  tailLayer.clearLayers();
-  const T=I18N[lang];
-  TAIL.forEach(d=>{
-    const m=L.circleMarker([d.lat,d.lng],{
-      radius:4.5,fillColor:TAIL_COLOR,color:'#fff',
-      weight:.8,opacity:.7,fillOpacity:.45,interactive:true
+/* ---- Choropleth polygons (beneath markers: polygons render in Leaflet's overlay
+   pane, marker-cluster icons in the marker pane, so markers always sit on top) ---- */
+let choroplethLayer=L.geoJSON(null,{
+  style:f=>{
+    const c=fillColorFor(f.properties.confirmed_cases);
+    return {fillColor:c||'#000',fillOpacity:c?0.75:0,color:'#fff',weight:1,opacity:c?0.7:0};
+  },
+  onEachFeature:(f,layer)=>{
+    const p=f.properties,T=I18N[lang];
+    layer.bindTooltip(`<b>${p.zone}</b> · ${p.confirmed_cases} ${T.tip_cases} · ${p.confirmed_deaths} ${T.tip_deaths}`,{className:'hz-tip',sticky:true,direction:'top'});
+    layer.on('mouseover',()=>layer.setStyle({weight:2.5,color:'#fff',opacity:1}));
+    layer.on('mouseout',()=>choroplethLayer.resetStyle(layer));
+    layer.on('click',()=>{
+      const hz=HZ.find(z=>z.name===p.zone);
+      const ctr=layer.getBounds().getCenter();
+      selectZone(hz||{name:p.zone,prov:p.province,country:'DRC',cases:p.confirmed_cases,deaths:p.confirmed_deaths,lat:ctr.lat,lng:ctr.lng});
     });
+  }
+}).addTo(map);
+
+function loadChoropleth(){
+  // Fetched at runtime (needs an HTTP origin). On failure (e.g. opened via file://)
+  // we log and continue with markers only — the map still works.
+  fetch('data/zones_sitrep39.geojson')
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(gj=>{choroplethLayer.addData(gj);})
+    .catch(e=>{console.warn('Choropleth GeoJSON failed to load — continuing with markers only.',e);});
+}
+loadChoropleth();
+
+/* ---- Uniform zone markers, clustered. Severity now lives in the choropleth and
+   density in the clusters, so every zone is one identical small red dot. ---- */
+const zoneClusterGroup=L.markerClusterGroup({
+  maxClusterRadius:45,
+  showCoverageOnHover:false,
+  spiderfyOnMaxZoom:true,
+  chunkedLoading:true
+}).addTo(map);
+
+function zoneDotIcon(){
+  return L.divIcon({className:'zone-dot',html:'<span class="zone-dot-i"></span>',iconSize:[16,16],iconAnchor:[8,8]});
+}
+function drawHZ(){
+  zoneClusterGroup.clearLayers();
+  const T=I18N[lang];
+  HZ.forEach(d=>{
+    const m=L.marker([d.lat,d.lng],{icon:zoneDotIcon()});
     m.bindTooltip(`<b>${d.name}</b> · ${d.cases} ${T.tip_cases} · ${d.deaths} ${T.tip_deaths}`,{className:'hz-tip',sticky:true,direction:'top'});
-    m.addTo(tailLayer);
+    m.on('click',()=>selectZone(d));
+    zoneClusterGroup.addLayer(m);
   });
 }
 function drawCtx(){
@@ -853,7 +866,7 @@ function drawCtx(){
     m.addTo(ctxLayer);
   });
 }
-drawTail();drawHZ();drawCtx();
+drawHZ();drawCtx();injectTotals();
 
 /* ============ PANEL UPDATES ============ */
 const $=s=>document.querySelector(s);
@@ -865,10 +878,10 @@ document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',
 
 function selectZone(d,noPan){
   selected=d;
-  const t=tr(d),T=I18N[lang];
+  const t=tr(d),T=I18N[lang]; // t is null for the 25 uncurated zones
   $('#hint').style.display='none';
   $('#snapEmpty').style.display='none';$('#snapBody').style.display='block';
-  $('#ctxEmpty').style.display='none';$('#ctxBody').style.display='block';
+  // Figures — always shown
   $('#znName').textContent=d.name;
   $('#znMeta').textContent=T.meta_hz.replace('{prov}',provName(d.prov)).replace('{country}',countryName(d.country));
   $('#znCases').textContent=d.cases;
@@ -878,11 +891,19 @@ function selectZone(d,noPan){
   $('#znBarLab').textContent=T.share_ituri_confirmed;
   $('#znBarVal').textContent=share.toFixed(1)+'%';
   $('#znBar').style.width=Math.min(100,share)+'%';
-  $('#znNote').textContent=t.note;
-  $('#ctxTag').textContent=t.tag;
-  $('#ctxText').innerHTML=t.ctx;
-  $('#ctxNote').textContent=t.note;
-  if(!noPan)map.panTo([d.lat,d.lng],{animate:true});
+  // Narrative — only for curated zones; otherwise hide the blocks (no "undefined")
+  if(t){
+    $('#znNote').textContent=t.note;
+    $('#ctxEmpty').style.display='none';$('#ctxBody').style.display='block';
+    $('#ctxTag').textContent=t.tag;
+    $('#ctxText').innerHTML=t.ctx;
+    $('#ctxNote').textContent=t.note;
+  }else{
+    $('#znNote').textContent='';
+    $('#ctxBody').style.display='none';$('#ctxEmpty').style.display='block';
+    $('#ctxEmpty').textContent=T.ctx_none;
+  }
+  if(!noPan && d.lat!=null)map.panTo([d.lat,d.lng],{animate:true});
 }
 function selectContext(d,noPan){
   selected=d;
@@ -1114,7 +1135,7 @@ function setLanguage(l){
   document.title=I18N[l].doc_title;
   applyStaticI18n();
   langBtn.textContent='🌐 '+(l==='fr'?'FR':'EN');
-  drawTail();drawHZ();drawCtx();
+  drawHZ();drawCtx();choroplethLayer&&choroplethLayer.eachLayer(l=>{const p=l.feature.properties,T=I18N[lang];l.setTooltipContent(`<b>${p.zone}</b> · ${p.confirmed_cases} ${T.tip_cases} · ${p.confirmed_deaths} ${T.tip_deaths}`);});
   if(selected){selected.kind?selectContext(selected,true):selectZone(selected,true);}
   updateChartsI18n();
 }
