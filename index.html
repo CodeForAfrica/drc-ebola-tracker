@@ -317,14 +317,11 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   <div class="panel-b">
     <div class="resp-grid">
       <div class="c"><div class="v red" id="respConfirmed">—</div><div class="l" data-i18n="resp_confirmed_both">Confirmed (both countries)</div></div>
-      <div class="c"><div class="v red" id="respDeaths">—</div><div class="l" data-i18n="resp_deaths">Deaths · CFR ≈25.3%*</div></div>
+      <div class="c"><div class="v red" id="respDeaths">—</div><div class="l" data-i18n="resp_deaths">Deaths · CFR ≈25.3% (provisional)</div></div>
       <div class="c"><div class="v" id="respHz">—</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · INSP SitRep N°39</div></div>
       <div class="c"><div class="v" id="respRecovered">—</div><div class="l" data-i18n="resp_recovered">Recovered (DRC) · INSP SitRep N°39</div></div>
       <div class="c"><div class="v">70.8%</div><div class="l" data-i18n="resp_followup">Contact follow-up (Ituri) · per DON608 · 17 Jun</div></div>
     </div>
-    <p class="note" data-i18n="resp_source_note">DRC figures INSP SitRep N°39 (22 Jun 2026); Uganda figures WHO DON608 (17 Jun). Composite of two sources/dates.</p>
-    <p class="note" data-i18n="resp_cfr_note">* Provisional — DRC case-fatality is confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.</p>
-    <p class="note" data-i18n="resp_ituri_note">Ituri province (epicentre): 817 confirmed · 186 deaths · CFR 22.7% (WHO DON608, 17 Jun).</p>
     <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
     <div class="risk-list">
       <div class="risk"><span class="rg" data-i18n="risk_drc">DRC</span><span class="pill vh" data-i18n="pill_vh">Very high</span></div>
@@ -342,9 +339,9 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-h"><h2 data-i18n="modal_data_title">Contributors, Data &amp; Methods</h2><button class="modal-x" data-close>✕</button></div>
     <div class="modal-b">
       <h4 data-i18n="md_h_source">Data source</h4>
-      <p data-i18n="md_source_p">All epidemiological figures are transcribed from the World Health Organization Disease Outbreak News:</p>
+      <p data-i18n="md_source_p">Health-zone figures are transcribed from INSP situation reports (SitRep N°39, 22 June 2026). National headline and Uganda figures are from WHO Disease Outbreak News (DON608). WHO cites COUSP-DRC / INSP as the underlying DRC source.</p>
       <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON608" target="_blank" rel="noopener" data-i18n="who_link_text">WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (19 June 2026)</a></p>
-      <p data-i18n="md_asof_p">DRC figures are as of 17 June 2026; Uganda figures as of 18 June 2026, including the Ituri health-zone breakdown (DON608, 17 June). WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.</p>
+      <p data-i18n="md_asof_p">DRC health-zone data are as of 22 June 2026 (INSP SitRep N°39); the WHO DON608 national and Uganda figures are as of 17–18 June. The headline totals are therefore a composite of two sources and dates.</p>
 
       <h4 data-i18n="md_h_method">Method</h4>
       <ul>
@@ -353,6 +350,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
         <li data-i18n-html="md_method_3">All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li data-i18n-html="md_method_4">Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
         <li data-i18n-html="md_method_5">The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).</li>
+        <li data-i18n-html="md_method_6">DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.</li>
         <li>The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential ramp (light = few, dark = many). Red markers mark zone centroids and cluster when zoomed out; click a zone polygon or a marker for detail.</li>
         <li>All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li>Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
@@ -604,13 +602,10 @@ const I18N={
     ctx_none:"No curated context for this zone — confirmed figures only. ⚠ Verify against WHO before publishing.",
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
-    resp_deaths:"Deaths · CFR ≈25.3%*",
+    resp_deaths:"Deaths · CFR ≈25.3% (provisional)",
     resp_hz:"Health zones with cases (DRC) · INSP SitRep N°39",
     resp_recovered:"Recovered (DRC) · INSP SitRep N°39",
     resp_followup:"Contact follow-up (Ituri) · per DON608 · 17 Jun",
-    resp_source_note:"DRC figures INSP SitRep N°39 (22 Jun 2026); Uganda figures WHO DON608 (17 Jun). Composite of two sources/dates.",
-    resp_cfr_note:"* Provisional — DRC case-fatality is confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.",
-    resp_ituri_note:"Ituri province (epicentre): 817 confirmed · 186 deaths · CFR 22.7% (WHO DON608, 17 Jun).",
     risk_drc:"DRC",
     risk_uganda:"Uganda",
     risk_borders:"Bordering countries",
@@ -621,15 +616,16 @@ const I18N={
     resp_note:"159 health zones categorized affected or at risk (risk-stratification, 8 Jun). Candidate-therapeutics trial underway: MBP134, REGN3479 (treatment); obeldesivir (post-exposure prophylaxis). No licensed vaccine or treatment for BVD.",
     modal_data_title:"Contributors, Data & Methods",
     md_h_source:"Data source",
-    md_source_p:"All epidemiological figures are transcribed from the World Health Organization Disease Outbreak News:",
+    md_source_p:"Health-zone figures are transcribed from INSP situation reports (SitRep N°39, 22 June 2026). National headline and Uganda figures are from WHO Disease Outbreak News (DON608). WHO cites COUSP-DRC / INSP as the underlying DRC source.",
     who_link_text:"WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC & Uganda (19 June 2026)",
-    md_asof_p:"DRC figures are as of 17 June 2026; Uganda figures as of 18 June 2026, including the Ituri health-zone breakdown (DON608, 17 June). WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.",
+    md_asof_p:"DRC health-zone data are as of 22 June 2026 (INSP SitRep N°39); the WHO DON608 national and Uganda figures are as of 17–18 June. The headline totals are therefore a composite of two sources and dates.",
     md_h_method:"Method",
     md_method_1:"The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential ramp (light = few, dark = many). Red markers mark zone centroids and cluster when zoomed out; click a zone polygon or a marker for detail.",
     md_method_2:"Zone markers use <strong>marker clustering</strong>: when zoomed out, nearby zones merge into a single numbered cluster; zoom in or click a cluster to split it into individual zones, then click a zone for its snapshot. Uganda (Kampala) stays a separate context marker, outside the cluster.",
     md_method_3:"All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.",
     md_method_4:"Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.",
     md_method_5:"The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).",
+    md_method_6:"DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.",
     md_h_figures:"WHO figures (view / download at source)",
     md_fig_alt:"WHO Figure 1: distribution of confirmed BVD cases, DRC and Uganda",
     md_figcap:"WHO Figure 1 — distribution of confirmed cases, DRC (10 Jun) & Uganda (11 Jun). © WHO.",
@@ -708,13 +704,10 @@ const I18N={
     ctx_none:"Aucun contexte détaillé pour cette zone — chiffres confirmés uniquement. ⚠ Vérifier auprès de l'OMS avant publication.",
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
-    resp_deaths:"Décès · TL ≈25,3 %*",
+    resp_deaths:"Décès · TL ≈25,3 % (provisoire)",
     resp_hz:"Zones de santé avec des cas (RDC) · INSP SitRep N°39",
     resp_recovered:"Guéris (RDC) · INSP SitRep N°39",
     resp_followup:"Suivi des contacts (Ituri) · selon le DON608 · 17 juin",
-    resp_source_note:"Chiffres RDC : INSP SitRep N°39 (22 juin 2026) ; chiffres Ouganda : OMS DON608 (17 juin). Composite de deux sources/dates.",
-    resp_cfr_note:"* Provisoire — la létalité en RDC correspond aux décès confirmés ÷ cas confirmés (277/1094 ≈ 25,3 %, INSP SitRep N°39). Non comparable aux DON précédents, qui utilisaient une définition de cas différente ; la létalité est instable tant que la plupart des cas ne sont pas résolus.",
-    resp_ituri_note:"Province de l'Ituri (épicentre) : 817 confirmés · 186 décès · TL 22,7 % (OMS DON608, 17 juin).",
     risk_drc:"RDC",
     risk_uganda:"Ouganda",
     risk_borders:"Pays frontaliers",
@@ -725,15 +718,16 @@ const I18N={
     resp_note:"159 zones de santé classées touchées ou à risque (stratification du risque, 8 juin). Essai de thérapies candidates en cours : MBP134, REGN3479 (traitement) ; obeldesivir (prophylaxie post-exposition). Aucun vaccin ni traitement homologué contre la MVB.",
     modal_data_title:"Contributeurs, données et méthodes",
     md_h_source:"Source des données",
-    md_source_p:"Tous les chiffres épidémiologiques sont transcrits du Bulletin d'information sur les flambées épidémiques de l'Organisation mondiale de la Santé :",
+    md_source_p:"Les chiffres par zone de santé sont transcrits des rapports de situation de l'INSP (SitRep N°39, 22 juin 2026). Les chiffres nationaux globaux et ceux de l'Ouganda proviennent du Bulletin d'information sur les flambées de l'OMS (DON608). L'OMS cite le COUSP-RDC / INSP comme source sous-jacente pour la RDC.",
     who_link_text:"OMS DON608 — Maladie à virus Ebola Bundibugyo, RDC et Ouganda (19 juin 2026)",
-    md_asof_p:"Les chiffres de la RDC sont arrêtés au 17 juin 2026 ; ceux de l'Ouganda au 18 juin 2026, y compris la répartition par zone de santé de l'Ituri (DON608, 17 juin). L'OMS cite le Centre des opérations d'urgences de santé publique (COUSP-RDC) comme source des données pour la RDC.",
+    md_asof_p:"Les données par zone de santé de la RDC sont arrêtées au 22 juin 2026 (SitRep N°39 de l'INSP) ; les chiffres nationaux et ougandais du DON608 de l'OMS sont arrêtés aux 17–18 juin. Les totaux affichés constituent donc un composite de deux sources et de deux dates.",
     md_h_method:"Méthode",
     md_method_1:"La carte est une <strong>choroplèthe</strong> : chaque polygone de zone de santé est coloré selon le nombre de cas confirmés sur un dégradé séquentiel (clair = peu, foncé = beaucoup). Des marqueurs rouges indiquent les centroïdes des zones et se regroupent au dézoom ; cliquez sur un polygone de zone ou un marqueur pour le détail.",
     md_method_2:"Les marqueurs de zones utilisent l'<strong>agrégation (clustering)</strong> : au dézoom, les zones proches fusionnent en un cluster numéroté ; zoomez ou cliquez sur un cluster pour le séparer en zones individuelles, puis cliquez sur une zone pour son aperçu. L'Ouganda (Kampala) demeure un marqueur contextuel distinct, hors du cluster.",
     md_method_3:"Les trois provinces touchées — Ituri, Nord-Kivu et Sud-Kivu — sont désormais cartographiées au <strong>niveau des zones de santé</strong> d'après le SitRep N°39 de l'INSP (22 juin 2026) ; les anciens marqueurs contextuels provinciaux du Nord- et du Sud-Kivu ont été retirés. Seul l'Ouganda (aire métropolitaine de Kampala) demeure un marqueur contextuel distinct, car il provient d'une source différente. 17 cas en RDC étaient en attente de répartition par zone de santé au moment du rapport.",
     md_method_4:"Les coordonnées des marqueurs sont des <strong>centroïdes approximatifs des zones de santé</strong> destinés au placement visuel, et non des limites officielles.",
     md_method_5:"Le graphique de tendance utilise les cas confirmés cumulés issus des DON successifs de l'OMS (21 mai, 8 juin, 10 juin, 17 juin).",
+    md_method_6:"La létalité en RDC est provisoire — décès confirmés ÷ cas confirmés (277/1094 ≈ 25,3 %, SitRep N°39 de l'INSP). Non comparable aux DON antérieurs (définition de cas différente) et instable tant que la plupart des cas ne sont pas clôturés.",
     md_h_figures:"Figures de l'OMS (consulter / télécharger à la source)",
     md_fig_alt:"Figure 1 de l'OMS : distribution des cas confirmés de MVB, RDC et Ouganda",
     md_figcap:"Figure 1 de l'OMS — distribution des cas confirmés, RDC (10 juin) et Ouganda (11 juin). © OMS.",
