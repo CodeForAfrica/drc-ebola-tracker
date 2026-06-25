@@ -290,17 +290,33 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       </div>
     </div>
     <div class="tabpane" id="tab-trend">
-      <div class="ctx"><span class="tag" data-i18n="trend_tag">National cumulative</span></div>
-      <p class="ctx" style="margin-bottom:8px" data-i18n="trend_desc">Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published by WHO.</p>
-      <div class="mini"><canvas id="trendChart"></canvas></div>
-      <p class="note" data-i18n="trend_note">DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun) → 896 (17 Jun). Uganda flat at 19 since 8 Jun.</p>
+      <div class="zone-empty" id="trendEmpty" data-i18n="trend_empty">Select a health zone to see its case &amp; death trend.</div>
+      <div id="trendBody" style="display:none">
+        <div class="mini"><canvas id="zoneTrendChart"></canvas></div>
+        <p class="note" id="znTrendSingle" style="display:none"></p>
+        <p class="note" data-i18n="trend_caption">Cumulative confirmed cases and deaths, INSP SitReps (14 May–22 Jun). Counts are occasionally revised down between reports.</p>
+      </div>
     </div>
     <div class="tabpane" id="tab-ctx">
       <div class="zone-empty" id="ctxEmpty" data-i18n="ctx_empty">Select a health zone for response context.</div>
       <div id="ctxBody" style="display:none">
-        <div class="ctx"><span class="tag" id="ctxTag">Context</span></div>
-        <p class="ctx" id="ctxText"></p>
-        <p class="note" id="ctxNote"></p>
+        <div id="ctxNarr">
+          <div class="ctx"><span class="tag" id="ctxTag">Context</span></div>
+          <p class="ctx" id="ctxText"></p>
+          <p class="note" id="ctxNote"></p>
+        </div>
+        <p class="note" id="ctxNoNarr" style="display:none" data-i18n="ctx_none">No curated context for this zone — confirmed figures only. ⚠ Verify against WHO before publishing.</p>
+        <div id="ctxPopSec" style="display:none">
+          <div class="leg-section" data-i18n="ctx_pop_header">Population</div>
+          <p class="zone-meta" id="znPop"></p>
+          <p class="zone-meta" id="znIncidence"></p>
+        </div>
+        <div id="ctxMobSec" style="display:none">
+          <div class="leg-section" data-i18n="ctx_mob_header">Mobility · importation risk</div>
+          <p class="zone-meta" id="znMob"></p>
+          <div id="znMobSpark" style="margin:5px 0"></div>
+          <p class="note" data-i18n="ctx_mob_caveat">Vodacom/Flowminder CDR, movements 24 Apr–24 May 2026; Vodacom subscribers only. Mobility predicts importation risk, not transmission.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -522,6 +538,12 @@ const UGANDA={confirmed:19,deaths:2};   // WHO DON608 (17 Jun) — separate sour
 const AWAITING_CASES=17;                // DRC cases awaiting health-zone assignment (INSP SitRep N°39)
 const DRC_RECOVERED=115;                // INSP SitRep N°39
 
+// Per-zone population (2024) and cumulative incidence per 100k — INSP / projections.
+const POP={"Bunia":[268128,110.4],"Mongbwalu":[133371,177.7],"Rwampara":[134068,167.8],"Nyankunde":[97949,87.8],"Katwa":[411346,7.8],"Nizi":[141651,21.2],"Butembo":[316182,8.9],"Lita":[128175,18.7],"Beni":[382409,5.2],"Bambu":[148752,9.4],"Mangala":[92662,15.1],"Komanda":[184816,5.4],"Tchomia":[110386,7.2],"Kilo":[55902,12.5],"Aungba":[158181,3.8],"Logo":[240552,2.1],"Damas":[116731,3.4],"Rimba":[211373,1.4],"Aru":[181110,1.7],"Oicha":[336160,0.9],"Kyondo":[215154,1.4],"Miti-Murhesa":[239135,1.3],"Mambasa":[95906,2.1],"Nia-Nia":[71361,2.8],"Kalunguta":[199559,1.0],"Musienene":[249370,0.8],"Drodro":[154777,0.6],"Gety":[186541,0.5],"Kambala":[123772,0.8],"Fataki":[128262,0.8],"Goma":[251728,0.4],"Masereka":[177664,0.6],"Vuhovi":[121520,0.8],"Mabalako":[186148,0.5]};
+
+// Per-zone time series + Flowminder mobility — fetched on init (see loadZoneData).
+let zoneTrends=null, zoneMobility=null;
+
 // National totals COMPUTED from the data (single source of truth) rather than hardcoded.
 const drcCases=HZ.reduce((s,z)=>s+z.cases,0)+AWAITING_CASES; // 1077 mapped + 17 awaiting = 1094
 const drcDeaths=HZ.reduce((s,z)=>s+z.deaths,0);              // 277
@@ -595,6 +617,18 @@ const I18N={
     trend_note:"DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun) → 896 (17 Jun). Uganda flat at 19 since 8 Jun.",
     ctx_empty:"Select a health zone for response context.",
     ctx_none:"No curated context for this zone — confirmed figures only. ⚠ Verify against WHO before publishing.",
+    trend_empty:"Select a health zone to see its case & death trend.",
+    trend_caption:"Cumulative confirmed cases and deaths, INSP SitReps (14 May–22 Jun). Counts are occasionally revised down between reports.",
+    trend_cases:"Cases",
+    trend_deaths:"Deaths",
+    ctx_pop_header:"Population",
+    ctx_pop_year:"Population (2024)",
+    ctx_incidence:"Cumulative incidence per 100k",
+    ctx_mob_header:"Mobility · importation risk",
+    ctx_mob_recipient:"Rank #{rank} of 141 recipient zones · {pct}% of the outbreak-origin cohort reached here by 24 May.",
+    ctx_mob_origin:"Outbreak-origin zone — the source of the mobility cohort, not a recipient.",
+    ctx_mob_excluded:"Excluded from the Flowminder mobility study for data quality.",
+    ctx_mob_caveat:"Vodacom/Flowminder CDR, movements 24 Apr–24 May 2026; Vodacom subscribers only. Mobility predicts importation risk, not transmission.",
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
     resp_deaths:"Deaths · CFR ≈25.3% (provisional)",
@@ -697,6 +731,18 @@ const I18N={
     trend_note:"RDC : 83 (21 mai) → 515 (8 juin) → 676 (10 juin) → 896 (17 juin). Ouganda stable à 19 depuis le 8 juin.",
     ctx_empty:"Sélectionnez une zone de santé pour le contexte de la riposte.",
     ctx_none:"Aucun contexte détaillé pour cette zone — chiffres confirmés uniquement. ⚠ Vérifier auprès de l'OMS avant publication.",
+    trend_empty:"Sélectionnez une zone de santé pour voir sa courbe de cas et de décès.",
+    trend_caption:"Cas et décès confirmés cumulés, SitReps de l'INSP (14 mai–22 juin). Les comptages sont parfois révisés à la baisse entre les rapports.",
+    trend_cases:"Cas",
+    trend_deaths:"Décès",
+    ctx_pop_header:"Population",
+    ctx_pop_year:"Population (2024)",
+    ctx_incidence:"Incidence cumulée pour 100 000",
+    ctx_mob_header:"Mobilité · risque d'importation",
+    ctx_mob_recipient:"Rang n°{rank} sur 141 zones réceptrices · {pct} % de la cohorte d'origine de l'épidémie atteinte ici au 24 mai.",
+    ctx_mob_origin:"Zone d'origine de l'épidémie — source de la cohorte de mobilité, pas une zone réceptrice.",
+    ctx_mob_excluded:"Exclue de l'étude de mobilité Flowminder pour qualité des données.",
+    ctx_mob_caveat:"Données Vodacom/Flowminder, déplacements du 24 avr. au 24 mai 2026 ; abonnés Vodacom uniquement. La mobilité prédit le risque d'importation, pas la transmission.",
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
     resp_deaths:"Décès · TL ≈25,3 % (provisoire)",
@@ -837,9 +883,12 @@ drawCtx();injectTotals();
 
 /* ============ PANEL UPDATES ============ */
 const $=s=>document.querySelector(s);
+let activeTab='snap';
 function setTab(t){
+  activeTab=t;
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
   document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+t));
+  if(t==='trend')drawZoneTrend(selected); // (re)draw when the tab becomes visible so Chart.js sizes correctly
 }
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 
@@ -858,18 +907,20 @@ function selectZone(d,noPan){
   $('#znBarLab').textContent=T.share_ituri_confirmed;
   $('#znBarVal').textContent=share.toFixed(1)+'%';
   $('#znBar').style.width=Math.min(100,share)+'%';
-  // Narrative — only for curated zones; otherwise hide the blocks (no "undefined")
+  // Context tab: always shown (population + mobility); narrative only for curated zones.
+  $('#ctxEmpty').style.display='none';$('#ctxBody').style.display='block';
   if(t){
     $('#znNote').textContent=t.note;
-    $('#ctxEmpty').style.display='none';$('#ctxBody').style.display='block';
+    $('#ctxNarr').style.display='block';$('#ctxNoNarr').style.display='none';
     $('#ctxTag').textContent=t.tag;
     $('#ctxText').innerHTML=t.ctx;
     $('#ctxNote').textContent=t.note;
   }else{
     $('#znNote').textContent='';
-    $('#ctxBody').style.display='none';$('#ctxEmpty').style.display='block';
-    $('#ctxEmpty').textContent=T.ctx_none;
+    $('#ctxNarr').style.display='none';$('#ctxNoNarr').style.display='block';
   }
+  fillContextExtras(d.name);
+  if(activeTab==='trend')drawZoneTrend(d);
   if(!noPan && d.lat!=null)map.panTo([d.lat,d.lng],{animate:true});
 }
 function selectContext(d,noPan){
@@ -888,9 +939,12 @@ function selectContext(d,noPan){
   $('#znBarVal').textContent=t.sub;
   $('#znBar').style.width=isUg?'3%':(d.prov==='North Kivu'?'25%':'3%');
   $('#znNote').textContent=t.note;
+  $('#ctxNarr').style.display='block';$('#ctxNoNarr').style.display='none';
   $('#ctxTag').textContent=isUg?T.tag_crossborder:T.tag_geoexpansion;
   $('#ctxText').innerHTML=t.ctx;
   $('#ctxNote').textContent=t.note;
+  fillContextExtras(d.name); // no POP/mobility for Kampala → both sections hide
+  if(activeTab==='trend')drawZoneTrend(d); // no per-zone series for Kampala → Trends shows empty state
   if(!noPan)map.panTo([d.lat,d.lng],{animate:true});
 }
 
@@ -899,21 +953,85 @@ document.querySelectorAll('[data-toggle]').forEach(h=>{
   h.addEventListener('click',()=>h.closest('.panel').classList.toggle('collapsed'));
 });
 
-/* ============ TREND CHART ============ */
-const tctx=document.getElementById('trendChart');
-const trendChart=new Chart(tctx,{
-  type:'line',
-  data:{labels:I18N[lang].chart_dates.slice(),datasets:[
-    {label:I18N[lang].chart_trend_drc,data:[83,515,676,896],borderColor:'#ff5a3c',backgroundColor:'rgba(255,90,60,.12)',fill:true,tension:.25,pointRadius:3,borderWidth:2},
-    {label:I18N[lang].chart_trend_uga,data:[2,19,19,19],borderColor:'#3d8bff',backgroundColor:'transparent',tension:.25,pointRadius:3,borderWidth:2}
-  ]},
-  options:{responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{labels:{color:'#8ba0b4',boxWidth:10,font:{size:9}}}},
-    scales:{
-      y:{ticks:{color:'#5f768c',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'}},
-      x:{ticks:{color:'#5f768c',font:{size:9}},grid:{display:false}}
-    }}
-});
+/* ============ PER-ZONE TREND CHART ============ */
+function chartColors(){
+  const light=document.documentElement.hasAttribute('data-theme');
+  return {tick:light?'#3a5268':'#5f768c',leg:light?'#50687c':'#8ba0b4',grid:light?'rgba(0,0,0,.08)':'rgba(255,255,255,.06)'};
+}
+let zoneTrendChart=null;
+function drawZoneTrend(d){
+  const T=I18N[lang];
+  const rows=d&&zoneTrends?zoneTrends[d.name]:null;
+  if(zoneTrendChart){zoneTrendChart.destroy();zoneTrendChart=null;}
+  if(!rows||!rows.length){               // no per-zone series (e.g. Uganda, or not yet loaded)
+    $('#trendBody').style.display='none';$('#trendEmpty').style.display='block';return;
+  }
+  $('#trendEmpty').style.display='none';$('#trendBody').style.display='block';
+  if(rows.length<2){                      // single data point → show as text, no chart
+    const r=rows[0];$('#zoneTrendChart').style.display='none';$('#znTrendSingle').style.display='block';
+    $('#znTrendSingle').textContent=`${r[0]}: ${r[1]} ${T.tip_cases}`+(r[2]!=null?` · ${r[2]} ${T.tip_deaths}`:'');
+    return;
+  }
+  $('#znTrendSingle').style.display='none';$('#zoneTrendChart').style.display='block';
+  const c=chartColors();
+  zoneTrendChart=new Chart($('#zoneTrendChart'),{
+    type:'line',
+    data:{labels:rows.map(r=>r[0]),datasets:[
+      {label:T.trend_cases,data:rows.map(r=>r[1]),borderColor:'#ff5a3c',backgroundColor:'rgba(255,90,60,.12)',fill:true,tension:.25,pointRadius:2,borderWidth:2,spanGaps:true},
+      {label:T.trend_deaths,data:rows.map(r=>r[2]),borderColor:'#67000d',backgroundColor:'transparent',borderDash:[5,4],tension:.25,pointRadius:2,borderWidth:2,spanGaps:true}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:c.leg,boxWidth:18,font:{size:9}}}},
+      scales:{
+        y:{beginAtZero:true,ticks:{color:c.tick,font:{size:9}},grid:{color:c.grid}},
+        x:{ticks:{color:c.tick,font:{size:9},maxTicksLimit:7,autoSkip:true},grid:{display:false}}
+      }}
+  });
+}
+
+/* ---- Context tab extras: population + Flowminder mobility ---- */
+function sparkline(series){
+  const w=124,h=26,pad=3,n=series.length;
+  const max=Math.max(...series),min=Math.min(...series),rng=(max-min)||1;
+  const xy=i=>[pad+i*(w-2*pad)/(n-1),h-pad-(series[i]-min)/rng*(h-2*pad)];
+  const pts=series.map((_,i)=>xy(i).map(v=>v.toFixed(1)).join(',')).join(' ');
+  const [lx,ly]=xy(n-1);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">`+
+    `<polyline points="${pts}" fill="none" stroke="#ff5a3c" stroke-width="1.5"/>`+
+    `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.2" fill="#ff5a3c"/></svg>`;
+}
+function fillContextExtras(name){
+  const T=I18N[lang];
+  const p=POP[name];
+  if(p){
+    $('#ctxPopSec').style.display='block';
+    $('#znPop').textContent=T.ctx_pop_year+': '+p[0].toLocaleString(lang==='fr'?'fr-FR':'en-US');
+    $('#znIncidence').textContent=T.ctx_incidence+': '+p[1];
+  }else $('#ctxPopSec').style.display='none';
+  const mob=zoneMobility?zoneMobility[name]:null;
+  if(mob){
+    $('#ctxMobSec').style.display='block';
+    if(mob.status==='recipient'){
+      $('#znMob').textContent=T.ctx_mob_recipient.replace('{rank}',mob.rank).replace('{pct}',mob.pct);
+      $('#znMobSpark').innerHTML=sparkline(mob.series);
+    }else if(mob.status==='origin'){
+      $('#znMob').textContent=T.ctx_mob_origin;$('#znMobSpark').innerHTML='';
+    }else{
+      $('#znMob').textContent=T.ctx_mob_excluded;$('#znMobSpark').innerHTML='';
+    }
+  }else $('#ctxMobSec').style.display='none';
+}
+
+function loadZoneData(){
+  // Fetched once on init; on failure log + degrade (Trends shows empty, Context omits the sections).
+  fetch('data/zone_trends_sitrep.json').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(j=>{zoneTrends=j;if(selected&&activeTab==='trend')drawZoneTrend(selected);})
+    .catch(e=>console.warn('zone_trends_sitrep.json failed to load — Trends tab will show no curve.',e));
+  fetch('data/zone_mobility_flowminder.json').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(j=>{zoneMobility=j.zones||j;if(selected)fillContextExtras(selected.name);})
+    .catch(e=>console.warn('zone_mobility_flowminder.json failed to load — Context mobility omitted.',e));
+}
+loadZoneData();
 
 /* ============ OUTCOMES DONUT ============ */
 // Outcomes (computed, same source of truth as the cards): recovered = DRC_RECOVERED (115),
@@ -953,16 +1071,10 @@ const outcomesChart=new Chart(outCtx,{
 });
 
 function updateChartTheme(light){
-  const tick=light?'#3a5268':'#5f768c';
   const leg=light?'#50687c':'#8ba0b4';
-  const grid=light?'rgba(0,0,0,.08)':'rgba(255,255,255,.06)';
-  trendChart.options.plugins.legend.labels.color=leg;
-  trendChart.options.scales.y.ticks.color=tick;
-  trendChart.options.scales.y.grid.color=grid;
-  trendChart.options.scales.x.ticks.color=tick;
-  trendChart.update();
   outcomesChart.options.plugins.legend.labels.color=leg;
   outcomesChart.update();
+  if(zoneTrendChart&&selected)drawZoneTrend(selected); // recolour the per-zone chart for the new theme
 }
 
 /* ============ THEME TOGGLE ============ */
@@ -1090,10 +1202,7 @@ function applyStaticI18n(){
 }
 function updateChartsI18n(){
   const T=I18N[lang];
-  trendChart.data.labels=T.chart_dates.slice();
-  trendChart.data.datasets[0].label=T.chart_trend_drc;
-  trendChart.data.datasets[1].label=T.chart_trend_uga;
-  trendChart.update();
+  // The per-zone trend chart is re-rendered via selectZone() on language change (see setLanguage).
   outcomesChart.data.labels=[T.chart_active,T.chart_recovered,T.chart_deaths];
   outcomesChart.update();
 }
