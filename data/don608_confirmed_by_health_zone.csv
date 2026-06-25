@@ -1,0 +1,5 @@
+health_zone,province,country,confirmed_cases,role,latitude,longitude,as_of,source
+Bunia,Ituri,DRC,247,Referral hub; <40km from Uganda border,1.5667,30.2500,2026-06-17,WHO DON608
+Rwampara,Ituri,DRC,195,Care-seeking destination,1.4800,30.2300,2026-06-17,WHO DON608
+Mongbwalu,Ituri,DRC,189,Presumed outbreak origin (gold-mining hub),1.9400,30.0300,2026-06-17,WHO DON608
+Nyankunde,Ituri,DRC,68,Care-seeking destination,1.4000,30.1800,2026-06-17,WHO DON608
