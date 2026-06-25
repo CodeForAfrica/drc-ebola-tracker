@@ -241,7 +241,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   <div class="panel-h" data-toggle>
     <div>
       <h3 data-i18n="legend_title">Confirmed cases</h3>
-      <div class="leg-sub" data-i18n="legend_sub">Ituri health zones · WHO DON607 · 10 Jun 2026</div>
+      <div class="leg-sub" data-i18n="legend_sub">DRC &amp; Uganda · most-affected health zones · WHO DON608 · 17 Jun 2026</div>
     </div>
     <span class="chev">▾</span>
   </div>
@@ -249,21 +249,21 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 
     <div class="leg-section" data-i18n="legend_colour">Colour · case intensity</div>
     <div class="ramp"><i style="background:var(--r1)"></i><i style="background:var(--r2)"></i><i style="background:var(--r3)"></i><i style="background:var(--r4)"></i><i style="background:var(--r5)"></i><i style="background:var(--r6)"></i></div>
-    <div class="ramp-vals"><span>33</span><span>80</span><span>130</span><span>185</span></div>
+    <div class="ramp-vals"><span>68</span><span>130</span><span>190</span><span>247</span></div>
 
     <div class="leg-section" data-i18n="legend_size">Size · confirmed cases</div>
     <div class="size-key">
       <div class="sk">
         <span class="circ" style="width:15px;height:15px;background:rgba(254,229,217,.55);border-color:#fcae91"></span>
-        <span class="skl">33<br>Nyankunde</span>
+        <span class="skl">68<br>Nyankunde</span>
       </div>
       <div class="sk">
         <span class="circ" style="width:28px;height:28px;background:rgba(165,15,21,.55);border-color:#a50f15"></span>
-        <span class="skl">132–137<br>Mongbwalu<br>Rwampara</span>
+        <span class="skl">189–195<br>Mongbwalu<br>Rwampara</span>
       </div>
       <div class="sk">
         <span class="circ" style="width:36px;height:36px;background:rgba(103,0,13,.65);border-color:#67000d"></span>
-        <span class="skl">185<br>Bunia</span>
+        <span class="skl">247<br>Bunia</span>
       </div>
     </div>
 
@@ -273,7 +273,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span><span data-i18n="legend_ctx_uga">Uganda · Kampala metro (19 confirmed)</span></div>
     </div>
 
-    <div class="legend-src" data-i18n="legend_src">Cumulative confirmed cases by Ituri health zone. Transcribed from WHO Disease Outbreak News DON607. Marker positions are approximate health-zone centroids. Zone counts are DON607 (10 Jun) and do not sum to the 915 confirmed DON608 headline — the panels are from different reporting dates. ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src" data-i18n="legend_src">Confirmed cases across DRC &amp; Uganda — most-affected Ituri health zones plus cross-border context markers. Transcribed from WHO Disease Outbreak News DON608. Marker positions are approximate health-zone centroids. WHO reports only the most-affected Ituri health zones individually; these four account for 699 of Ituri's 817 confirmed cases, with the remainder across other affected zones not broken out by WHO, plus 17 cases awaiting health-zone assignment (DON608, 17 Jun). ⚠ Verify against WHO before publishing.</div>
   </div>
 </div>
 
@@ -293,18 +293,19 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
         <div class="zone-meta" id="znMeta">—</div>
         <div class="kpi">
           <div class="k"><div class="v red" id="znCases">—</div><div class="l" data-i18n="kpi_confirmed">Confirmed cases</div></div>
-          <div class="k"><div class="v" id="znShare">—</div><div class="l" data-i18n="kpi_share">Share of Ituri</div></div>
+          <div class="k"><div class="v" id="znShare">—</div><div class="l" data-i18n="kpi_share">Share of DRC</div></div>
         </div>
         <div class="bar-wrap">
-          <div class="bl"><span id="znBarLab" data-i18n="share_ituri_confirmed">Share of Ituri confirmed</span><span id="znBarVal">—</span></div>
+          <div class="bl"><span id="znBarLab" data-i18n="share_ituri_confirmed">Share of DRC confirmed</span><span id="znBarVal">—</span></div>
           <div class="bar"><i id="znBar" style="width:0%"></i></div>
         </div>
+        <p class="note" data-i18n="share_drc_caption">share of all confirmed cases in DRC (896, WHO DON608, 17 Jun); excludes Uganda, which is not reported by health zone.</p>
         <p class="note" id="znNote"></p>
       </div>
     </div>
     <div class="tabpane" id="tab-trend">
       <div class="ctx"><span class="tag" data-i18n="trend_tag">National cumulative</span></div>
-      <p class="ctx" style="margin-bottom:8px" data-i18n="trend_desc">Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published in DON607.</p>
+      <p class="ctx" style="margin-bottom:8px" data-i18n="trend_desc">Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published by WHO.</p>
       <div class="mini"><canvas id="trendChart"></canvas></div>
       <p class="note" data-i18n="trend_note">DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun) → 896 (17 Jun). Uganda flat at 19 since 8 Jun.</p>
     </div>
@@ -326,10 +327,11 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="resp-grid">
       <div class="c"><div class="v red">915</div><div class="l" data-i18n="resp_confirmed_both">Confirmed (both countries)</div></div>
       <div class="c"><div class="v red">234</div><div class="l" data-i18n="resp_deaths">Deaths · CFR ≈26%*</div></div>
-      <div class="c"><div class="v">29</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · per DON607 · 10 Jun</div></div>
-      <div class="c"><div class="v">71%</div><div class="l" data-i18n="resp_followup">Contact follow-up (Ituri) · per DON607 · 10 Jun</div></div>
+      <div class="c"><div class="v">33</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · per DON608 · 17 Jun</div></div>
+      <div class="c"><div class="v">70.8%</div><div class="l" data-i18n="resp_followup">Contact follow-up (Ituri) · per DON608 · 17 Jun</div></div>
     </div>
     <p class="note" data-i18n="resp_cfr_note">* Provisional — confirmed deaths ÷ confirmed cases (234/915). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.</p>
+    <p class="note" data-i18n="resp_ituri_note">Ituri province (epicentre): 817 confirmed · 186 deaths · CFR 22.7% (WHO DON608, 17 Jun).</p>
     <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
     <div class="risk-list">
       <div class="risk"><span class="rg" data-i18n="risk_drc">DRC</span><span class="pill vh" data-i18n="pill_vh">Very high</span></div>
@@ -349,18 +351,17 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <h4 data-i18n="md_h_source">Data source</h4>
       <p data-i18n="md_source_p">All epidemiological figures are transcribed from the World Health Organization Disease Outbreak News:</p>
       <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON608" target="_blank" rel="noopener" data-i18n="who_link_text">WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (19 June 2026)</a></p>
-      <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON607" target="_blank" rel="noopener" data-i18n="who_link_text_607">WHO DON607 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (13 June 2026) — source for the Ituri health-zone map</a></p>
-      <p data-i18n="md_asof_p">DRC headline figures are as of 17 June 2026; Uganda figures as of 18 June 2026. The Ituri health-zone breakdown (and the affected-zone and contact-follow-up figures) are from DON607, data as of 10 June, as DON608 publishes no zone-level disaggregation. WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.</p>
+      <p data-i18n="md_asof_p">DRC figures are as of 17 June 2026; Uganda figures as of 18 June 2026, including the Ituri health-zone breakdown (DON608, 17 June). WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.</p>
 
       <h4 data-i18n="md_h_method">Method</h4>
       <ul>
-        <li data-i18n-html="md_method_1">The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
+        <li data-i18n-html="md_method_1">The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 247, Rwampara 195, Mongbwalu 189, Nyankunde 68). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
         <li data-i18n-html="md_method_2">The <strong>log / linear</strong> toggle changes how case counts map onto the color ramp. The marker toggle shows or hides the case symbols.</li>
-        <li data-i18n-html="md_method_3">North Kivu (9 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON607 does not disaggregate their case counts. 94 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
+        <li data-i18n-html="md_method_3">North Kivu (11 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON608 does not disaggregate their case counts. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li data-i18n-html="md_method_4">Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
         <li data-i18n-html="md_method_5">The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).</li>
-        <li>The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
-        <li>North Kivu (9 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON607 does not disaggregate their case counts. 94 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
+        <li>The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 247, Rwampara 195, Mongbwalu 189, Nyankunde 68). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.</li>
+        <li>North Kivu (11 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON608 does not disaggregate their case counts. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li>Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.</li>
         <li>The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).</li>
       </ul>
@@ -376,10 +377,10 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 
       <h4 data-i18n="md_h_csv">Download the data (CSV)</h4>
       <div class="dlrow">
-        <button class="dlbtn" data-dl="don607_confirmed_by_health_zone.csv" data-i18n="dl_csv_hz">Cases by health zone</button>
-        <button class="dlbtn" data-dl="don607_province_summary.csv" data-i18n="dl_csv_prov">Province summary</button>
+        <button class="dlbtn" data-dl="don608_confirmed_by_health_zone.csv" data-i18n="dl_csv_hz">Cases by health zone</button>
+        <button class="dlbtn" data-dl="don608_province_summary.csv" data-i18n="dl_csv_prov">Province summary</button>
         <button class="dlbtn" data-dl="don608_country_summary.csv" data-i18n="dl_csv_country">Country summary</button>
-        <button class="dlbtn" data-dl="don607_contacts.csv" data-i18n="dl_csv_contacts">Contact tracing</button>
+        <button class="dlbtn" data-dl="don608_contacts.csv" data-i18n="dl_csv_contacts">Contact tracing</button>
         <button class="dlbtn" data-dl="don_cumulative_trend.csv" data-i18n="dl_csv_trend">Cumulative trend</button>
         <button class="dlbtn" data-dl="risk_assessment.csv" data-i18n="dl_csv_risk">WHO risk levels</button>
       </div>
@@ -397,9 +398,9 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-b">
       <p data-i18n="terms_p1">This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.</p>
       <h4 data-i18n="terms_h_warranty">No warranty</h4>
-      <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (national totals 17–18 June 2026; health-zone breakdown 10 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
+      <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (17–18 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
       <h4 data-i18n="terms_h_rights">Rights</h4>
-      <p data-i18n="terms_rights_p">All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News sources (DON608 for national totals, DON607 for the health-zone map) for any onward use.</p>
+      <p data-i18n="terms_rights_p">All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.</p>
       <h4 data-i18n="terms_h_sensitive">Sensitive context</h4>
       <p data-i18n="terms_sensitive_p">This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.</p>
     </div>
@@ -411,15 +412,15 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 /* Place names, provinces, countries and case figures are language-independent
    identifiers; the translatable prose lives under each record's i18n.{en,fr}. */
 const HZ=[
-  {name:"Bunia",prov:"Ituri",country:"DRC",cases:185,lat:1.5667,lng:30.2500,
+  {name:"Bunia",prov:"Ituri",country:"DRC",cases:247,lat:1.5667,lng:30.2500,
     i18n:{
       en:{tag:"Referral hub",
-        ctx:"Bunia is Ituri's provincial capital and main referral hub, and reports the highest confirmed case count in the province (185). It sits less than 40 km from the Uganda border, making it central to cross-border transmission risk.",
+        ctx:"Bunia is Ituri's provincial capital and main referral hub, and reports the highest confirmed case count in the province (247). It sits less than 40 km from the Uganda border, making it central to cross-border transmission risk.",
         note:"Cases migrated here from Mongbwalu to seek medical care."},
       fr:{tag:"Pôle de référence",
-        ctx:"Bunia est le chef-lieu de l'Ituri et son principal pôle de référence ; elle enregistre le plus grand nombre de cas confirmés de la province (185). Située à moins de 40 km de la frontière ougandaise, elle est au cœur du risque de transmission transfrontalière.",
+        ctx:"Bunia est le chef-lieu de l'Ituri et son principal pôle de référence ; elle enregistre le plus grand nombre de cas confirmés de la province (247). Située à moins de 40 km de la frontière ougandaise, elle est au cœur du risque de transmission transfrontalière.",
         note:"Des cas s'y sont déplacés depuis Mongbwalu pour chercher des soins médicaux."}}},
-  {name:"Rwampara",prov:"Ituri",country:"DRC",cases:137,lat:1.4800,lng:30.2300,
+  {name:"Rwampara",prov:"Ituri",country:"DRC",cases:195,lat:1.4800,lng:30.2300,
     i18n:{
       en:{tag:"Care-seeking destination",
         ctx:"Rwampara is one of the three health zones (with Bunia and Mongbwalu) that together account for the bulk of confirmed cases. Transmission here is linked to care-seeking movement from the outbreak origin.",
@@ -427,7 +428,7 @@ const HZ=[
       fr:{tag:"Destination de recours aux soins",
         ctx:"Rwampara est l'une des trois zones de santé (avec Bunia et Mongbwalu) qui concentrent l'essentiel des cas confirmés. La transmission y est liée aux déplacements pour recours aux soins depuis le foyer d'origine.",
         note:"Parmi les premières zones de santé déclarées lors de la 17e épidémie."}}},
-  {name:"Mongbwalu",prov:"Ituri",country:"DRC",cases:132,lat:1.9400,lng:30.0300,
+  {name:"Mongbwalu",prov:"Ituri",country:"DRC",cases:189,lat:1.9400,lng:30.0300,
     i18n:{
       en:{tag:"Presumed origin",
         ctx:"Mongbwalu — a high-traffic gold-mining area — is the presumed origin of the outbreak. Four health-worker deaths within four days at Mongbwalu General Referral Hospital signalled critical breaches in infection prevention and control early in the response.",
@@ -435,7 +436,7 @@ const HZ=[
       fr:{tag:"Origine présumée",
         ctx:"Mongbwalu — une zone aurifère à fort trafic — est l'origine présumée de l'épidémie. Le décès de quatre agents de santé en quatre jours à l'Hôpital général de référence de Mongbwalu a révélé de graves défaillances de la prévention et du contrôle des infections au début de la riposte.",
         note:"La forte mobilité de la population liée à l'exploitation minière amplifie le risque de transmission."}}},
-  {name:"Nyankunde",prov:"Ituri",country:"DRC",cases:33,lat:1.4000,lng:30.1800,
+  {name:"Nyankunde",prov:"Ituri",country:"DRC",cases:68,lat:1.4000,lng:30.1800,
     i18n:{
       en:{tag:"Care-seeking destination",
         ctx:"Nyankunde, south of Bunia, is among the Ituri health zones with confirmed cases and is associated with referral and care-seeking movement within the province.",
@@ -447,20 +448,20 @@ const HZ=[
 const CONTEXT=[
   {name:"North Kivu",prov:"North Kivu",country:"DRC",lat:0.05,lng:29.20,kind:"province",
     i18n:{
-      en:{label:"North Kivu",sub:"9 of 35 health zones affected",
-        ctx:"North Kivu reports confirmed cases across 9 health zones. DON607 does not disaggregate North Kivu case counts; they fall within the DRC total alongside 94 cases awaiting health-zone distribution.",
-        note:"Contacts: 841 identified, 71% follow-up."},
-      fr:{label:"Nord-Kivu",sub:"9 des 35 zones de santé touchées",
-        ctx:"Le Nord-Kivu rapporte des cas confirmés dans 9 zones de santé. Le DON607 ne désagrège pas le nombre de cas du Nord-Kivu ; ils sont inclus dans le total de la RDC, aux côtés de 94 cas en attente de répartition par zone de santé.",
-        note:"Contacts : 841 identifiés, 71 % de suivi."}}},
+      en:{label:"North Kivu",sub:"11 of 35 health zones affected",
+        ctx:"North Kivu reports confirmed cases across 11 health zones. DON608 does not disaggregate North Kivu case counts; they fall within the DRC total alongside 17 cases awaiting health-zone distribution.",
+        note:"Contacts: 1628 identified, 70.5% follow-up."},
+      fr:{label:"Nord-Kivu",sub:"11 des 35 zones de santé touchées",
+        ctx:"Le Nord-Kivu rapporte des cas confirmés dans 11 zones de santé. Le DON608 ne désagrège pas le nombre de cas du Nord-Kivu ; ils sont inclus dans le total de la RDC, aux côtés de 17 cas en attente de répartition par zone de santé.",
+        note:"Contacts : 1628 identifiés, 70,5 % de suivi."}}},
   {name:"South Kivu",prov:"South Kivu",country:"DRC",lat:-2.50,lng:28.85,kind:"province",
     i18n:{
       en:{label:"South Kivu",sub:"1 of 34 health zones affected",
-        ctx:"South Kivu reports confirmed cases in a single health zone — the southern edge of the outbreak's geographic expansion. Counts are not disaggregated in DON607.",
-        note:"Contacts: 224 identified, 83.5% follow-up — the highest rate of the three provinces."},
+        ctx:"South Kivu reports confirmed cases in a single health zone — the southern edge of the outbreak's geographic expansion. Counts are not disaggregated in DON608.",
+        note:"Contacts: 80 identified, 100% follow-up — the highest rate of the three provinces."},
       fr:{label:"Sud-Kivu",sub:"1 des 34 zones de santé touchées",
-        ctx:"Le Sud-Kivu rapporte des cas confirmés dans une seule zone de santé — la limite méridionale de l'expansion géographique de l'épidémie. Les nombres ne sont pas désagrégés dans le DON607.",
-        note:"Contacts : 224 identifiés, 83,5 % de suivi — le taux le plus élevé des trois provinces."}}},
+        ctx:"Le Sud-Kivu rapporte des cas confirmés dans une seule zone de santé — la limite méridionale de l'expansion géographique de l'épidémie. Les nombres ne sont pas désagrégés dans le DON608.",
+        note:"Contacts : 80 identifiés, 100 % de suivi — le taux le plus élevé des trois provinces."}}},
   {name:"Kampala Metro",prov:"Kampala / Wakiso",country:"Uganda",lat:0.3476,lng:32.5825,kind:"uganda",
     i18n:{
       en:{label:"Kampala Metropolitan Area",sub:"19 confirmed · 2 deaths",
@@ -470,7 +471,7 @@ const CONTEXT=[
         ctx:"Les 19 cas confirmés en Ouganda (14 importés, 5 secondaires) sont confinés à l'aire métropolitaine de Kampala (districts de Kampala et Wakiso), épidémiologiquement liés à la RDC. Aucun nouveau cas au cours des six derniers jours et aucune transmission communautaire documentée.",
         note:"820 contacts répertoriés ; 409 sous suivi actif, 394 ayant achevé les 21 jours."}}}
 ];
-const ITURI_TOTAL=629;
+const DRC_CONFIRMED_TOTAL=896; // WHO DON608 national confirmed total for DRC (data as of 17 Jun 2026)
 
 /* ============ I18N ============
    French strings below are AI-assisted and MUST be reviewed by a Francophone
@@ -500,7 +501,7 @@ const I18N={
     lang_title:"Changer de langue · Switch language",
     hint:"Click a marker to inspect a health zone · scroll to zoom",
     legend_title:"Confirmed cases",
-    legend_sub:"Ituri health zones · WHO DON607 · 10 Jun 2026",
+    legend_sub:"DRC & Uganda · most-affected health zones · WHO DON608 · 17 Jun 2026",
     legend_colour:"Colour · case intensity",
     legend_scale:"Scale",
     seg_log:"log",
@@ -510,25 +511,27 @@ const I18N={
     legend_context:"Context markers",
     legend_ctx_drc:"DRC province (cases not disaggregated)",
     legend_ctx_uga:"Uganda · Kampala metro (19 confirmed)",
-    legend_src:"Cumulative confirmed cases by Ituri health zone. Transcribed from WHO Disease Outbreak News DON607. Marker positions are approximate health-zone centroids. Zone counts are DON607 (10 Jun) and do not sum to the 915 confirmed DON608 headline — the panels are from different reporting dates. ⚠ Verify against WHO before publishing.",
+    legend_src:"Confirmed cases across DRC & Uganda — most-affected Ituri health zones plus cross-border context markers. Transcribed from WHO Disease Outbreak News DON608. Marker positions are approximate health-zone centroids. WHO reports only the most-affected Ituri health zones individually; these four account for 699 of Ituri's 817 confirmed cases, with the remainder across other affected zones not broken out by WHO, plus 17 cases awaiting health-zone assignment (DON608, 17 Jun). ⚠ Verify against WHO before publishing.",
     zone_title:"Health zone",
     tab_snap:"Current snapshot",
     tab_trend:"Trends",
     tab_ctx:"Context",
     snap_empty:"Select a health zone on the map to see its current snapshot.",
     kpi_confirmed:"Confirmed cases",
-    kpi_share:"Share of Ituri",
-    share_ituri_confirmed:"Share of Ituri confirmed",
+    kpi_share:"Share of DRC",
+    share_ituri_confirmed:"Share of DRC confirmed",
+    share_drc_caption:"share of all confirmed cases in DRC (896, WHO DON608, 17 Jun); excludes Uganda, which is not reported by health zone.",
     trend_tag:"National cumulative",
-    trend_desc:"Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published in DON607.",
+    trend_desc:"Confirmed cases reported across WHO Disease Outbreak News. Per–health-zone time series are not published by WHO.",
     trend_note:"DRC: 83 (21 May) → 515 (8 Jun) → 676 (10 Jun) → 896 (17 Jun). Uganda flat at 19 since 8 Jun.",
     ctx_empty:"Select a health zone for response context.",
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
     resp_deaths:"Deaths · CFR ≈26%*",
-    resp_hz:"Health zones with cases (DRC) · per DON607 · 10 Jun",
-    resp_followup:"Contact follow-up (Ituri) · per DON607 · 10 Jun",
+    resp_hz:"Health zones with cases (DRC) · per DON608 · 17 Jun",
+    resp_followup:"Contact follow-up (Ituri) · per DON608 · 17 Jun",
     resp_cfr_note:"* Provisional — confirmed deaths ÷ confirmed cases (234/915). Not comparable to earlier DONs, which used a different case definition; case-fatality is unstable while most cases remain unresolved.",
+    resp_ituri_note:"Ituri province (epicentre): 817 confirmed · 186 deaths · CFR 22.7% (WHO DON608, 17 Jun).",
     risk_drc:"DRC",
     risk_uganda:"Uganda",
     risk_borders:"Bordering countries",
@@ -541,12 +544,11 @@ const I18N={
     md_h_source:"Data source",
     md_source_p:"All epidemiological figures are transcribed from the World Health Organization Disease Outbreak News:",
     who_link_text:"WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC & Uganda (19 June 2026)",
-    who_link_text_607:"WHO DON607 — Ebola disease caused by Bundibugyo virus, DRC & Uganda (13 June 2026) — source for the Ituri health-zone map",
-    md_asof_p:"DRC headline figures are as of 17 June 2026; Uganda figures as of 18 June 2026. The Ituri health-zone breakdown (and the affected-zone and contact-follow-up figures) are from DON607, data as of 10 June, as DON608 publishes no zone-level disaggregation. WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.",
+    md_asof_p:"DRC figures are as of 17 June 2026; Uganda figures as of 18 June 2026, including the Ituri health-zone breakdown (DON608, 17 June). WHO cites the Centre des opérations d'urgences de santé publique (COUSP-DRC) as the underlying DRC data source.",
     md_h_method:"Method",
-    md_method_1:"The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.",
+    md_method_1:"The map is a <strong>proportional-symbol layer</strong>: each circle is an Ituri health zone with WHO-published confirmed case counts (Bunia 247, Rwampara 195, Mongbwalu 189, Nyankunde 68). Circle <em>area</em> is proportional to cases; <em>color</em> follows a sequential red ramp.",
     md_method_2:"The <strong>log / linear</strong> toggle changes how case counts map onto the color ramp. The marker toggle shows or hides the case symbols.",
-    md_method_3:"North Kivu (9 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON607 does not disaggregate their case counts. 94 DRC cases were awaiting health-zone distribution at the time of reporting.",
+    md_method_3:"North Kivu (11 affected health zones) and South Kivu (1) are shown as <strong>context markers</strong> — DON608 does not disaggregate their case counts. 17 DRC cases were awaiting health-zone distribution at the time of reporting.",
     md_method_4:"Marker coordinates are <strong>approximate health-zone centroids</strong> for visual placement, not official boundaries.",
     md_method_5:"The trend chart uses cumulative confirmed counts from successive WHO DONs (21 May, 8 June, 10 June, 17 June).",
     md_h_figures:"WHO figures (view / download at source)",
@@ -567,13 +569,13 @@ const I18N={
     modal_terms_title:"Terms of Use",
     terms_p1:"This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.",
     terms_h_warranty:"No warranty",
-    terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (national totals 17–18 June 2026; health-zone breakdown 10 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
+    terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (17–18 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
     terms_h_rights:"Rights",
-    terms_rights_p:"All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News sources (DON608 for national totals, DON607 for the health-zone map) for any onward use.",
+    terms_rights_p:"All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.",
     terms_h_sensitive:"Sensitive context",
     terms_sensitive_p:"This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.",
-    meta_hz:"{prov} Province · {country} · WHO DON607",
-    meta_ctx:"{prov} · {country} · WHO DON607",
+    meta_hz:"{prov} Province · {country} · WHO DON608",
+    meta_ctx:"{prov} · {country} · WHO DON608",
     na:"n/a",
     ctx_confirmed_kampala:"Confirmed in Kampala metro",
     ctx_hz_affected:"Health zones affected",
@@ -597,7 +599,7 @@ const I18N={
     lang_title:"Changer de langue · Switch language",
     hint:"Cliquez sur un marqueur pour examiner une zone de santé · défilez pour zoomer",
     legend_title:"Cas confirmés",
-    legend_sub:"Zones de santé de l'Ituri · OMS DON607 · 10 juin 2026",
+    legend_sub:"RDC et Ouganda · zones de santé les plus touchées · OMS DON608 · 17 juin 2026",
     legend_colour:"Couleur · intensité des cas",
     legend_scale:"Échelle",
     seg_log:"log",
@@ -607,25 +609,27 @@ const I18N={
     legend_context:"Marqueurs contextuels",
     legend_ctx_drc:"Province de la RDC (cas non désagrégés)",
     legend_ctx_uga:"Ouganda · agglomération de Kampala (19 confirmés)",
-    legend_src:"Cas confirmés cumulés par zone de santé de l'Ituri. Transcrit du Bulletin d'information sur les flambées épidémiques de l'OMS (DON607). Les positions des marqueurs sont des centroïdes approximatifs des zones de santé. Les nombres par zone proviennent du DON607 (10 juin) et ne totalisent pas les 915 cas confirmés du DON608 — les panneaux correspondent à des dates de rapport différentes. ⚠ Vérifier auprès de l'OMS avant publication.",
+    legend_src:"Cas confirmés en RDC et Ouganda — zones de santé les plus touchées de l'Ituri et marqueurs contextuels transfrontaliers. Transcrit du Bulletin d'information sur les flambées épidémiques de l'OMS (DON608). Les positions des marqueurs sont des centroïdes approximatifs des zones de santé. L'OMS ne rapporte individuellement que les zones de santé les plus touchées de l'Ituri ; ces quatre totalisent 699 des 817 cas confirmés de l'Ituri, le reste étant réparti entre d'autres zones touchées non ventilées par l'OMS, plus 17 cas en attente d'attribution à une zone de santé (DON608, 17 juin). ⚠ Vérifier auprès de l'OMS avant publication.",
     zone_title:"Zone de santé",
     tab_snap:"Aperçu actuel",
     tab_trend:"Tendances",
     tab_ctx:"Contexte",
     snap_empty:"Sélectionnez une zone de santé sur la carte pour afficher son aperçu actuel.",
     kpi_confirmed:"Cas confirmés",
-    kpi_share:"Part de l'Ituri",
-    share_ituri_confirmed:"Part des cas confirmés de l'Ituri",
+    kpi_share:"Part de la RDC",
+    share_ituri_confirmed:"Part des cas confirmés de la RDC",
+    share_drc_caption:"part de tous les cas confirmés en RDC (896, OMS DON608, 17 juin) ; hors Ouganda, non ventilé par zone de santé.",
     trend_tag:"Cumul national",
-    trend_desc:"Cas confirmés rapportés dans les Bulletins d'information sur les flambées épidémiques de l'OMS. Les séries chronologiques par zone de santé ne sont pas publiées dans le DON607.",
+    trend_desc:"Cas confirmés rapportés dans les Bulletins d'information sur les flambées épidémiques de l'OMS. Les séries chronologiques par zone de santé ne sont pas publiées par l'OMS.",
     trend_note:"RDC : 83 (21 mai) → 515 (8 juin) → 676 (10 juin) → 896 (17 juin). Ouganda stable à 19 depuis le 8 juin.",
     ctx_empty:"Sélectionnez une zone de santé pour le contexte de la riposte.",
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
     resp_deaths:"Décès · TL ≈26 %*",
-    resp_hz:"Zones de santé avec des cas (RDC) · selon le DON607 · 10 juin",
-    resp_followup:"Suivi des contacts (Ituri) · selon le DON607 · 10 juin",
+    resp_hz:"Zones de santé avec des cas (RDC) · selon le DON608 · 17 juin",
+    resp_followup:"Suivi des contacts (Ituri) · selon le DON608 · 17 juin",
     resp_cfr_note:"* Provisoire — décès confirmés ÷ cas confirmés (234/915). Non comparable aux DON précédents, qui utilisaient une définition de cas différente ; la létalité est instable tant que la plupart des cas ne sont pas résolus.",
+    resp_ituri_note:"Province de l'Ituri (épicentre) : 817 confirmés · 186 décès · TL 22,7 % (OMS DON608, 17 juin).",
     risk_drc:"RDC",
     risk_uganda:"Ouganda",
     risk_borders:"Pays frontaliers",
@@ -638,12 +642,11 @@ const I18N={
     md_h_source:"Source des données",
     md_source_p:"Tous les chiffres épidémiologiques sont transcrits du Bulletin d'information sur les flambées épidémiques de l'Organisation mondiale de la Santé :",
     who_link_text:"OMS DON608 — Maladie à virus Ebola Bundibugyo, RDC et Ouganda (19 juin 2026)",
-    who_link_text_607:"OMS DON607 — Maladie à virus Ebola Bundibugyo, RDC et Ouganda (13 juin 2026) — source de la carte des zones de santé de l'Ituri",
-    md_asof_p:"Les chiffres principaux de la RDC sont arrêtés au 17 juin 2026 ; ceux de l'Ouganda au 18 juin 2026. La répartition par zone de santé de l'Ituri (ainsi que le nombre de zones touchées et le suivi des contacts) provient du DON607, données au 10 juin, le DON608 ne publiant pas de désagrégation par zone. L'OMS cite le Centre des opérations d'urgences de santé publique (COUSP-RDC) comme source des données pour la RDC.",
+    md_asof_p:"Les chiffres de la RDC sont arrêtés au 17 juin 2026 ; ceux de l'Ouganda au 18 juin 2026, y compris la répartition par zone de santé de l'Ituri (DON608, 17 juin). L'OMS cite le Centre des opérations d'urgences de santé publique (COUSP-RDC) comme source des données pour la RDC.",
     md_h_method:"Méthode",
-    md_method_1:"La carte est une <strong>couche de symboles proportionnels</strong> : chaque cercle représente une zone de santé de l'Ituri avec le nombre de cas confirmés publié par l'OMS (Bunia 185, Rwampara 137, Mongbwalu 132, Nyankunde 33). L'<em>aire</em> du cercle est proportionnelle au nombre de cas ; la <em>couleur</em> suit un dégradé rouge séquentiel.",
+    md_method_1:"La carte est une <strong>couche de symboles proportionnels</strong> : chaque cercle représente une zone de santé de l'Ituri avec le nombre de cas confirmés publié par l'OMS (Bunia 247, Rwampara 195, Mongbwalu 189, Nyankunde 68). L'<em>aire</em> du cercle est proportionnelle au nombre de cas ; la <em>couleur</em> suit un dégradé rouge séquentiel.",
     md_method_2:"Le sélecteur <strong>log / linéaire</strong> modifie la façon dont le nombre de cas est associé au dégradé de couleur. Le sélecteur de marqueurs affiche ou masque les symboles de cas.",
-    md_method_3:"Le Nord-Kivu (9 zones de santé touchées) et le Sud-Kivu (1) sont représentés par des <strong>marqueurs contextuels</strong> — le DON607 ne désagrège pas leur nombre de cas. 94 cas en RDC étaient en attente de répartition par zone de santé au moment du rapport.",
+    md_method_3:"Le Nord-Kivu (11 zones de santé touchées) et le Sud-Kivu (1) sont représentés par des <strong>marqueurs contextuels</strong> — le DON608 ne désagrège pas leur nombre de cas. 17 cas en RDC étaient en attente de répartition par zone de santé au moment du rapport.",
     md_method_4:"Les coordonnées des marqueurs sont des <strong>centroïdes approximatifs des zones de santé</strong> destinés au placement visuel, et non des limites officielles.",
     md_method_5:"Le graphique de tendance utilise les cas confirmés cumulés issus des DON successifs de l'OMS (21 mai, 8 juin, 10 juin, 17 juin).",
     md_h_figures:"Figures de l'OMS (consulter / télécharger à la source)",
@@ -664,13 +667,13 @@ const I18N={
     modal_terms_title:"Conditions d'utilisation",
     terms_p1:"Ce tableau de bord reproduit des chiffres accessibles au public issus du Bulletin d'information sur les flambées épidémiques de l'OMS, à des fins d'information humanitaire non commerciale. Il ne constitue pas une publication officielle de l'OMS, de l'INRB ou d'une quelconque autorité gouvernementale.",
     terms_h_warranty:"Aucune garantie",
-    terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (totaux nationaux au 17–18 juin 2026 ; répartition par zone de santé au 10 juin 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
+    terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (17–18 juin 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
     terms_h_rights:"Droits",
-    terms_rights_p:"L'ensemble des données et chiffres épidémiologiques demeurent la propriété de l'Organisation mondiale de la Santé et des autorités nationales concernées. Les tuiles cartographiques sont © contributeurs OpenStreetMap et © CARTO. Citez toujours les sources originales de l'OMS (DON608 pour les totaux nationaux, DON607 pour la carte des zones de santé) pour toute réutilisation.",
+    terms_rights_p:"L'ensemble des données et chiffres épidémiologiques demeurent la propriété de l'Organisation mondiale de la Santé et des autorités nationales concernées. Les tuiles cartographiques sont © contributeurs OpenStreetMap et © CARTO. Citez toujours la source originale de l'OMS (DON608) pour toute réutilisation.",
     terms_h_sensitive:"Contexte sensible",
     terms_sensitive_p:"Il s'agit d'une urgence de santé publique en cours touchant des communautés affectées par les conflits et des populations déplacées. Veuillez utiliser ces informations de manière responsable.",
-    meta_hz:"Province : {prov} · {country} · OMS DON607",
-    meta_ctx:"{prov} · {country} · OMS DON607",
+    meta_hz:"Province : {prov} · {country} · OMS DON608",
+    meta_ctx:"{prov} · {country} · OMS DON608",
     na:"n/d",
     ctx_confirmed_kampala:"Confirmés dans l'agglomération de Kampala",
     ctx_hz_affected:"Zones de santé touchées",
@@ -691,7 +694,7 @@ const countryName=c=>(COUNTRY_I18N[c]&&COUNTRY_I18N[c][lang])||c;
 
 /* ============ MAP ============ */
 const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).setView([0.9,30.4],6.4);
-const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: WHO DON607';
+const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: WHO DON608';
 const darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
 const lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
 darkTile.addTo(map);
@@ -780,7 +783,7 @@ function selectZone(d,noPan){
   $('#znName').textContent=d.name;
   $('#znMeta').textContent=T.meta_hz.replace('{prov}',provName(d.prov)).replace('{country}',countryName(d.country));
   $('#znCases').textContent=d.cases;
-  const share=(d.cases/ITURI_TOTAL*100);
+  const share=(d.cases/DRC_CONFIRMED_TOTAL*100);
   $('#znShare').textContent=share.toFixed(1)+'%';
   $('#znBarLab').textContent=T.share_ituri_confirmed;
   $('#znBarVal').textContent=share.toFixed(1)+'%';
@@ -919,25 +922,25 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
 
 /* ============ CSV DOWNLOADS ============ */
 const CSV={
-"don607_confirmed_by_health_zone.csv":`health_zone,province,country,confirmed_cases,role,latitude,longitude,as_of,source
-Bunia,Ituri,DRC,185,Referral hub; <40km from Uganda border,1.5667,30.2500,2026-06-10,WHO DON607
-Rwampara,Ituri,DRC,137,Care-seeking destination,1.4800,30.2300,2026-06-10,WHO DON607
-Mongbwalu,Ituri,DRC,132,Presumed outbreak origin (gold-mining hub),1.9400,30.0300,2026-06-10,WHO DON607
-Nyankunde,Ituri,DRC,33,Care-seeking destination,1.4000,30.1800,2026-06-10,WHO DON607`,
-"don607_province_summary.csv":`province,country,confirmed_cases,health_zones_affected,health_zones_total,cfr_pct,note,as_of,source
-Ituri,DRC,629,19,36,17.3,Epicentre; 93% of DRC confirmed cases,2026-06-10,WHO DON607
-North Kivu,DRC,not disaggregated,9,35,,Part of remaining DRC cases; counts not split in DON607,2026-06-10,WHO DON607
-South Kivu,DRC,not disaggregated,1,34,,Part of remaining DRC cases; counts not split in DON607,2026-06-10,WHO DON607
-Kampala Metropolitan Area,Uganda,19,2,,,14 imported + 5 secondary; districts Kampala & Wakiso,2026-06-11,WHO DON607`,
+"don608_confirmed_by_health_zone.csv":`health_zone,province,country,confirmed_cases,role,latitude,longitude,as_of,source
+Bunia,Ituri,DRC,247,Referral hub; <40km from Uganda border,1.5667,30.2500,2026-06-17,WHO DON608
+Rwampara,Ituri,DRC,195,Care-seeking destination,1.4800,30.2300,2026-06-17,WHO DON608
+Mongbwalu,Ituri,DRC,189,Presumed outbreak origin (gold-mining hub),1.9400,30.0300,2026-06-17,WHO DON608
+Nyankunde,Ituri,DRC,68,Care-seeking destination,1.4000,30.1800,2026-06-17,WHO DON608`,
+"don608_province_summary.csv":`province,country,confirmed_cases,deaths,health_zones_affected,health_zones_total,cfr_pct,note,as_of,source
+Ituri,DRC,817,186,21,36,22.7,Epicentre; 91% of DRC confirmed cases,2026-06-17,WHO DON608
+North Kivu,DRC,not disaggregated,,11,35,,Part of remaining DRC cases; counts not split by WHO,2026-06-17,WHO DON608
+South Kivu,DRC,not disaggregated,,1,34,,Part of remaining DRC cases; counts not split by WHO,2026-06-17,WHO DON608
+Kampala Metropolitan Area,Uganda,19,2,2,,,14 imported + 5 secondary; districts Kampala & Wakiso,2026-06-11,WHO DON607`,
 "don608_country_summary.csv":`country,confirmed_cases,deaths,cfr_pct,recovered,health_zones_with_cases,health_worker_cases,as_of,source
 DRC,896,232,25.9,78,29,16,2026-06-17,WHO DON608
 Uganda,19,2,,10,2,,2026-06-18,WHO DON608
 Both countries,915,234,,88,31,,2026-06-18,WHO DON608`,
-"don607_contacts.csv":`location,contacts_identified,contacts_followed_up,follow_up_rate_pct,as_of,source
-Ituri (DRC),4703,,71.4,2026-06-10,WHO DON607
-North Kivu (DRC),841,,71.0,2026-06-10,WHO DON607
-South Kivu (DRC),224,,83.5,2026-06-10,WHO DON607
-DRC total,5768,4141,,2026-06-10,WHO DON607
+"don608_contacts.csv":`location,contacts_identified,contacts_followed_up,follow_up_rate_pct,as_of,source
+Ituri (DRC),4659,,70.8,2026-06-17,WHO DON608
+North Kivu (DRC),1628,,70.5,2026-06-17,WHO DON608
+South Kivu (DRC),80,,100,2026-06-17,WHO DON608
+DRC total,6367,4525,,2026-06-17,WHO DON608
 Uganda,820,,,2026-06-11,WHO DON607
 Uganda active follow-up,409,,,2026-06-11,WHO DON607
 Uganda completed 21-day,394,,,2026-06-11,WHO DON607`,

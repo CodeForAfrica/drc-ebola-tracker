@@ -1,0 +1,5 @@
+province,country,confirmed_cases,deaths,health_zones_affected,health_zones_total,cfr_pct,note,as_of,source
+Ituri,DRC,817,186,21,36,22.7,Epicentre; 91% of DRC confirmed cases,2026-06-17,WHO DON608
+North Kivu,DRC,not disaggregated,,11,35,,Part of remaining DRC cases; counts not split by WHO,2026-06-17,WHO DON608
+South Kivu,DRC,not disaggregated,,1,34,,Part of remaining DRC cases; counts not split by WHO,2026-06-17,WHO DON608
+Kampala Metropolitan Area,Uganda,19,2,2,,,14 imported + 5 secondary; districts Kampala & Wakiso,2026-06-11,WHO DON607

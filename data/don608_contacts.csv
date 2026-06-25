@@ -1,8 +1,8 @@
 location,contacts_identified,contacts_followed_up,follow_up_rate_pct,as_of,source
-Ituri (DRC),4703,,71.4,2026-06-10,WHO DON607
-North Kivu (DRC),841,,71.0,2026-06-10,WHO DON607
-South Kivu (DRC),224,,83.5,2026-06-10,WHO DON607
-DRC total,5768,4141,,2026-06-10,WHO DON607
+Ituri (DRC),4659,,70.8,2026-06-17,WHO DON608
+North Kivu (DRC),1628,,70.5,2026-06-17,WHO DON608
+South Kivu (DRC),80,,100,2026-06-17,WHO DON608
+DRC total,6367,4525,,2026-06-17,WHO DON608
 Uganda,820,,,2026-06-11,WHO DON607
 Uganda active follow-up,409,,,2026-06-11,WHO DON607
 Uganda completed 21-day,394,,,2026-06-11,WHO DON607
