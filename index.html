@@ -9,7 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="vendor/leaflet.markercluster/MarkerCluster.css">
+<link rel="stylesheet" href="vendor/leaflet.markercluster/MarkerCluster.Default.css">
 <script src="vendor/leaflet/leaflet.js"></script>
+<script src="vendor/leaflet.markercluster/leaflet.markercluster.js"></script>
 <script src="vendor/chartjs/chart.umd.js"></script>
 <style>
 :root{
@@ -76,6 +79,15 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 .hz-tip:before{display:none!important}
 .hz-tip b{font-family:'Archivo';font-weight:800}
 .hz-tip .n{font-family:'IBM Plex Mono';font-size:1.25rem;color:#ff7d63;font-weight:600}
+/* cluster/marker bubbles: case number printed inside a ramp-coloured circle */
+.zbub-wrap{background:none;border:0}
+.zbub{box-sizing:border-box;border-radius:50%;border:1.5px solid rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-weight:700;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.5)}
+.zbub.zclus{border-width:2px;box-shadow:0 0 0 3px rgba(255,255,255,.18),0 1px 6px rgba(0,0,0,.55)}
+/* segmented Choropleth/Clusters view toggle (Leaflet control, top-left under zoom) */
+.map-toggle{display:flex;overflow:hidden;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.45);border:1px solid var(--line)}
+.map-toggle button{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;padding:6px 9px;background:var(--panel);color:var(--muted);border:0;border-right:1px solid var(--line);cursor:pointer}
+.map-toggle button:last-child{border-right:0}
+.map-toggle button.active{background:var(--panel-2);color:#fff}
 
 /* ---------- floating panels ---------- */
 .panel{
@@ -248,17 +260,19 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   </div>
   <div class="panel-b">
 
-    <div class="leg-section" data-i18n="legend_choropleth">Choropleth · confirmed cases</div>
+    <div class="leg-section"><span id="legHeadChoro" data-i18n="legend_choropleth">Choropleth · confirmed cases</span><span id="legHeadCluster" data-i18n="legend_cluster_head" style="display:none">Clusters · confirmed cases</span></div>
     <div class="ramp"><i style="background:#fee5d9"></i><i style="background:#fcae91"></i><i style="background:#fb6a4a"></i><i style="background:#de2d26"></i><i style="background:#a50f15"></i><i style="background:#67000d"></i></div>
     <div class="ramp-vals"><span>1</span><span>10</span><span>50</span><span>150</span><span>296</span></div>
 
     <div class="leg-section" data-i18n="legend_markers">Map</div>
     <div class="ctx-key">
-      <div class="ctx-key-row"><span class="ctx-dot" style="background:#de2d26;border-radius:2px;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_zone">Click a shaded zone for detail</span></div>
+      <div class="ctx-key-row" id="legRowChoro"><span class="ctx-dot" style="background:#de2d26;border-radius:2px;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_zone">Click a shaded zone for detail</span></div>
+      <div class="ctx-key-row" id="legRowCluster" style="display:none"><span class="ctx-dot" style="background:#de2d26;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_marker">Number on each marker/bubble = confirmed cases</span></div>
       <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span><span data-i18n="legend_ctx_uga">Uganda · Kampala metro (19 confirmed)</span></div>
     </div>
 
-    <div class="legend-src" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only); Uganda (Kampala) is a separate WHO DON608 context marker (17 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src" id="legSrcChoro" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only); Uganda (Kampala) is a separate WHO DON608 context marker (17 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src" id="legSrcCluster" data-i18n="legend_cluster" style="display:none">Bubbles group nearby zones; the number on each marker or bubble is confirmed cases (per zone, or the group total when clustered), coloured by that count. Hover for zone detail; zoom in to separate.</div>
   </div>
 </div>
 
@@ -596,6 +610,14 @@ const I18N={
     seg_log:"log",
     seg_linear:"linear",
     legend_choropleth:"Choropleth · confirmed cases",
+    legend_cluster_head:"Clusters · confirmed cases",
+    legend_cluster:"Bubbles group nearby zones; the number on each marker or bubble is confirmed cases (per zone, or the group total when clustered), coloured by that count. Hover for zone detail; zoom in to separate.",
+    legend_click_marker:"Number on each marker/bubble = confirmed cases",
+    view_choro:"Choropleth",
+    view_cluster:"Clusters",
+    cluster_zones:"zones",
+    cluster_cases:"confirmed cases",
+    cluster_more:"more",
     legend_markers:"Map",
     legend_click_zone:"Click a shaded zone for detail",
     legend_ctx_uga:"Uganda · Kampala metro (19 confirmed)",
@@ -710,6 +732,14 @@ const I18N={
     seg_log:"log",
     seg_linear:"linéaire",
     legend_choropleth:"Choroplèthe · cas confirmés",
+    legend_cluster_head:"Grappes · cas confirmés",
+    legend_cluster:"Les grappes regroupent les zones proches ; le nombre sur chaque marqueur ou grappe indique les cas confirmés (par zone, ou le total du groupe), coloré selon ce nombre. Survolez pour le détail ; zoomez pour les séparer.",
+    legend_click_marker:"Nombre sur chaque marqueur/grappe = cas confirmés",
+    view_choro:"Choroplèthe",
+    view_cluster:"Grappes",
+    cluster_zones:"zones",
+    cluster_cases:"cas confirmés",
+    cluster_more:"de plus",
     legend_markers:"Carte",
     legend_click_zone:"Cliquez sur une zone colorée pour le détail",
     legend_ctx_uga:"Ouganda · agglomération de Kampala (19 confirmés)",
@@ -836,13 +866,26 @@ function fillColorFor(cases){
 let ctxLayer=L.layerGroup().addTo(map);
 let selected=null;
 
-/* ---- Choropleth polygons — the only interactive zone layer (hover to highlight,
-   click to open the snapshot). Uganda is the lone point marker, in ctxLayer. ---- */
+/* ---- Shared red ramp helpers — the choropleth fill AND the cluster bubbles use the
+   SAME ramp + breakpoints. Cluster SUMS can exceed 296, so clamp to the darkest band. ---- */
+function rampIdx(c){return Math.min(FILL_RAMP.length-1,Math.max(0,Math.round(Math.sqrt(Math.max(c,0))/Math.sqrt(296)*(FILL_RAMP.length-1))));}
+function rampColor(c){return FILL_RAMP[rampIdx(c)];}
+function bubbleDiam(c){const t=Math.min(1,Math.sqrt(Math.max(c,1))/Math.sqrt(296));return Math.round(24+t*22);} // 24..46px
+function digitColor(c){return rampIdx(c)<=1?'#67000d':'#fff';}                                  // dark digits on the 2 lightest reds
+function bubbleHtml(n,extra){const d=bubbleDiam(n),fs=(''+n).length>=3?11:13;
+  return `<div class="zbub ${extra||''}" style="width:${d}px;height:${d}px;background:${rampColor(n)};color:${digitColor(n)};font-size:${fs}px">${n}</div>`;}
+function bubbleIcon(n){const d=bubbleDiam(n);return L.divIcon({html:bubbleHtml(n),className:'zbub-wrap',iconSize:[d,d],iconAnchor:[d/2,d/2]});}
+
+/* ---- Choropleth polygons. choroFilled toggles fill (Choropleth view) vs borders-only
+   (Clusters view). Always on the map for geographic reference + as a click target. ---- */
+let choroFilled=true;
+function styleFeature(f){
+  const c=fillColorFor(f.properties.confirmed_cases);
+  if(choroFilled) return {fillColor:c||'#000',fillOpacity:c?0.8:0,color:'#fff',weight:1,opacity:c?0.8:0};
+  return {fillColor:'#000',fillOpacity:0,color:'#fff',weight:1,opacity:.5}; // borders only
+}
 let choroplethLayer=L.geoJSON(null,{
-  style:f=>{
-    const c=fillColorFor(f.properties.confirmed_cases);
-    return {fillColor:c||'#000',fillOpacity:c?0.8:0,color:'#fff',weight:1,opacity:c?0.8:0};
-  },
+  style:styleFeature,
   onEachFeature:(f,layer)=>{
     const p=f.properties,T=I18N[lang];
     layer.bindTooltip(`<b>${p.zone}</b> · ${p.confirmed_cases} ${T.tip_cases} · ${p.confirmed_deaths} ${T.tip_deaths}`,{className:'hz-tip',sticky:true,direction:'top'});
@@ -858,13 +901,64 @@ let choroplethLayer=L.geoJSON(null,{
 
 function loadChoropleth(){
   // Fetched at runtime (needs an HTTP origin). On failure (e.g. opened via file://)
-  // we log and continue with markers only — the map still works.
+  // we log and continue — borders/markers still work once data loads.
   fetch('data/zones_sitrep39.geojson')
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(gj=>{choroplethLayer.addData(gj);})
+    .then(gj=>{choroplethLayer.addData(gj);choroplethLayer.setStyle(styleFeature);})
     .catch(e=>{console.warn('Choropleth GeoJSON failed to load — continuing with markers only.',e);});
 }
 loadChoropleth();
+
+/* ---- Clusters view (opt-in): one numbered red bubble per zone, grouped by
+   Leaflet.markercluster; the cluster bubble shows the SUMMED case count. ---- */
+const clusterLayer=L.markerClusterGroup({
+  maxClusterRadius:50,spiderfyOnMaxZoom:true,showCoverageOnHover:false,
+  iconCreateFunction:cl=>{
+    const sum=cl.getAllChildMarkers().reduce((s,m)=>s+(m.options.zCases||0),0);
+    const d=bubbleDiam(sum);
+    return L.divIcon({html:bubbleHtml(sum,'zclus'),className:'zbub-wrap',iconSize:[d,d]});
+  }
+});
+HZ.forEach(d=>{
+  const m=L.marker([d.lat,d.lng],{icon:bubbleIcon(d.cases),zCases:d.cases,zName:d.name});
+  m.bindTooltip(()=>{const T=I18N[lang];return `<b>${d.name}</b> · ${d.cases} ${T.tip_cases} · ${d.deaths} ${T.tip_deaths}`;},{className:'hz-tip',sticky:true,direction:'top'});
+  m.on('click',()=>selectZone(d));
+  clusterLayer.addLayer(m);
+});
+clusterLayer.on('clustermouseover',e=>{
+  const T=I18N[lang];
+  const arr=e.layer.getAllChildMarkers().map(m=>({n:m.options.zName,c:m.options.zCases})).sort((a,b)=>b.c-a.c);
+  const sum=arr.reduce((s,z)=>s+z.c,0);
+  const top=arr.slice(0,3).map(z=>`${z.n} ${z.c}`).join(', ');
+  const more=arr.length>3?` +${arr.length-3} ${T.cluster_more}`:'';
+  e.layer.bindTooltip(`${arr.length} ${T.cluster_zones} · ${sum} ${T.cluster_cases} — ${top}${more}`,{className:'hz-tip',direction:'top'}).openTooltip();
+});
+
+/* ---- View toggle: Choropleth (default) ↔ Clusters. Only one lens active at a time;
+   Uganda (ctxLayer) stays visible in both. ---- */
+let mapView='choro';
+function setMapView(v){
+  mapView=v;const cluster=v==='cluster';
+  document.querySelectorAll('.map-toggle button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  choroFilled=!cluster;
+  choroplethLayer.setStyle(styleFeature);            // fill ⇄ borders-only
+  if(cluster){if(!map.hasLayer(clusterLayer))clusterLayer.addTo(map);}
+  else if(map.hasLayer(clusterLayer))map.removeLayer(clusterLayer);
+  const $$=s=>document.querySelector(s);
+  $$('#legHeadChoro').style.display=cluster?'none':'';$$('#legHeadCluster').style.display=cluster?'':'none';
+  $$('#legRowChoro').style.display=cluster?'none':'';$$('#legRowCluster').style.display=cluster?'':'none';
+  $$('#legSrcChoro').style.display=cluster?'none':'';$$('#legSrcCluster').style.display=cluster?'':'none';
+}
+const ViewToggle=L.control({position:'topleft'});
+ViewToggle.onAdd=function(){
+  const div=L.DomUtil.create('div','map-toggle');
+  div.innerHTML='<button data-view="choro" class="active" data-i18n="view_choro">Choropleth</button>'+
+                '<button data-view="cluster" data-i18n="view_cluster">Clusters</button>';
+  L.DomEvent.disableClickPropagation(div);L.DomEvent.disableScrollPropagation(div);
+  div.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setMapView(b.dataset.view)));
+  return div;
+};
+ViewToggle.addTo(map);
 
 function drawCtx(){
   ctxLayer.clearLayers();
