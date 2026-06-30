@@ -240,7 +240,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <span class="dot"></span>
     <div style="min-width:0">
       <h1 data-i18n-html="app_title_html">Ebola <span>Bundibugyo</span> 2026 · DRC &amp; Uganda</h1>
-      <div class="sub" data-i18n="topbar_sub">Interactive outbreak dashboard · WHO DON608 · as of 17–18 Jun 2026</div>
+      <div class="sub" data-i18n="topbar_sub">Interactive outbreak dashboard · INSP SitRep N°044 + Uganda MoH · as of 27–28 Jun 2026</div>
     </div>
   </div>
   <div class="links">
@@ -260,7 +260,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   <div class="panel-h" data-toggle>
     <div>
       <h3 data-i18n="legend_title">Confirmed cases</h3>
-      <div class="leg-sub" data-i18n="legend_sub">DRC health zones · INSP SitRep N°39 · 22 Jun 2026</div>
+      <div class="leg-sub" data-i18n="legend_sub">DRC health zones · INSP SitRep N°044 · 27 Jun 2026</div>
     </div>
     <span class="chev">▾</span>
   </div>
@@ -268,16 +268,16 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 
     <div class="leg-section"><span id="legHeadChoro" data-i18n="legend_choropleth">Choropleth · confirmed cases</span><span id="legHeadCluster" data-i18n="legend_cluster_head" style="display:none">Clusters · confirmed cases</span></div>
     <div class="ramp"><i style="background:#fee5d9"></i><i style="background:#fcae91"></i><i style="background:#fb6a4a"></i><i style="background:#de2d26"></i><i style="background:#a50f15"></i><i style="background:#67000d"></i></div>
-    <div class="ramp-vals"><span>1</span><span>10</span><span>50</span><span>150</span><span>296</span></div>
+    <div class="ramp-vals"><span>1</span><span>10</span><span>50</span><span>150</span><span>338</span></div>
 
     <div class="leg-section" data-i18n="legend_markers">Map</div>
     <div class="ctx-key">
       <div class="ctx-key-row" id="legRowChoro"><span class="ctx-dot" style="background:#de2d26;border-radius:2px;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_zone">Click a shaded zone for detail</span></div>
       <div class="ctx-key-row" id="legRowCluster" style="display:none"><span class="ctx-dot" style="background:#de2d26;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_marker">Number on each marker/bubble = confirmed cases</span></div>
-      <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span><span data-i18n="legend_ctx_uga">Uganda · Kampala metro (19 confirmed)</span></div>
+      <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(61,139,255,.3);border-color:#3d8bff"></span><span data-i18n="legend_ctx_uga">Uganda · Kampala metro (20 confirmed)</span></div>
     </div>
 
-    <div class="legend-src" id="legSrcChoro" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only); Uganda (Kampala) is a separate WHO DON608 context marker (17 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src" id="legSrcChoro" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°044 (27 Jun 2026, DRC only); Uganda (Kampala) is a separate Uganda MoH context marker (28 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°044, 27 Jun). ⚠ Verify against WHO before publishing.</div>
     <div class="legend-src" id="legSrcCluster" data-i18n="legend_cluster" style="display:none">Bubbles group nearby zones; the number on each marker or bubble is confirmed cases (per zone, or the group total when clustered), coloured by that count. Hover for zone detail; zoom in to separate.</div>
   </div>
 </div>
@@ -302,10 +302,10 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
         </div>
         <div class="zone-meta" id="znDeaths" style="margin-top:8px;color:#ff6a4d;font-weight:600"></div>
         <div class="bar-wrap">
-          <div class="bl"><span id="znBarLab" data-i18n="share_ituri_confirmed">Share of DRC confirmed (INSP SitRep N°39)</span><span id="znBarVal">—</span></div>
+          <div class="bl"><span id="znBarLab" data-i18n="share_ituri_confirmed">Share of DRC confirmed (INSP SitRep N°044)</span><span id="znBarVal">—</span></div>
           <div class="bar"><i id="znBar" style="width:0%"></i></div>
         </div>
-        <p class="note" data-i18n="share_drc_caption">share of all confirmed cases in DRC (1094, INSP SitRep N°39, 22 Jun); excludes Uganda, which is not reported by health zone.</p>
+        <p class="note" data-i18n="share_drc_caption">share of all confirmed cases in DRC (1274, INSP SitRep N°044, 27 Jun); excludes Uganda, which is not reported by health zone.</p>
         <p class="note" id="znNote"></p>
       </div>
     </div>
@@ -314,7 +314,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <div id="trendBody" style="display:none">
         <div class="mini"><canvas id="zoneTrendChart"></canvas></div>
         <p class="note" id="znTrendSingle" style="display:none"></p>
-        <p class="note" data-i18n="trend_caption">Cumulative confirmed cases and deaths, INSP SitReps (14 May–22 Jun). Counts are occasionally revised down between reports.</p>
+        <p class="note" data-i18n="trend_caption">Cumulative confirmed cases and deaths, INSP SitReps (14 May–27 Jun). Counts are occasionally revised down between reports.</p>
       </div>
     </div>
     <div class="tabpane" id="tab-ctx">
@@ -349,8 +349,8 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="resp-grid">
       <div class="c"><div class="v red" id="respConfirmed">—</div><div class="l" data-i18n="resp_confirmed_both">Confirmed (both countries)</div></div>
       <div class="c"><div class="v red" id="respDeaths">—</div><div class="l" data-i18n="resp_deaths">Deaths · CFR ≈25.3% (provisional)</div></div>
-      <div class="c"><div class="v" id="respHz">—</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · INSP SitRep N°39</div></div>
-      <div class="c"><div class="v" id="respRecovered">—</div><div class="l" data-i18n="resp_recovered">Recovered (DRC) · INSP SitRep N°39</div></div>
+      <div class="c"><div class="v" id="respHz">—</div><div class="l" data-i18n="resp_hz">Health zones with cases (DRC) · INSP SitRep N°044</div></div>
+      <div class="c"><div class="v" id="respRecovered">—</div><div class="l" data-i18n="resp_recovered">Recovered (DRC) · INSP SitRep N°044</div></div>
       <div class="c" style="grid-column:1/-1"><div class="v">70.8%</div><div class="l" data-i18n="resp_followup">Contact follow-up (Ituri) · per DON608 · 17 Jun</div></div>
     </div>
     <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
@@ -370,18 +370,18 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-h"><h2 data-i18n="modal_data_title">Contributors, Data &amp; Methods</h2><button class="modal-x" data-close>✕</button></div>
     <div class="modal-b">
       <h4 data-i18n="md_h_source">Data source</h4>
-      <p data-i18n="md_source_p">Health-zone figures are transcribed from INSP situation reports (SitRep N°39, 22 June 2026). National headline and Uganda figures are from WHO Disease Outbreak News (DON608). WHO cites COUSP-DRC / INSP as the underlying DRC source.</p>
+      <p data-i18n="md_source_p">All DRC figures — national headline and every health zone — are transcribed from INSP situation reports (SitRep N°044, 27 June 2026, Table II). Uganda figures are from the Uganda Ministry of Health Ebola portal (28 June 2026). WHO Disease Outbreak News (DON608, 17 Jun) is retained only as a cross-reference.</p>
       <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON608" target="_blank" rel="noopener" data-i18n="who_link_text">WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (19 June 2026)</a></p>
-      <p data-i18n="md_asof_p">DRC health-zone data are as of 22 June 2026 (INSP SitRep N°39); the WHO DON608 national and Uganda figures are as of 17–18 June. The headline totals are therefore a composite of two sources and dates.</p>
+      <p data-i18n="md_asof_p">DRC figures are as of 27 June 2026 (INSP SitRep N°044); Uganda figures are as of 28 June 2026 (Uganda Ministry of Health). The headline total is a composite of these two sources.</p>
 
       <h4 data-i18n="md_h_method">Method</h4>
       <ul>
         <li data-i18n-html="md_method_1">The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many). Click a shaded zone for its detail; hover to highlight it.</li>
         <li data-i18n-html="md_method_2">Each zone polygon is <strong>interactive</strong>: hovering highlights it and shows its figures, and clicking opens the zone's snapshot. Uganda (Kampala) is the only point marker, on a separate context layer.</li>
-        <li data-i18n-html="md_method_3">All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
+        <li data-i18n-html="md_method_3">All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°044 (27 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.</li>
         <li data-i18n-html="md_method_4">Zone polygons are <strong>approximate health-zone boundaries</strong> for visual placement, not official administrative boundaries.</li>
-        <li data-i18n-html="md_method_5">The per-zone Trends tab shows cumulative confirmed cases and deaths from successive INSP SitReps (14 May–22 Jun 2026).</li>
-        <li data-i18n-html="md_method_6">DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.</li>
+        <li data-i18n-html="md_method_5">The per-zone Trends tab shows cumulative confirmed cases and deaths from successive INSP SitReps (14 May–27 Jun 2026).</li>
+        <li data-i18n-html="md_method_6">DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (360/1274 ≈ 28.3%, INSP SitRep N°044). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.</li>
       </ul>
 
       <h4 data-i18n="md_h_figures">WHO figures (view / download at source)</h4>
@@ -395,7 +395,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 
       <h4 data-i18n="md_h_csv">Download the data (CSV)</h4>
       <div class="dlrow">
-        <button class="dlbtn" data-dl="zones_sitrep39.csv" data-i18n="dl_csv_sitrep39">Cases by health zone — INSP SitRep N°39 (22 Jun)</button>
+        <button class="dlbtn" data-dl="zones_sitrep044.csv" data-i18n="dl_csv_sitrep39">Cases by health zone — INSP SitRep N°044 (27 Jun)</button>
         <button class="dlbtn" data-dl="don608_confirmed_by_health_zone.csv" data-i18n="dl_csv_hz">Cases by health zone — WHO DON608 (17 Jun)</button>
         <button class="dlbtn" data-dl="don608_province_summary.csv" data-i18n="dl_csv_prov">Province summary</button>
         <button class="dlbtn" data-dl="don608_country_summary.csv" data-i18n="dl_csv_country">Country summary</button>
@@ -417,7 +417,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-b">
       <p data-i18n="terms_p1">This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.</p>
       <h4 data-i18n="terms_h_warranty">No warranty</h4>
-      <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (17–18 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
+      <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (27–28 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
       <h4 data-i18n="terms_h_rights">Rights</h4>
       <p data-i18n="terms_rights_p">All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.</p>
       <h4 data-i18n="terms_h_sensitive">Sensitive context</h4>
@@ -431,7 +431,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 /* Place names, provinces, countries and case figures are language-independent
    identifiers; the translatable prose lives under each record's i18n.{en,fr}. */
 const HZ=[
-  {name:"Bunia",prov:"Ituri",country:"DRC",cases:296,deaths:48,lat:1.5667,lng:30.2500,
+  {name:"Bunia",prov:"Ituri",country:"DRC",cases:338,deaths:71,lat:1.5667,lng:30.2500,
     i18n:{
       en:{tag:"Referral hub",
         ctx:"Bunia is Ituri's provincial capital and main referral hub, and reports the highest confirmed case count in the province (296). It sits less than 40 km from the Uganda border, making it central to cross-border transmission risk.",
@@ -439,7 +439,7 @@ const HZ=[
       fr:{tag:"Pôle de référence",
         ctx:"Bunia est le chef-lieu de l'Ituri et son principal pôle de référence ; elle enregistre le plus grand nombre de cas confirmés de la province (296). Située à moins de 40 km de la frontière ougandaise, elle est au cœur du risque de transmission transfrontalière.",
         note:"Des cas s'y sont déplacés depuis Mongbwalu pour chercher des soins médicaux."}}},
-  {name:"Rwampara",prov:"Ituri",country:"DRC",cases:225,deaths:37,lat:1.4800,lng:30.2300,
+  {name:"Rwampara",prov:"Ituri",country:"DRC",cases:282,deaths:52,lat:1.4800,lng:30.2300,
     i18n:{
       en:{tag:"Care-seeking destination",
         ctx:"Rwampara is one of the three health zones (with Bunia and Mongbwalu) that together account for the bulk of confirmed cases. Transmission here is linked to care-seeking movement from the outbreak origin.",
@@ -447,7 +447,7 @@ const HZ=[
       fr:{tag:"Destination de recours aux soins",
         ctx:"Rwampara est l'une des trois zones de santé (avec Bunia et Mongbwalu) qui concentrent l'essentiel des cas confirmés. La transmission y est liée aux déplacements pour recours aux soins depuis le foyer d'origine.",
         note:"Parmi les premières zones de santé déclarées lors de la 17e épidémie."}}},
-  {name:"Mongbwalu",prov:"Ituri",country:"DRC",cases:237,deaths:100,lat:1.9400,lng:30.0300,
+  {name:"Mongbwalu",prov:"Ituri",country:"DRC",cases:258,deaths:118,lat:1.9400,lng:30.0300,
     i18n:{
       en:{tag:"Presumed origin",
         ctx:"Mongbwalu — a high-traffic gold-mining area — is the presumed origin of the outbreak. Four health-worker deaths within four days at Mongbwalu General Referral Hospital signalled critical breaches in infection prevention and control early in the response.",
@@ -455,7 +455,7 @@ const HZ=[
       fr:{tag:"Origine présumée",
         ctx:"Mongbwalu — une zone aurifère à fort trafic — est l'origine présumée de l'épidémie. Le décès de quatre agents de santé en quatre jours à l'Hôpital général de référence de Mongbwalu a révélé de graves défaillances de la prévention et du contrôle des infections au début de la riposte.",
         note:"La forte mobilité de la population liée à l'exploitation minière amplifie le risque de transmission."}}},
-  {name:"Nyankunde",prov:"Ituri",country:"DRC",cases:86,deaths:9,lat:1.4000,lng:30.1800,
+  {name:"Nyankunde",prov:"Ituri",country:"DRC",cases:94,deaths:13,lat:1.4000,lng:30.1800,
     i18n:{
       en:{tag:"Care-seeking destination",
         ctx:"Nyankunde, south of Bunia, is among the Ituri health zones with confirmed cases and is associated with referral and care-seeking movement within the province.",
@@ -463,7 +463,7 @@ const HZ=[
       fr:{tag:"Destination de recours aux soins",
         ctx:"Nyankunde, au sud de Bunia, fait partie des zones de santé de l'Ituri comptant des cas confirmés et est associée aux déplacements de référence et de recours aux soins au sein de la province.",
         note:"Nombre de cas inférieur à celui des trois zones principales, mais elle fait partie du foyer actif."}}},
-  {name:"Katwa",prov:"Nord-Kivu",country:"DRC",cases:32,deaths:19,lat:0.12058,lng:29.32371,
+  {name:"Katwa",prov:"Nord-Kivu",country:"DRC",cases:37,deaths:23,lat:0.12058,lng:29.32371,
     i18n:{
       en:{tag:"North Kivu cluster",
         ctx:"Katwa, near Butembo in North Kivu, is among the North Kivu health zones now reporting confirmed cases — evidence the outbreak has reached beyond its Ituri core. Its high case-fatality (19 of 32 confirmed) should be read cautiously: on small caseloads, undetected milder cases can inflate the ratio.",
@@ -471,7 +471,7 @@ const HZ=[
       fr:{tag:"Foyer du Nord-Kivu",
         ctx:"Katwa, près de Butembo au Nord-Kivu, fait partie des zones de santé du Nord-Kivu désormais touchées — signe que l'épidémie s'étend au-delà de son foyer ituri. Sa létalité élevée (19 décès sur 32 cas confirmés) doit être interprétée avec prudence : sur de faibles effectifs, les cas bénins non détectés peuvent gonfler ce ratio.",
         note:"Katwa fut un foyer majeur de l'épidémie d'Ebola au Kivu de 2018-2020. (À vérifier.)"}}},
-  {name:"Nizi",prov:"Ituri",country:"DRC",cases:30,deaths:6,lat:1.74969,lng:30.32474,
+  {name:"Nizi",prov:"Ituri",country:"DRC",cases:37,deaths:9,lat:1.74969,lng:30.32474,
     i18n:{
       en:{tag:"Ituri mining belt",
         ctx:"Nizi, in Djugu territory, sits in the Ituri gold-mining belt close to Mongbwalu, the presumed origin. Its caseload is consistent with local spread and care-seeking movement around that core.",
@@ -479,7 +479,7 @@ const HZ=[
       fr:{tag:"Ceinture minière de l'Ituri",
         ctx:"Nizi, dans le territoire de Djugu, se situe dans la ceinture aurifère de l'Ituri, près de Mongbwalu, l'origine présumée. Son nombre de cas est cohérent avec une diffusion locale et les déplacements de recours aux soins autour de ce foyer.",
         note:"La proximité de Mongbwalu et la forte mobilité minière accroissent le risque de transmission."}}},
-  {name:"Butembo",prov:"Nord-Kivu",country:"DRC",cases:28,deaths:13,lat:0.13996,lng:29.25991,
+  {name:"Butembo",prov:"Nord-Kivu",country:"DRC",cases:33,deaths:14,lat:0.13996,lng:29.25991,
     i18n:{
       en:{tag:"North Kivu urban centre",
         ctx:"Butembo is a large North Kivu commercial city; confirmed cases here carry outsized weight because dense urban populations and heavy trade movement can accelerate spread. The 13 deaths in 28 confirmed reflect a high reported fatality, with the usual small-number caveat.",
@@ -487,7 +487,7 @@ const HZ=[
       fr:{tag:"Centre urbain du Nord-Kivu",
         ctx:"Butembo est une grande ville commerciale du Nord-Kivu ; les cas confirmés y pèsent particulièrement, car la densité urbaine et l'intensité des échanges peuvent accélérer la propagation. Les 13 décès sur 28 cas confirmés traduisent une létalité élevée, avec la réserve habituelle des faibles effectifs.",
         note:"Ville-clé de l'épidémie d'Ebola au Kivu de 2018-2020. (À vérifier.)"}}},
-  {name:"Lita",prov:"Ituri",country:"DRC",cases:24,deaths:6,lat:1.57476,lng:30.37491,
+  {name:"Lita",prov:"Ituri",country:"DRC",cases:27,deaths:7,lat:1.57476,lng:30.37491,
     i18n:{
       en:{tag:"Ituri — Djugu",
         ctx:"Lita, in Djugu territory north of Bunia, is part of the Ituri cluster where most confirmed cases concentrate. Transmission here is linked to movement within the province's outbreak core.",
@@ -495,7 +495,7 @@ const HZ=[
       fr:{tag:"Ituri — Djugu",
         ctx:"Lita, dans le territoire de Djugu au nord de Bunia, fait partie du foyer ituri où se concentrent la plupart des cas confirmés. La transmission y est liée aux déplacements au sein du cœur épidémique de la province.",
         note:"Parmi les zones de santé de l'Ituri du foyer actif."}}},
-  {name:"Beni",prov:"Nord-Kivu",country:"DRC",cases:20,deaths:12,lat:0.49952,lng:29.46953,
+  {name:"Beni",prov:"Nord-Kivu",country:"DRC",cases:22,deaths:13,lat:0.49952,lng:29.46953,
     i18n:{
       en:{tag:"North Kivu — prior epicentre",
         ctx:"Beni is a major North Kivu city and was the epicentre of the 2018-2020 Ebola outbreak, leaving it with significant prior response infrastructure. Confirmed cases here signal the outbreak's reach into a historically high-risk, high-mobility hub.",
@@ -507,65 +507,66 @@ const HZ=[
 const CONTEXT=[
   {name:"Kampala Metro",prov:"Kampala / Wakiso",country:"Uganda",lat:0.3476,lng:32.5825,kind:"uganda",
     i18n:{
-      en:{label:"Kampala Metropolitan Area",sub:"19 confirmed · 2 deaths",
-        ctx:"Uganda's 19 confirmed cases (14 imported, 5 secondary) are confined to the Kampala Metropolitan Area (Kampala &amp; Wakiso districts), epidemiologically linked to DRC. Source: WHO DON608 / Uganda MoH (17 Jun) — separate from the INSP zone layer, which is DRC-only. As of that report, no new cases in the prior six days and no documented community transmission.",
+      en:{label:"Kampala Metropolitan Area",sub:"20 confirmed · 2 deaths",
+        ctx:"Uganda's 20 confirmed cases (15 imported, 5 local) are confined to the Kampala Metropolitan Area (Kampala &amp; Wakiso districts), epidemiologically linked to DRC. Source: WHO DON608 / Uganda MoH (28 Jun) — separate from the INSP zone layer, which is DRC-only. As of that report, no new cases in the prior six days and no documented community transmission.",
         note:"820 contacts listed; 409 under active follow-up, 394 completed 21 days."},
-      fr:{label:"Aire métropolitaine de Kampala",sub:"19 confirmés · 2 décès",
-        ctx:"Les 19 cas confirmés en Ouganda (14 importés, 5 secondaires) sont confinés à l'aire métropolitaine de Kampala (districts de Kampala et Wakiso), épidémiologiquement liés à la RDC. Source : OMS DON608 / ministère ougandais de la Santé (17 juin) — distincte des données par zone de l'INSP, qui ne couvrent que la RDC. À la date de ce rapport, aucun nouveau cas au cours des six derniers jours et aucune transmission communautaire documentée.",
+      fr:{label:"Aire métropolitaine de Kampala",sub:"20 confirmés · 2 décès",
+        ctx:"Les 20 cas confirmés en Ouganda (15 importés, 5 locaux) sont confinés à l'aire métropolitaine de Kampala (districts de Kampala et Wakiso), épidémiologiquement liés à la RDC. Source : OMS DON608 / ministère ougandais de la Santé (28 juin) — distincte des données par zone de l'INSP, qui ne couvrent que la RDC. À la date de ce rapport, aucun nouveau cas au cours des six derniers jours et aucune transmission communautaire documentée.",
         note:"820 contacts répertoriés ; 409 sous suivi actif, 394 ayant achevé les 21 jours."}}}
 ];
-/* The 25 lower-burden zones (<20 confirmed cases, INSP SitRep N°39). These carry no
+/* The 25 lower-burden zones (<20 confirmed cases, INSP SitRep N°044). These carry no
    curated i18n (tag/ctx/note); they are merged into HZ below so every one of the 34
    zones gets a clustered marker and a clickable choropleth polygon. selectZone()
    shows figures only and hides the narrative blocks for these (no "undefined"). */
 const TAIL=[
-  {name:"Bambu",prov:"Ituri",cases:14,deaths:2,lat:1.87176,lng:30.22046},
-  {name:"Mangala",prov:"Ituri",cases:14,deaths:6,lat:1.96698,lng:30.41024},
-  {name:"Komanda",prov:"Ituri",cases:10,deaths:3,lat:1.13414,lng:29.64301},
-  {name:"Tchomia",prov:"Ituri",cases:8,deaths:0,lat:1.52789,lng:30.59572},
-  {name:"Kilo",prov:"Ituri",cases:7,deaths:1,lat:1.76212,lng:30.08494},
+  {name:"Bambu",prov:"Ituri",cases:16,deaths:4,lat:1.87176,lng:30.22046},
+  {name:"Mangala",prov:"Ituri",cases:20,deaths:9,lat:1.96698,lng:30.41024},
+  {name:"Komanda",prov:"Ituri",cases:16,deaths:5,lat:1.13414,lng:29.64301},
+  {name:"Tchomia",prov:"Ituri",cases:11,deaths:0,lat:1.52789,lng:30.59572},
+  {name:"Kilo",prov:"Ituri",cases:9,deaths:1,lat:1.76212,lng:30.08494},
   {name:"Aungba",prov:"Ituri",cases:6,deaths:2,lat:2.59705,lng:30.59664},
-  {name:"Logo",prov:"Ituri",cases:5,deaths:0,lat:2.17107,lng:30.91868},
-  {name:"Damas",prov:"Ituri",cases:4,deaths:0,lat:2.18521,lng:30.17799},
+  {name:"Logo",prov:"Ituri",cases:7,deaths:0,lat:2.17107,lng:30.91868},
+  {name:"Damas",prov:"Ituri",cases:5,deaths:0,lat:2.18521,lng:30.17799},
   {name:"Rimba",prov:"Ituri",cases:3,deaths:0,lat:2.21952,lng:30.75595},
   {name:"Aru",prov:"Ituri",cases:3,deaths:1,lat:2.85261,lng:30.73485},
   {name:"Oicha",prov:"Nord-Kivu",cases:3,deaths:2,lat:0.75582,lng:29.59942},
-  {name:"Kyondo",prov:"Nord-Kivu",cases:3,deaths:1,lat:0.01319,lng:29.4859},
+  {name:"Kyondo",prov:"Nord-Kivu",cases:3,deaths:2,lat:0.01319,lng:29.4859},
   {name:"Miti-Murhesa",prov:"Sud-Kivu",cases:3,deaths:1,lat:-2.33753,lng:28.86162},
   {name:"Mambasa",prov:"Ituri",cases:2,deaths:1,lat:1.44963,lng:28.69974},
-  {name:"Nia-Nia",prov:"Ituri",cases:2,deaths:2,lat:1.31274,lng:27.97986},
+  {name:"Nia-Nia",prov:"Ituri",cases:7,deaths:4,lat:1.31274,lng:27.97986},
   {name:"Kalunguta",prov:"Nord-Kivu",cases:2,deaths:1,lat:0.43659,lng:29.51381},
-  {name:"Musienene",prov:"Nord-Kivu",cases:2,deaths:1,lat:0.01858,lng:28.65899},
-  {name:"Drodro",prov:"Ituri",cases:1,deaths:1,lat:1.74173,lng:30.54869},
+  {name:"Musienene",prov:"Nord-Kivu",cases:2,deaths:2,lat:0.01858,lng:28.65899},
+  {name:"Drodro",prov:"Ituri",cases:3,deaths:3,lat:1.74173,lng:30.54869},
   {name:"Gety",prov:"Ituri",cases:1,deaths:0,lat:1.26554,lng:30.2325},
   {name:"Kambala",prov:"Ituri",cases:1,deaths:1,lat:2.33517,lng:30.48101},
   {name:"Fataki",prov:"Ituri",cases:1,deaths:0,lat:1.91391,lng:30.55534},
   {name:"Goma",prov:"Nord-Kivu",cases:1,deaths:0,lat:-1.6526,lng:29.18021},
   {name:"Masereka",prov:"Nord-Kivu",cases:1,deaths:0,lat:-0.18405,lng:29.55946},
   {name:"Vuhovi",prov:"Nord-Kivu",cases:1,deaths:1,lat:0.25118,lng:29.25411},
-  {name:"Mabalako",prov:"Nord-Kivu",cases:1,deaths:0,lat:0.46812,lng:29.21145}
+  {name:"Mabalako",prov:"Nord-Kivu",cases:1,deaths:0,lat:0.46812,lng:29.21145},
+  {name:"Mandima",prov:"Ituri",cases:1,deaths:0,lat:0.91185,lng:29.19347}
 ];
 // Merge the 25 lower-burden zones into HZ → one 34-zone array (all DRC).
 TAIL.forEach(z=>{z.country="DRC";});
 HZ.push(...TAIL);
 
 // Figures that aren't broken out by health zone, kept as named constants.
-const UGANDA={confirmed:19,deaths:2};   // WHO DON608 (17 Jun) — separate source/date
-const AWAITING_CASES=17;                // DRC cases awaiting health-zone assignment (INSP SitRep N°39)
-const DRC_RECOVERED=115;                // INSP SitRep N°39
+const UGANDA={confirmed:20,deaths:2};   // WHO DON608 (17 Jun) — separate source/date
+const AWAITING_CASES=17;                // DRC cases awaiting health-zone assignment (INSP SitRep N°044)
+const DRC_RECOVERED=178;                // INSP SitRep N°044
 
 // Per-zone population (2024) and cumulative incidence per 100k — INSP / projections.
-const POP={"Bunia":[268128,110.4],"Mongbwalu":[133371,177.7],"Rwampara":[134068,167.8],"Nyankunde":[97949,87.8],"Katwa":[411346,7.8],"Nizi":[141651,21.2],"Butembo":[316182,8.9],"Lita":[128175,18.7],"Beni":[382409,5.2],"Bambu":[148752,9.4],"Mangala":[92662,15.1],"Komanda":[184816,5.4],"Tchomia":[110386,7.2],"Kilo":[55902,12.5],"Aungba":[158181,3.8],"Logo":[240552,2.1],"Damas":[116731,3.4],"Rimba":[211373,1.4],"Aru":[181110,1.7],"Oicha":[336160,0.9],"Kyondo":[215154,1.4],"Miti-Murhesa":[239135,1.3],"Mambasa":[95906,2.1],"Nia-Nia":[71361,2.8],"Kalunguta":[199559,1.0],"Musienene":[249370,0.8],"Drodro":[154777,0.6],"Gety":[186541,0.5],"Kambala":[123772,0.8],"Fataki":[128262,0.8],"Goma":[251728,0.4],"Masereka":[177664,0.6],"Vuhovi":[121520,0.8],"Mabalako":[186148,0.5]};
+const POP={"Bunia":[268128,126.1],"Rwampara":[134068,210.3],"Mongbwalu":[133371,193.4],"Nyankunde":[97949,96],"Nizi":[141651,26.1],"Katwa":[411346,9],"Butembo":[316182,10.4],"Lita":[128175,21.1],"Beni":[382409,5.8],"Mangala":[92662,21.6],"Komanda":[184816,8.7],"Bambu":[148752,10.8],"Tchomia":[110386,10],"Kilo":[55902,16.1],"Logo":[240552,2.9],"Nia-Nia":[71361,9.8],"Aungba":[158181,3.8],"Damas":[116731,4.3],"Rimba":[211373,1.4],"Aru":[181110,1.7],"Drodro":[154777,1.9],"Oicha":[336160,0.9],"Kyondo":[215154,1.4],"Miti-Murhesa":[239135,1.3],"Mambasa":[95906,2.1],"Kalunguta":[199559,1],"Musienene":[249370,0.8],"Gety":[186541,0.5],"Kambala":[123772,0.8],"Fataki":[128262,0.8],"Mandima":[138196,0.7],"Goma":[251728,0.4],"Masereka":[177664,0.6],"Vuhovi":[121520,0.8],"Mabalako":[186148,0.5]};
 
 // Per-zone time series + Flowminder mobility — fetched on init (see loadZoneData).
 let zoneTrends=null, zoneMobility=null;
 
 // National totals COMPUTED from the data (single source of truth) rather than hardcoded.
-const drcCases=HZ.reduce((s,z)=>s+z.cases,0)+AWAITING_CASES; // 1077 mapped + 17 awaiting = 1094
-const drcDeaths=HZ.reduce((s,z)=>s+z.deaths,0);              // 277
-const totalConfirmed=drcCases+UGANDA.confirmed;             // 1113
-const totalDeaths=drcDeaths+UGANDA.deaths;                 // 279
-const zonesWithCases=HZ.length;                            // 34
+const drcCases=HZ.reduce((s,z)=>s+z.cases,0)+AWAITING_CASES; // 1257 mapped + 17 awaiting = 1274
+const drcDeaths=HZ.reduce((s,z)=>s+z.deaths,0);              // 360
+const totalConfirmed=drcCases+UGANDA.confirmed;             // 1294
+const totalDeaths=drcDeaths+UGANDA.deaths;                 // 362
+const zonesWithCases=HZ.length;                            // 35
 function injectTotals(){
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   set('respConfirmed',totalConfirmed);
@@ -574,7 +575,7 @@ function injectTotals(){
   set('respRecovered',DRC_RECOVERED);
 }
 
-const DRC_CONFIRMED_TOTAL=drcCases; // 1094 — DRC national confirmed total (computed), used for per-zone share
+const DRC_CONFIRMED_TOTAL=drcCases; // 1274 — DRC national confirmed total (computed), used for per-zone share
 
 /* ============ I18N ============
    French strings below are AI-assisted and MUST be reviewed by a Francophone
@@ -599,14 +600,14 @@ const I18N={
   en:{
     doc_title:"DRC · Uganda — Ebola Bundibugyo 2026 · Interactive Dashboard",
     app_title_html:'Ebola <span>Bundibugyo</span> 2026 · DRC &amp; Uganda',
-    topbar_sub:"Interactive outbreak dashboard · WHO DON608 · as of 17–18 Jun 2026",
+    topbar_sub:"Interactive outbreak dashboard · INSP SitRep N°044 + Uganda MoH · as of 27–28 Jun 2026",
     btn_data:"Contributors, Data & Methods",
     btn_terms:"Terms of Use",
     theme_title:"Toggle light/dark mode",
     lang_title:"Changer de langue · Switch language",
     hint:"Click a shaded zone to inspect a health zone · scroll to zoom",
     legend_title:"Confirmed cases",
-    legend_sub:"DRC health zones · INSP SitRep N°39 · 22 Jun 2026",
+    legend_sub:"DRC health zones · INSP SitRep N°044 · 27 Jun 2026",
     legend_colour:"Colour · case intensity",
     legend_scale:"Scale",
     seg_log:"log",
@@ -623,8 +624,8 @@ const I18N={
     cluster_more:"more",
     legend_markers:"Map",
     legend_click_zone:"Click a shaded zone for detail",
-    legend_ctx_uga:"Uganda · Kampala metro (19 confirmed)",
-    legend_src:"Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°39 (22 Jun 2026, DRC only); Uganda (Kampala) is a separate WHO DON608 context marker (17 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°39, 22 Jun). ⚠ Verify against WHO before publishing.",
+    legend_ctx_uga:"Uganda · Kampala metro (20 confirmed)",
+    legend_src:"Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°044 (27 Jun 2026, DRC only); Uganda (Kampala) is a separate Uganda MoH context marker (28 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°044, 27 Jun). ⚠ Verify against WHO before publishing.",
     zone_title:"Health zone",
     tab_snap:"Current snapshot",
     tab_trend:"Trends",
@@ -632,8 +633,8 @@ const I18N={
     snap_empty:"Select a health zone on the map to see its current snapshot.",
     kpi_confirmed:"Confirmed cases",
     kpi_share:"Share of DRC",
-    share_ituri_confirmed:"Share of DRC confirmed (INSP SitRep N°39)",
-    share_drc_caption:"share of all confirmed cases in DRC (1094, INSP SitRep N°39, 22 Jun); excludes Uganda, which is not reported by health zone.",
+    share_ituri_confirmed:"Share of DRC confirmed (INSP SitRep N°044)",
+    share_drc_caption:"share of all confirmed cases in DRC (1274, INSP SitRep N°044, 27 Jun); excludes Uganda, which is not reported by health zone.",
     snap_deaths:"deaths",
     tip_cases:"cases",
     tip_deaths:"deaths",
@@ -643,7 +644,7 @@ const I18N={
     ctx_empty:"Select a health zone for response context.",
     ctx_none:"No curated context for this zone — confirmed figures only. ⚠ Verify against WHO before publishing.",
     trend_empty:"Select a health zone to see its case & death trend.",
-    trend_caption:"Cumulative confirmed cases and deaths, INSP SitReps (14 May–22 Jun). Counts are occasionally revised down between reports.",
+    trend_caption:"Cumulative confirmed cases and deaths, INSP SitReps (14 May–27 Jun). Counts are occasionally revised down between reports.",
     trend_cases:"Cases",
     trend_deaths:"Deaths",
     ctx_pop_header:"Population",
@@ -657,8 +658,8 @@ const I18N={
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
     resp_deaths:"Deaths · CFR ≈25.3% (provisional)",
-    resp_hz:"Health zones with cases (DRC) · INSP SitRep N°39",
-    resp_recovered:"Recovered (DRC) · INSP SitRep N°39",
+    resp_hz:"Health zones with cases (DRC) · INSP SitRep N°044",
+    resp_recovered:"Recovered (DRC) · INSP SitRep N°044",
     resp_followup:"Contact follow-up (Ituri) · per DON608 · 17 Jun",
     risk_drc:"DRC",
     risk_uganda:"Uganda",
@@ -670,16 +671,16 @@ const I18N={
     resp_note:"159 health zones categorized affected or at risk (risk-stratification, 8 Jun). Candidate-therapeutics trial underway: MBP134, REGN3479 (treatment); obeldesivir (post-exposure prophylaxis). No licensed vaccine or treatment for BVD.",
     modal_data_title:"Contributors, Data & Methods",
     md_h_source:"Data source",
-    md_source_p:"Health-zone figures are transcribed from INSP situation reports (SitRep N°39, 22 June 2026). National headline and Uganda figures are from WHO Disease Outbreak News (DON608). WHO cites COUSP-DRC / INSP as the underlying DRC source.",
+    md_source_p:"All DRC figures — national headline and every health zone — are transcribed from INSP situation reports (SitRep N°044, 27 June 2026, Table II). Uganda figures are from the Uganda Ministry of Health Ebola portal (28 June 2026). WHO Disease Outbreak News (DON608, 17 Jun) is retained only as a cross-reference.",
     who_link_text:"WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC & Uganda (19 June 2026)",
-    md_asof_p:"DRC health-zone data are as of 22 June 2026 (INSP SitRep N°39); the WHO DON608 national and Uganda figures are as of 17–18 June. The headline totals are therefore a composite of two sources and dates.",
+    md_asof_p:"DRC figures are as of 27 June 2026 (INSP SitRep N°044); Uganda figures are as of 28 June 2026 (Uganda Ministry of Health). The headline total is a composite of these two sources.",
     md_h_method:"Method",
     md_method_1:"The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many). Click a shaded zone for its detail; hover to highlight it.",
     md_method_2:"Each zone polygon is <strong>interactive</strong>: hovering highlights it and shows its figures, and clicking opens the zone's snapshot. Uganda (Kampala) is the only point marker, on a separate context layer.",
-    md_method_3:"All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°39 (22 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.",
+    md_method_3:"All three affected provinces — Ituri, North Kivu and South Kivu — are now mapped at <strong>health-zone level</strong> from INSP SitRep N°044 (27 Jun 2026); the earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source. 17 DRC cases were awaiting health-zone distribution at the time of reporting.",
     md_method_4:"Zone polygons are <strong>approximate health-zone boundaries</strong> for visual placement, not official administrative boundaries.",
-    md_method_5:"The per-zone Trends tab shows cumulative confirmed cases and deaths from successive INSP SitReps (14 May–22 Jun 2026).",
-    md_method_6:"DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (277/1094 ≈ 25.3%, INSP SitRep N°39). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.",
+    md_method_5:"The per-zone Trends tab shows cumulative confirmed cases and deaths from successive INSP SitReps (14 May–27 Jun 2026).",
+    md_method_6:"DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (360/1274 ≈ 28.3%, INSP SitRep N°044). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.",
     md_h_figures:"WHO figures (view / download at source)",
     md_fig_alt:"WHO Figure 1: distribution of confirmed BVD cases, DRC and Uganda",
     md_figcap:"WHO Figure 1 — distribution of confirmed cases, DRC (10 Jun) & Uganda (11 Jun). © WHO.",
@@ -687,7 +688,7 @@ const I18N={
     dl_fig2:"Fig 2 · DRC epicurve",
     dl_fig3:"Fig 3 · Uganda epicurve",
     md_h_csv:"Download the data (CSV)",
-    dl_csv_sitrep39:"Cases by health zone — INSP SitRep N°39 (22 Jun)",
+    dl_csv_sitrep39:"Cases by health zone — INSP SitRep N°044 (27 Jun)",
     dl_csv_hz:"Cases by health zone — WHO DON608 (17 Jun)",
     dl_csv_prov:"Province summary",
     dl_csv_country:"Country summary",
@@ -699,12 +700,12 @@ const I18N={
     modal_terms_title:"Terms of Use",
     terms_p1:"This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.",
     terms_h_warranty:"No warranty",
-    terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (17–18 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
+    terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (27–28 June 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
     terms_h_rights:"Rights",
     terms_rights_p:"All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.",
     terms_h_sensitive:"Sensitive context",
     terms_sensitive_p:"This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.",
-    meta_hz:"{prov} Province · {country} · INSP SitRep N°39",
+    meta_hz:"{prov} Province · {country} · INSP SitRep N°044",
     meta_ctx:"{prov} · {country} · WHO DON608",
     na:"n/a",
     ctx_confirmed_kampala:"Confirmed in Kampala metro",
@@ -729,7 +730,7 @@ const I18N={
     lang_title:"Changer de langue · Switch language",
     hint:"Cliquez sur une zone colorée pour examiner une zone de santé · défilez pour zoomer",
     legend_title:"Cas confirmés",
-    legend_sub:"Zones de santé de la RDC · INSP SitRep N°39 · 22 juin 2026",
+    legend_sub:"Zones de santé de la RDC · INSP SitRep N°044 · 27 juin 2026",
     legend_colour:"Couleur · intensité des cas",
     legend_scale:"Échelle",
     seg_log:"log",
@@ -746,8 +747,8 @@ const I18N={
     cluster_more:"de plus",
     legend_markers:"Carte",
     legend_click_zone:"Cliquez sur une zone colorée pour le détail",
-    legend_ctx_uga:"Ouganda · agglomération de Kampala (19 confirmés)",
-    legend_src:"Chaque polygone de zone de santé de la RDC est coloré selon le nombre de cas confirmés sur un dégradé rouge séquentiel (clair = peu, foncé = beaucoup) — cliquez sur une zone pour son détail. Les chiffres par zone proviennent du SitRep N°39 de l'INSP (22 juin 2026, RDC uniquement) ; l'Ouganda (Kampala) est un marqueur contextuel distinct (OMS DON608, 17 juin). 17 cas en attente d'attribution à une zone de santé (INSP SitRep N°39, 22 juin). ⚠ Vérifier auprès de l'OMS avant publication.",
+    legend_ctx_uga:"Ouganda · agglomération de Kampala (20 confirmés)",
+    legend_src:"Chaque polygone de zone de santé de la RDC est coloré selon le nombre de cas confirmés sur un dégradé rouge séquentiel (clair = peu, foncé = beaucoup) — cliquez sur une zone pour son détail. Les chiffres par zone proviennent du SitRep N°044 de l'INSP (27 juin 2026, RDC uniquement) ; l'Ouganda (Kampala) est un marqueur contextuel distinct (OMS DON608, 17 juin). 17 cas en attente d'attribution à une zone de santé (INSP SitRep N°044, 27 juin). ⚠ Vérifier auprès de l'OMS avant publication.",
     zone_title:"Zone de santé",
     tab_snap:"Aperçu actuel",
     tab_trend:"Tendances",
@@ -755,8 +756,8 @@ const I18N={
     snap_empty:"Sélectionnez une zone de santé sur la carte pour afficher son aperçu actuel.",
     kpi_confirmed:"Cas confirmés",
     kpi_share:"Part de la RDC",
-    share_ituri_confirmed:"Part des cas confirmés de la RDC (INSP SitRep N°39)",
-    share_drc_caption:"part de tous les cas confirmés en RDC (1094, INSP SitRep N°39, 22 juin) ; hors Ouganda, non ventilé par zone de santé.",
+    share_ituri_confirmed:"Part des cas confirmés de la RDC (INSP SitRep N°044)",
+    share_drc_caption:"part de tous les cas confirmés en RDC (1274, INSP SitRep N°044, 27 juin) ; hors Ouganda, non ventilé par zone de santé.",
     snap_deaths:"décès",
     tip_cases:"cas",
     tip_deaths:"décès",
@@ -766,7 +767,7 @@ const I18N={
     ctx_empty:"Sélectionnez une zone de santé pour le contexte de la riposte.",
     ctx_none:"Aucun contexte détaillé pour cette zone — chiffres confirmés uniquement. ⚠ Vérifier auprès de l'OMS avant publication.",
     trend_empty:"Sélectionnez une zone de santé pour voir sa courbe de cas et de décès.",
-    trend_caption:"Cas et décès confirmés cumulés, SitReps de l'INSP (14 mai–22 juin). Les comptages sont parfois révisés à la baisse entre les rapports.",
+    trend_caption:"Cas et décès confirmés cumulés, SitReps de l'INSP (14 mai–27 juin). Les comptages sont parfois révisés à la baisse entre les rapports.",
     trend_cases:"Cas",
     trend_deaths:"Décès",
     ctx_pop_header:"Population",
@@ -780,8 +781,8 @@ const I18N={
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
     resp_deaths:"Décès · TL ≈25,3 % (provisoire)",
-    resp_hz:"Zones de santé avec des cas (RDC) · INSP SitRep N°39",
-    resp_recovered:"Guéris (RDC) · INSP SitRep N°39",
+    resp_hz:"Zones de santé avec des cas (RDC) · INSP SitRep N°044",
+    resp_recovered:"Guéris (RDC) · INSP SitRep N°044",
     resp_followup:"Suivi des contacts (Ituri) · selon le DON608 · 17 juin",
     risk_drc:"RDC",
     risk_uganda:"Ouganda",
@@ -793,16 +794,16 @@ const I18N={
     resp_note:"159 zones de santé classées touchées ou à risque (stratification du risque, 8 juin). Essai de thérapies candidates en cours : MBP134, REGN3479 (traitement) ; obeldesivir (prophylaxie post-exposition). Aucun vaccin ni traitement homologué contre la MVB.",
     modal_data_title:"Contributeurs, données et méthodes",
     md_h_source:"Source des données",
-    md_source_p:"Les chiffres par zone de santé sont transcrits des rapports de situation de l'INSP (SitRep N°39, 22 juin 2026). Les chiffres nationaux globaux et ceux de l'Ouganda proviennent du Bulletin d'information sur les flambées de l'OMS (DON608). L'OMS cite le COUSP-RDC / INSP comme source sous-jacente pour la RDC.",
+    md_source_p:"Les chiffres par zone de santé sont transcrits des rapports de situation de l'INSP (SitRep N°044, 27 juin 2026). Les chiffres nationaux globaux et ceux de l'Ouganda proviennent du Bulletin d'information sur les flambées de l'OMS (DON608). L'OMS cite le COUSP-RDC / INSP comme source sous-jacente pour la RDC.",
     who_link_text:"OMS DON608 — Maladie à virus Ebola Bundibugyo, RDC et Ouganda (19 juin 2026)",
-    md_asof_p:"Les données par zone de santé de la RDC sont arrêtées au 22 juin 2026 (SitRep N°39 de l'INSP) ; les chiffres nationaux et ougandais du DON608 de l'OMS sont arrêtés aux 17–18 juin. Les totaux affichés constituent donc un composite de deux sources et de deux dates.",
+    md_asof_p:"Les données par zone de santé de la RDC sont arrêtées au 27 juin 2026 (SitRep N°044 de l'INSP) ; les chiffres nationaux et ougandais du DON608 de l'OMS sont arrêtés aux 17–18 juin. Les totaux affichés constituent donc un composite de deux sources et de deux dates.",
     md_h_method:"Méthode",
     md_method_1:"La carte est une <strong>choroplèthe</strong> : chaque polygone de zone de santé est coloré selon le nombre de cas confirmés sur un dégradé rouge séquentiel (clair = peu, foncé = beaucoup). Cliquez sur une zone colorée pour son détail ; survolez pour la mettre en évidence.",
     md_method_2:"Chaque polygone de zone est <strong>interactif</strong> : le survol le met en évidence et affiche ses chiffres, et le clic ouvre l'aperçu de la zone. L'Ouganda (Kampala) est le seul marqueur ponctuel, sur une couche contextuelle distincte.",
-    md_method_3:"Les trois provinces touchées — Ituri, Nord-Kivu et Sud-Kivu — sont désormais cartographiées au <strong>niveau des zones de santé</strong> d'après le SitRep N°39 de l'INSP (22 juin 2026) ; les anciens marqueurs contextuels provinciaux du Nord- et du Sud-Kivu ont été retirés. Seul l'Ouganda (aire métropolitaine de Kampala) demeure un marqueur contextuel distinct, car il provient d'une source différente. 17 cas en RDC étaient en attente de répartition par zone de santé au moment du rapport.",
+    md_method_3:"Les trois provinces touchées — Ituri, Nord-Kivu et Sud-Kivu — sont désormais cartographiées au <strong>niveau des zones de santé</strong> d'après le SitRep N°044 de l'INSP (27 juin 2026) ; les anciens marqueurs contextuels provinciaux du Nord- et du Sud-Kivu ont été retirés. Seul l'Ouganda (aire métropolitaine de Kampala) demeure un marqueur contextuel distinct, car il provient d'une source différente. 17 cas en RDC étaient en attente de répartition par zone de santé au moment du rapport.",
     md_method_4:"Les polygones de zones sont des <strong>limites approximatives des zones de santé</strong> destinées au placement visuel, et non des limites administratives officielles.",
-    md_method_5:"L'onglet Tendances par zone montre les cas et décès confirmés cumulés des SitReps successifs de l'INSP (14 mai–22 juin 2026).",
-    md_method_6:"La létalité en RDC est provisoire — décès confirmés ÷ cas confirmés (277/1094 ≈ 25,3 %, SitRep N°39 de l'INSP). Non comparable aux DON antérieurs (définition de cas différente) et instable tant que la plupart des cas ne sont pas clôturés.",
+    md_method_5:"L'onglet Tendances par zone montre les cas et décès confirmés cumulés des SitReps successifs de l'INSP (14 mai–27 juin 2026).",
+    md_method_6:"La létalité en RDC est provisoire — décès confirmés ÷ cas confirmés (277/1094 ≈ 25,3 %, SitRep N°044 de l'INSP). Non comparable aux DON antérieurs (définition de cas différente) et instable tant que la plupart des cas ne sont pas clôturés.",
     md_h_figures:"Figures de l'OMS (consulter / télécharger à la source)",
     md_fig_alt:"Figure 1 de l'OMS : distribution des cas confirmés de MVB, RDC et Ouganda",
     md_figcap:"Figure 1 de l'OMS — distribution des cas confirmés, RDC (10 juin) et Ouganda (11 juin). © OMS.",
@@ -810,7 +811,7 @@ const I18N={
     dl_fig2:"Fig 2 · courbe épidémique RDC",
     dl_fig3:"Fig 3 · courbe épidémique Ouganda",
     md_h_csv:"Télécharger les données (CSV)",
-    dl_csv_sitrep39:"Cas par zone de santé — INSP SitRep N°39 (22 juin)",
+    dl_csv_sitrep39:"Cas par zone de santé — INSP SitRep N°044 (27 juin)",
     dl_csv_hz:"Cas par zone de santé — OMS DON608 (17 juin)",
     dl_csv_prov:"Synthèse par province",
     dl_csv_country:"Synthèse par pays",
@@ -822,12 +823,12 @@ const I18N={
     modal_terms_title:"Conditions d'utilisation",
     terms_p1:"Ce tableau de bord reproduit des chiffres accessibles au public issus du Bulletin d'information sur les flambées épidémiques de l'OMS, à des fins d'information humanitaire non commerciale. Il ne constitue pas une publication officielle de l'OMS, de l'INRB ou d'une quelconque autorité gouvernementale.",
     terms_h_warranty:"Aucune garantie",
-    terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (17–18 juin 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
+    terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (27–28 juin 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
     terms_h_rights:"Droits",
     terms_rights_p:"L'ensemble des données et chiffres épidémiologiques demeurent la propriété de l'Organisation mondiale de la Santé et des autorités nationales concernées. Les tuiles cartographiques sont © contributeurs OpenStreetMap et © CARTO. Citez toujours la source originale de l'OMS (DON608) pour toute réutilisation.",
     terms_h_sensitive:"Contexte sensible",
     terms_sensitive_p:"Il s'agit d'une urgence de santé publique en cours touchant des communautés affectées par les conflits et des populations déplacées. Veuillez utiliser ces informations de manière responsable.",
-    meta_hz:"Province : {prov} · {country} · INSP SitRep N°39",
+    meta_hz:"Province : {prov} · {country} · INSP SitRep N°044",
     meta_ctx:"{prov} · {country} · OMS DON608",
     na:"n/d",
     ctx_confirmed_kampala:"Confirmés dans l'agglomération de Kampala",
@@ -850,19 +851,20 @@ const countryName=c=>(COUNTRY_I18N[c]&&COUNTRY_I18N[c][lang])||c;
 /* ============ MAP ============ */
 // Locally vendored Leaflet: point default marker icons at the bundled images/ folder.
 L.Icon.Default.imagePath='vendor/leaflet/images/';
-const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).setView([0.9,30.4],6.4);
-const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: INSP SitRep N°39';
+const EPI_BOUNDS=[[-0.1,29.05],[2.35,30.70]]; // Ituri + N-Kivu high-case cluster (~91% of cases)
+const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).fitBounds(EPI_BOUNDS,{padding:[16,16]});
+const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: INSP SitRep N°044';
 const darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
 const lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
 darkTile.addTo(map);
 
 /* Choropleth fill ramp — sequential RED (light = few cases, dark = many).
    This is a SINGLE array: swap it to change the scheme.
-   Domain 1..296; sqrt transform keeps the long tail of small zones readable. */
+   Domain 1..338; sqrt transform keeps the long tail of small zones readable. */
 const FILL_RAMP=['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15','#67000d'];
 function fillColorFor(cases){
   if(cases==null||cases<=0) return null;            // zones with no cases get no fill
-  const t=Math.sqrt(cases)/Math.sqrt(296);
+  const t=Math.sqrt(cases)/Math.sqrt(338);
   const idx=Math.min(FILL_RAMP.length-1,Math.max(0,Math.round(t*(FILL_RAMP.length-1))));
   return FILL_RAMP[idx];
 }
@@ -871,19 +873,19 @@ let ctxLayer=L.layerGroup().addTo(map);
 let selected=null;
 
 /* ---- Shared red ramp helpers — the choropleth fill AND the cluster bubbles use the
-   SAME ramp + breakpoints. Cluster SUMS can exceed 296, so clamp to the darkest band. ---- */
-function rampIdx(c){return Math.min(FILL_RAMP.length-1,Math.max(0,Math.round(Math.sqrt(Math.max(c,0))/Math.sqrt(296)*(FILL_RAMP.length-1))));}
+   SAME ramp + breakpoints. Cluster SUMS can exceed 338, so clamp to the darkest band. ---- */
+function rampIdx(c){return Math.min(FILL_RAMP.length-1,Math.max(0,Math.round(Math.sqrt(Math.max(c,0))/Math.sqrt(338)*(FILL_RAMP.length-1))));}
 function rampColor(c){return FILL_RAMP[rampIdx(c)];}
-function bubbleDiam(c){const t=Math.min(1,Math.sqrt(Math.max(c,1))/Math.sqrt(296));return Math.round(24+t*22);} // 24..46px
+function bubbleDiam(c){const t=Math.min(1,Math.sqrt(Math.max(c,1))/Math.sqrt(338));return Math.round(24+t*22);} // 24..46px
 function digitColor(c){return rampIdx(c)<=1?'#67000d':'#fff';}                                  // dark digits on the 2 lightest reds
 function bubbleHtml(n,extra){const d=bubbleDiam(n),fs=(''+n).length>=3?11:13;
   return `<div class="zbub ${extra||''}" style="width:${d}px;height:${d}px;background:${rampColor(n)};color:${digitColor(n)};font-size:${fs}px">${n}</div>`;}
 function bubbleIcon(n){const d=bubbleDiam(n);return L.divIcon({html:bubbleHtml(n),className:'zbub-wrap',iconSize:[d,d],iconAnchor:[d/2,d/2]});}
 
 /* ---- Choropleth zone labels: confirmed-case number centred on the polygon, for the
-   9 zones with >=20 cases only. Auto-contrast digits (matching the fill darkness) +
+   18 zones with >=5 cases only. Auto-contrast digits (matching the fill darkness) +
    a halo so they stay legible over any fill. Non-interactive so hover/click pass through. ---- */
-const LABEL_MIN=20;
+const LABEL_MIN=5;
 let labelLayer=L.layerGroup();
 function zoneLabelIcon(cases){
   const fg=digitColor(cases);
@@ -921,7 +923,7 @@ let choroplethLayer=L.geoJSON(null,{
 function loadChoropleth(){
   // Fetched at runtime (needs an HTTP origin). On failure (e.g. opened via file://)
   // we log and continue — borders/markers still work once data loads.
-  fetch('data/zones_sitrep39.geojson')
+  fetch('data/zones_sitrep044.geojson')
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(gj=>{choroplethLayer.addData(gj);choroplethLayer.setStyle(styleFeature);if(mapView!=='cluster')labelLayer.addTo(map);})
     .catch(e=>{console.warn('Choropleth GeoJSON failed to load — continuing with markers only.',e);});
@@ -1234,37 +1236,38 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals()});
 
 /* ============ CSV DOWNLOADS ============ */
 const CSV={
-"zones_sitrep39.csv":`zone,province,confirmed_cases,confirmed_deaths,lat,lon,population_2024,zone_cfr_pct,cases_per_100k
-Bunia,Ituri,296,48,1.59551,30.22344,268128,16.2,110.4
-Mongbwalu,Ituri,237,100,1.98343,29.91567,133371,42.2,177.7
-Rwampara,Ituri,225,37,1.57195,30.11021,134068,16.4,167.8
-Nyankunde,Ituri,86,9,1.47609,29.9444,97949,10.5,87.8
-Katwa,Nord-Kivu,32,19,0.12058,29.32371,411346,59.4,7.8
-Nizi,Ituri,30,6,1.74969,30.32474,141651,20.0,21.2
-Butembo,Nord-Kivu,28,13,0.13996,29.25991,316182,46.4,8.9
-Lita,Ituri,24,6,1.57476,30.37491,128175,25.0,18.7
-Beni,Nord-Kivu,20,12,0.49952,29.46953,382409,60.0,5.2
-Bambu,Ituri,14,2,1.87176,30.22046,148752,14.3,9.4
-Mangala,Ituri,14,6,1.96698,30.41024,92662,42.9,15.1
-Komanda,Ituri,10,3,1.13414,29.64301,184816,30.0,5.4
-Tchomia,Ituri,8,0,1.52789,30.59572,110386,0.0,7.2
-Kilo,Ituri,7,1,1.76212,30.08494,55902,14.3,12.5
+"zones_sitrep044.csv":`zone,province,confirmed_cases,confirmed_deaths,lat,lon,population_2024,zone_cfr_pct,cases_per_100k
+Bunia,Ituri,338,71,1.59551,30.22344,268128,21.0,126.1
+Rwampara,Ituri,282,52,1.57195,30.11021,134068,18.4,210.3
+Mongbwalu,Ituri,258,118,1.98343,29.91567,133371,45.7,193.4
+Nyankunde,Ituri,94,13,1.47609,29.9444,97949,13.8,96.0
+Nizi,Ituri,37,9,1.74969,30.32474,141651,24.3,26.1
+Katwa,Nord-Kivu,37,23,0.12058,29.32371,411346,62.2,9.0
+Butembo,Nord-Kivu,33,14,0.13996,29.25991,316182,42.4,10.4
+Lita,Ituri,27,7,1.57476,30.37491,128175,25.9,21.1
+Beni,Nord-Kivu,22,13,0.49952,29.46953,382409,59.1,5.8
+Mangala,Ituri,20,9,1.96698,30.41024,92662,45.0,21.6
+Komanda,Ituri,16,5,1.13414,29.64301,184816,31.2,8.7
+Bambu,Ituri,16,4,1.87176,30.22046,148752,25.0,10.8
+Tchomia,Ituri,11,0,1.52789,30.59572,110386,0.0,10.0
+Kilo,Ituri,9,1,1.76212,30.08494,55902,11.1,16.1
+Logo,Ituri,7,0,2.17107,30.91868,240552,0.0,2.9
+Nia-Nia,Ituri,7,4,1.31274,27.97986,71361,57.1,9.8
 Aungba,Ituri,6,2,2.59705,30.59664,158181,33.3,3.8
-Logo,Ituri,5,0,2.17107,30.91868,240552,0.0,2.1
-Damas,Ituri,4,0,2.18521,30.17799,116731,0.0,3.4
+Damas,Ituri,5,0,2.18521,30.17799,116731,0.0,4.3
 Rimba,Ituri,3,0,2.21952,30.75595,211373,0.0,1.4
 Aru,Ituri,3,1,2.85261,30.73485,181110,33.3,1.7
+Drodro,Ituri,3,3,1.74173,30.54869,154777,100.0,1.9
 Oicha,Nord-Kivu,3,2,0.75582,29.59942,336160,66.7,0.9
-Kyondo,Nord-Kivu,3,1,0.01319,29.4859,215154,33.3,1.4
+Kyondo,Nord-Kivu,3,2,0.01319,29.4859,215154,66.7,1.4
 Miti-Murhesa,Sud-Kivu,3,1,-2.33753,28.86162,239135,33.3,1.3
 Mambasa,Ituri,2,1,1.44963,28.69974,95906,50.0,2.1
-Nia-Nia,Ituri,2,2,1.31274,27.97986,71361,100.0,2.8
 Kalunguta,Nord-Kivu,2,1,0.43659,29.51381,199559,50.0,1.0
-Musienene,Nord-Kivu,2,1,0.01858,28.65899,249370,50.0,0.8
-Drodro,Ituri,1,1,1.74173,30.54869,154777,100.0,0.6
+Musienene,Nord-Kivu,2,2,0.01858,28.65899,249370,100.0,0.8
 Gety,Ituri,1,0,1.26554,30.2325,186541,0.0,0.5
 Kambala,Ituri,1,1,2.33517,30.48101,123772,100.0,0.8
 Fataki,Ituri,1,0,1.91391,30.55534,128262,0.0,0.8
+Mandima,Ituri,1,0,0.91185,29.19347,138196,0.0,0.7
 Goma,Nord-Kivu,1,0,-1.6526,29.18021,251728,0.0,0.4
 Masereka,Nord-Kivu,1,0,-0.18405,29.55946,177664,0.0,0.6
 Vuhovi,Nord-Kivu,1,1,0.25118,29.25411,121520,100.0,0.8
