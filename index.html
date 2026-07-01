@@ -129,7 +129,7 @@ html[data-theme="light"] .map-toggle{box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .donut-wrap{position:relative;height:100px;margin:12px 0 0}
 
 /* zone panel (right) */
-#zone{right:16px;top:74px;width:330px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+#zone{right:16px;bottom:22px;width:330px;max-height:calc(40vh - 40px);display:flex;flex-direction:column}
 #zone .panel-b{overflow-y:auto;padding:0}
 .tabs{display:flex;border-bottom:1px solid var(--line)}
 .tabs button{flex:1;font-family:'IBM Plex Mono';font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;
@@ -156,7 +156,7 @@ html[data-theme="light"] .map-toggle{box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .note{font-size:.72rem;color:var(--dim);margin-top:10px;line-height:1.5}
 
 /* response panel (bottom-right) */
-#response{right:16px;bottom:22px;width:330px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+#response{right:16px;top:74px;width:330px;max-height:calc(60vh - 60px);display:flex;flex-direction:column}
 #response .panel-b{overflow-y:auto;min-height:0}
 .resp-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:7px;overflow:hidden}
 .resp-grid .c{background:var(--panel-2);padding:11px 12px}
@@ -166,6 +166,20 @@ html[data-theme="light"] .map-toggle{box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .ctry-toggle{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:7px;overflow:hidden;margin-bottom:12px}
 .ctry-toggle button{flex:1;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:8px 6px;background:var(--panel-2);color:var(--muted);border:0;cursor:pointer;transition:background .15s,color .15s}
 .ctry-toggle button.active{background:#ff6a4d;color:#fff}
+.resp-total{padding:2px 2px 12px}
+.resp-total .rt-line{font-size:.8rem;line-height:1.6}
+.resp-total .rt-n{font-family:'Archivo';font-weight:800;font-size:1.05rem;color:#fff}
+.resp-total .rt-n.red{color:#ff6a4d}
+.resp-total .rt-l{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.resp-total .rt-sub{font-size:.64rem;color:var(--dim);margin-top:5px}
+.resp-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.resp-table th,.resp-table td{padding:7px 8px;text-align:right;border-top:1px solid var(--line)}
+.resp-table thead th{color:var(--muted);font-weight:600;font-size:.58rem;text-transform:uppercase;letter-spacing:.05em}
+.resp-table tbody th{text-align:left;color:var(--text);font-weight:600}
+.resp-table tbody tr.hl{background:rgba(255,106,77,.14)}
+.resp-table tbody tr.hl th{color:#ff6a4d}
+.zone-hint{font-size:.6rem;color:var(--dim);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-left:auto;margin-right:10px;white-space:nowrap}
+#zone:not(.collapsed) .zone-hint{display:none}
 #respSummarySrc{font-size:.63rem;color:var(--dim);margin:8px 2px 2px}
 .risk-list{margin-top:13px;display:flex;flex-direction:column;gap:7px}
 .risk{display:flex;align-items:center;justify-content:space-between;font-size:.78rem}
@@ -224,6 +238,7 @@ html[data-theme="light"] .leaflet-bar a:hover{background:var(--panel-2)!importan
 html[data-theme="light"] .zone-name{color:var(--text)}
 html[data-theme="light"] .kpi .k .v{color:var(--text)}
 html[data-theme="light"] .resp-grid .c .v{color:var(--text)}
+html[data-theme="light"] .resp-total .rt-n{color:var(--text)}
 html[data-theme="light"] .modal-h h2{color:var(--text)}
 html[data-theme="light"] .modal-h{background:var(--panel)}
 html[data-theme="light"] .modal-b p,html[data-theme="light"] .modal-b li{color:#3a5268}
@@ -287,8 +302,8 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 </div>
 
 <!-- ZONE PANEL -->
-<div class="panel" id="zone">
-  <div class="panel-h" data-toggle><h3 data-i18n="zone_title">Health zone</h3><span class="chev">▾</span></div>
+<div class="panel collapsed" id="zone">
+  <div class="panel-h" data-toggle><h3 data-i18n="zone_title">Health zone</h3><span class="zone-hint" data-i18n="zone_hint">Select a zone ›</span><span class="chev">▾</span></div>
   <div class="panel-b">
     <div class="tabs">
       <button data-tab="snap" class="active" data-i18n="tab_snap">Current snapshot</button>
@@ -350,13 +365,17 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 <div class="panel" id="response">
   <div class="panel-h" data-toggle><h3 data-i18n="resp_title">National &amp; provincial response</h3><span class="chev">▾</span></div>
   <div class="panel-b">
-    <div class="ctry-toggle" id="respToggle">
-      <button data-ctry="DRC" class="active" data-i18n="ctry_drc">DR Congo</button>
-      <button data-ctry="UGANDA" data-i18n="ctry_uga">Uganda</button>
+    <div class="resp-total">
+      <div class="rt-line"><span class="rt-n red" id="rtConfirmed">—</span> <span class="rt-l" data-i18n="rt_confirmed">confirmed</span> · <span class="rt-n red" id="rtDeaths">—</span> <span class="rt-l" data-i18n="rt_deaths">deaths</span> · <span class="rt-n" id="rtRecovered">—</span> <span class="rt-l" data-i18n="rt_recovered">recovered</span></div>
+      <div class="rt-sub"><span id="rtCfr">—</span> · <span data-i18n="rt_both">both countries</span></div>
     </div>
-    <div class="resp-grid" id="respSummary"></div>
-    <p id="respSummarySrc"></p>
-    <div class="donut-wrap"><canvas id="outcomesChart"></canvas></div>
+    <table class="resp-table">
+      <thead><tr><th></th><th data-i18n="th_confirmed">Confirmed</th><th data-i18n="th_recoveries">Recoveries</th><th data-i18n="th_deaths">Deaths</th></tr></thead>
+      <tbody>
+        <tr id="row-DRC"><th data-i18n="ctry_drc">DR Congo</th><td id="drcC">—</td><td id="drcR">—</td><td id="drcD">—</td></tr>
+        <tr id="row-UGANDA"><th data-i18n="ctry_uga">Uganda</th><td id="ugC">—</td><td id="ugR">—</td><td id="ugD">—</td></tr>
+      </tbody>
+    </table>
     <div class="risk-list">
       <div class="risk"><span class="rg" data-i18n="risk_drc">DRC</span><span class="pill vh" data-i18n="pill_vh">Very high</span></div>
       <div class="risk"><span class="rg" data-i18n="risk_uganda">Uganda</span><span class="pill h" data-i18n="pill_h">High</span></div>
@@ -571,24 +590,19 @@ const totalConfirmed=drcCases+UGANDA.confirmed;             // 1353
 const totalDeaths=drcDeaths+UGANDA.deaths;                 // 401
 const zonesWithCases=HZ.length;                            // 35
 function injectTotals(){ renderRespSummary(); }
-/* ---- dynamic country summary (response panel) ---- */
-let respCountry='DRC';
-function respTiles(){
-  const T=I18N[lang];
-  return {
-    DRC:{src:T.sum_src_drc, tiles:[[T.sum_confirmed, drcCases, true],[T.sum_recoveries, DRC_RECOVERED, false],[T.sum_deaths, drcDeaths, true]]},
-    UGANDA:{src:T.sum_src_uga, tiles:[[T.sum_confirmed, UGANDA.confirmed, true],[T.sum_admissions, UGANDA.admissions, false],[T.sum_recoveries, UGANDA.recoveries, false],[T.sum_deaths, UGANDA.deaths, true]]}
-  };
-}
+/* ---- country summary: composite total + per-country breakdown ---- */
 function renderRespSummary(){
-  const d=respTiles()[respCountry], g=document.getElementById('respSummary');
-  if(!g) return;
-  g.innerHTML=d.tiles.map(t=>`<div class="c"><div class="v ${t[2]?'red':''}">${Number(t[1]).toLocaleString(lang==='fr'?'fr-FR':'en-US')}</div><div class="l">${t[0]}</div></div>`).join('');
-  const src=document.getElementById('respSummarySrc'); if(src) src.textContent=d.src;
-  document.querySelectorAll('#respToggle button').forEach(b=>b.classList.toggle('active',b.dataset.ctry===respCountry));
+  const nf=n=>Number(n).toLocaleString(lang==='fr'?'fr-FR':'en-US');
+  const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=v;};
+  const totalRec=DRC_RECOVERED+UGANDA.recoveries;
+  set('rtConfirmed',nf(totalConfirmed)); set('rtDeaths',nf(totalDeaths)); set('rtRecovered',nf(totalRec));
+  set('rtCfr','CFR ≈ '+(totalConfirmed?(totalDeaths/totalConfirmed*100).toFixed(1):0)+'%');
+  set('drcC',nf(drcCases)); set('drcR',nf(DRC_RECOVERED)); set('drcD',nf(drcDeaths));
+  set('ugC',nf(UGANDA.confirmed)); set('ugR',nf(UGANDA.recoveries)); set('ugD',nf(UGANDA.deaths));
 }
-function setRespCountry(c){ respCountry=c; renderRespSummary(); }
-document.querySelectorAll('#respToggle button').forEach(b=>b.addEventListener('click',()=>setRespCountry(b.dataset.ctry)));
+function highlightCountry(c){
+  document.querySelectorAll('.resp-table tbody tr').forEach(tr=>tr.classList.toggle('hl',tr.id===('row-'+c)));
+}
 
 const DRC_CONFIRMED_TOTAL=drcCases; // 1333 — DRC national confirmed total (computed), used for per-zone share
 
@@ -642,6 +656,7 @@ const I18N={
     legend_ctx_uga:"Uganda · Kampala metro (20 confirmed)",
     legend_src:"Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°046 (Draft) (29 Jun 2026, DRC only); Uganda (Kampala) is a separate Uganda MoH context marker (28 Jun). 17 cases awaiting health-zone assignment (INSP SitRep N°046 (Draft), 29 Jun). ⚠ Verify against WHO before publishing.",
     zone_title:"Health zone",
+    zone_hint:"Select a zone ›",
     tab_snap:"Current snapshot",
     tab_trend:"Trends",
     tab_ctx:"Context",
@@ -672,7 +687,7 @@ const I18N={
     ctx_mob_caveat:"Vodacom/Flowminder CDR, movements 24 Apr–24 May 2026; Vodacom subscribers only. Mobility predicts importation risk, not transmission.",
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
-    ctry_drc:"DR Congo",ctry_uga:"Uganda",sum_confirmed:"Cumulative confirmed",sum_admissions:"Current admissions",sum_recoveries:"Recoveries",sum_deaths:"Cumulative deaths",sum_src_drc:"INSP SitRep N°046 (Draft) · 29 Jun 2026",sum_src_uga:"Uganda MoH · 28 Jun 2026",
+    ctry_drc:"DR Congo",ctry_uga:"Uganda",rt_confirmed:"confirmed",rt_deaths:"deaths",rt_recovered:"recovered",rt_both:"both countries",th_confirmed:"Confirmed",th_recoveries:"Recoveries",th_deaths:"Deaths",sum_confirmed:"Cumulative confirmed",sum_admissions:"Current admissions",sum_recoveries:"Recoveries",sum_deaths:"Cumulative deaths",sum_src_drc:"INSP SitRep N°046 (Draft) · 29 Jun 2026",sum_src_uga:"Uganda MoH · 28 Jun 2026",
     resp_deaths:"Deaths · CFR ≈25.3% (provisional)",
     resp_hz:"Health zones with cases (DRC) · INSP SitRep N°046 (Draft)",
     resp_recovered:"Recovered (DRC) · INSP SitRep N°046 (Draft)",
@@ -766,6 +781,7 @@ const I18N={
     legend_ctx_uga:"Ouganda · agglomération de Kampala (20 confirmés)",
     legend_src:"Chaque polygone de zone de santé de la RDC est coloré selon le nombre de cas confirmés sur un dégradé rouge séquentiel (clair = peu, foncé = beaucoup) — cliquez sur une zone pour son détail. Les chiffres par zone proviennent du SitRep N°046 (Draft) de l'INSP (29 juin 2026, RDC uniquement) ; l'Ouganda (Kampala) est un marqueur contextuel distinct (OMS DON608, 17 juin). 17 cas en attente d'attribution à une zone de santé (INSP SitRep N°046 (Draft), 29 juin). ⚠ Vérifier auprès de l'OMS avant publication.",
     zone_title:"Zone de santé",
+    zone_hint:"Sélectionnez une zone ›",
     tab_snap:"Aperçu actuel",
     tab_trend:"Tendances",
     tab_ctx:"Contexte",
@@ -796,7 +812,7 @@ const I18N={
     ctx_mob_caveat:"Données Vodacom/Flowminder, déplacements du 24 avr. au 24 mai 2026 ; abonnés Vodacom uniquement. La mobilité prédit le risque d'importation, pas la transmission.",
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
-    ctry_drc:"RD Congo",ctry_uga:"Ouganda",sum_confirmed:"Cas confirmés cumulés",sum_admissions:"Admissions en cours",sum_recoveries:"Guéris",sum_deaths:"Décès cumulés",sum_src_drc:"INSP SitRep N°046 (provisoire) · 29 juin 2026",sum_src_uga:"MinSanté Ouganda · 28 juin 2026",
+    ctry_drc:"RD Congo",ctry_uga:"Ouganda",rt_confirmed:"confirmés",rt_deaths:"décès",rt_recovered:"guéris",rt_both:"les deux pays",th_confirmed:"Confirmés",th_recoveries:"Guéris",th_deaths:"Décès",sum_confirmed:"Cas confirmés cumulés",sum_admissions:"Admissions en cours",sum_recoveries:"Guéris",sum_deaths:"Décès cumulés",sum_src_drc:"INSP SitRep N°046 (provisoire) · 29 juin 2026",sum_src_uga:"MinSanté Ouganda · 28 juin 2026",
     resp_deaths:"Décès · TL ≈25,3 % (provisoire)",
     resp_hz:"Zones de santé avec des cas (RDC) · INSP SitRep N°046 (Draft)",
     resp_recovered:"Guéris (RDC) · INSP SitRep N°046 (Draft)",
@@ -1014,7 +1030,7 @@ function drawCtx(){
     });
     m.bindTooltip(`<b>${tr(d).label}</b><br>${tr(d).sub}`,{className:'hz-tip',sticky:true,direction:'top'});
     m.on('click',()=>selectContext(d));
-    m.on('click',()=>setRespCountry('UGANDA'));
+    m.on('click',()=>highlightCountry('UGANDA'));
     m.addTo(ctxLayer);
   });
 }
@@ -1032,7 +1048,8 @@ function setTab(t){
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 
 function selectZone(d,noPan){
-  setRespCountry('DRC');
+  highlightCountry('DRC');
+  document.getElementById('zone').classList.remove('collapsed');
   selected=d;
   const t=tr(d),T=I18N[lang]; // t is null for the 25 uncurated zones
   $('#hint').style.display='none';
@@ -1176,44 +1193,11 @@ loadZoneData();
 /* ============ OUTCOMES DONUT ============ */
 // Outcomes (computed, same source of truth as the cards): recovered = DRC_RECOVERED (115),
 // deaths = totalDeaths (279), active = totalConfirmed - deaths - recovered = 719.
-const outActive=totalConfirmed-totalDeaths-DRC_RECOVERED;
-const outCtx=document.getElementById('outcomesChart');
-const outcomesChart=new Chart(outCtx,{
-  type:'doughnut',
-  data:{
-    labels:[I18N[lang].chart_active,I18N[lang].chart_recovered,I18N[lang].chart_deaths],
-    datasets:[{
-      data:[outActive,DRC_RECOVERED,totalDeaths],
-      backgroundColor:['#ff5a3c','#2bb3a3','#67000d'],
-      borderColor:'transparent',
-      borderWidth:0,
-      hoverOffset:4
-    }]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,cutout:'60%',
-    plugins:{
-      legend:{position:'right',labels:{color:'#8ba0b4',boxWidth:10,padding:8,font:{size:9},
-        generateLabels:(chart)=>{
-          const ds=chart.data.datasets[0];
-          return chart.data.labels.map((lbl,i)=>({
-            text:`${lbl}  ${ds.data[i]}`,
-            fillStyle:ds.backgroundColor[i],
-            hidden:false,index:i
-          }));
-        }
-      }},
-      tooltip:{callbacks:{
-        label:(ctx)=>` ${ctx.label}: ${ctx.parsed} (${(ctx.parsed/915*100).toFixed(1)}%)`
-      }}
-    }
-  }
-});
+const outcomesChart=null; // donut removed
 
 function updateChartTheme(light){
   const leg=light?'#50687c':'#8ba0b4';
-  outcomesChart.options.plugins.legend.labels.color=leg;
-  outcomesChart.update();
+  if(outcomesChart){outcomesChart.options.plugins.legend.labels.color=leg;outcomesChart.update();}
   if(zoneTrendChart&&selected)drawZoneTrend(selected); // recolour the per-zone chart for the new theme
 }
 
@@ -1344,8 +1328,7 @@ function applyStaticI18n(){
 function updateChartsI18n(){
   const T=I18N[lang];
   // The per-zone trend chart is re-rendered via selectZone() on language change (see setLanguage).
-  outcomesChart.data.labels=[T.chart_active,T.chart_recovered,T.chart_deaths];
-  outcomesChart.update();
+  if(outcomesChart){outcomesChart.data.labels=[T.chart_active,T.chart_recovered,T.chart_deaths];outcomesChart.update();}
 }
 function setLanguage(l){
   lang=l;
