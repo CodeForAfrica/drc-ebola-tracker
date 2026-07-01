@@ -1050,6 +1050,7 @@ document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',
 function selectZone(d,noPan){
   highlightCountry('DRC');
   document.getElementById('zone').classList.remove('collapsed');
+  document.getElementById('response').classList.add('collapsed');
   selected=d;
   const t=tr(d),T=I18N[lang]; // t is null for the 25 uncurated zones
   $('#hint').style.display='none';
@@ -1107,7 +1108,10 @@ function selectContext(d,noPan){
 
 /* collapse panels */
 document.querySelectorAll('[data-toggle]').forEach(h=>{
-  h.addEventListener('click',()=>h.closest('.panel').classList.toggle('collapsed'));
+  h.addEventListener('click',()=>{
+    const p=h.closest('.panel'); p.classList.toggle('collapsed');
+    if(p.id==='zone' && p.classList.contains('collapsed')) document.getElementById('response').classList.remove('collapsed');
+  });
 });
 
 /* ============ PER-ZONE TREND CHART ============ */
