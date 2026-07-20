@@ -1,0 +1,12 @@
+sitrep,report_date,publication_date,provinces,zones,confirmed,deaths,cfr_pct,in_isolation,recovered,suspects_today,contact_tracing_pct,source_pdf,status
+055,2026-07-08,2026-07-09,3,37,1792,625,34.9,764,295,227,78.6,Draft_SitRep_MVE_RDC_N_055_08_07_2026.pdf,provisional
+056,2026-07-09,2026-07-10,3,37,1830,648,35.4,780,300,284,78.1,SitRep_MVE_RDC_N_56_09-07-2026.pdf,final
+057,2026-07-10,2026-07-11,5,41,1873,672,35.9,763,306,299,71.7,Draft_SitRep_MVE_RDC_NA_57_10-07-2026_IM_SAM_vf.pdf,provisional
+058,2026-07-11,2026-07-12,5,42,1926,702,36.4,753,318,299,78.3,Draft_SitRep_MVE_RDC_N_58_11-07-2026-final.pdf,provisional
+059,2026-07-12,2026-07-13,5,42,1963,719,36.6,736,333,268,81.5,SitRep-MVE-17-No59-Analytique-final.pdf,final
+060,2026-07-13,2026-07-14,5,45,2011,754,37.5,753,366,268,67.4,Draft_SitRep_MVE_RDC_N_60_13-07-2026_Analytique_VF.pdf,provisional
+061,2026-07-14,2026-07-15,5,45,2073,796,38.4,737,377,418,76.6,Draft_SitRep_MVE_RDC_N_61_14-07-2026_Analytique.pdf,provisional
+062,2026-07-15,2026-07-16,5,46,2124,828,39.0,725,390,389,80.3,Draft_SitRep_MVE_RDC_N_62_15-07-2026_VF.pdf,provisional
+063,2026-07-16,2026-07-17,5,,2181,,,,,,,SitRep_MVE_RDC_N_63_16-07-2026.pdf,missing
+064,2026-07-17,2026-07-18,5,46,2267,893,39.4,722,412,236,83.6,SitRep_MVE_RDC_N_64_17-07-2026_OKK.pdf,final
+065,2026-07-18,2026-07-19,5,46,2344,930,39.7,724,466,192,85.8,SitRep_MVE_RDC_N_65_18-07-2026.pdf,provisional
