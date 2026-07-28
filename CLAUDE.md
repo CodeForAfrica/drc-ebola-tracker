@@ -17,12 +17,15 @@ A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbr
 - Keep all outputs **aggregated to health-zone level** (or coarser: province/country). Do not produce or display anything more granular than health zone.
 - Keep the **"verify against WHO before publishing"** note visible in the UI. Do not remove it.
 - **Two GeoJSON files in `data/` look interchangeable but are not.** `zones_sitrep0XX.geojson` carries per-zone `confirmed_cases`/`confirmed_deaths` and is what the live choropleth `fetch()`es. `zones_geometry.geojson` carries **geometry only** (46 zones, no counts) and is staged for a future CSV-driven refactor — it is **not wired up**. Do not point `fetch()` at `zones_geometry.geojson` without also changing how the choropleth reads counts, or the map will render unfilled with no error.
-- `data/zones_timeseries_full.csv` (per-zone, N°055–065) and `data/national_timeseries.csv` (headline figures, N°055–065) are reference series for that refactor and are **not read at runtime**.
+- `data/zones_timeseries_full.csv` (per-zone) and `data/national_timeseries.csv` (headline figures) are reference series for that refactor and are **not read at runtime**.
+- Health zone count is 48 as of N°073. Adja (Ituri) first appeared in N°066 and Rungu (Haut-Uélé) in N°070. Geometry, centroid and population for both came from the INRB-UMIE archived shapefile (data/shapefiles/archived/DRC_Health_zones.shp), not from INSP.
+- Zone-name spellings change between sitreps and must be canonicalised on ingest. INSP writes Nia-Nia through N°068 and "Nia Nia" from N°069; Gety through N°068 and "Gethy" from N°069. The repo keys are Nia-Nia and Gety. An un-aliased name does not error — it silently fails to join and the zone drops off the map.
+- SitRep N°069 is a source restatement and breaks the per-zone series. National cumulative moved 2536 -> 2905 while N°069 reported only 97 new confirmations; deaths moved +236 against a stated +62. Counts were re-attributed between zones (Bunia deaths -53, Rwampara +81) and the 17 previously unassigned cases were distributed into named zones. Per-zone figures before and after N°069 are NOT comparable. Any trend rendering spanning N°068->N°069 must show a break or start at N°069.
 
 ## Source of truth
 
-- Primary source: **INSP situation reports** (insp.cd) through **SitRep N°065 (18 July 2026)** for DRC, plus the **Uganda Ministry of Health Ebola portal (20 July 2026)** for Uganda. WHO Disease Outbreak News, ECDC and NICD are used as cross-checks.
-- Current snapshot: DRC figures as of **18 July 2026** (INSP SitRep N°065), Uganda figures as of **20 July 2026** (Uganda MoH portal).
+- Primary source: **INSP situation reports** (insp.cd) through **SitRep N°073 (26 July 2026)** for DRC, plus the **Uganda Ministry of Health Ebola portal (28 July 2026)** for Uganda. WHO Disease Outbreak News, ECDC and NICD are used as cross-checks.
+- Current snapshot: DRC figures as of **26 July 2026** (INSP SitRep N°073), Uganda figures as of **28 July 2026** (Uganda MoH portal).
 
 ## Design
 
