@@ -182,7 +182,6 @@ html[data-theme="light"] .map-toggle{box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .resp-total .rt-n.red{color:#ff6a4d}
 .resp-total .rt-l{font-size:.64rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .resp-total .rt-sub{font-size:.64rem;color:var(--dim);margin-top:5px}
-.resp-status{font-size:.62rem;color:var(--muted);background:rgba(100,116,139,.16);border:1px solid var(--line);border-radius:4px;padding:5px 8px;margin-top:8px;letter-spacing:.03em}
 .hz-tip .ug-tip-badge{color:#9fb3c8;font-size:.68rem}
 .resp-table{width:100%;border-collapse:collapse;font-size:.72rem}
 .resp-table th,.resp-table td{padding:7px 8px;text-align:right;border-top:1px solid var(--line)}
@@ -190,6 +189,9 @@ html[data-theme="light"] .map-toggle{box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .resp-table tbody th{text-align:left;color:var(--text);font-weight:600}
 .resp-table tbody tr.hl{background:rgba(255,106,77,.14)}
 .resp-table tbody tr.hl th{color:#ff6a4d}
+#row-UGANDA th{vertical-align:top}
+.row-status{display:block;margin-top:3px;font-size:.68rem;font-weight:400;line-height:1.3;color:#8ba0b4;letter-spacing:.02em}
+tr.resolved td{color:#8ba0b4}
 .zone-hint{font-size:.6rem;color:var(--dim);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-left:auto;margin-right:10px;white-space:nowrap}
 #zone:not(.collapsed) .zone-hint{display:none}
 #respSummarySrc{font-size:.63rem;color:var(--dim);margin:8px 2px 2px}
@@ -386,10 +388,9 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <thead><tr><th></th><th data-i18n="th_confirmed">Confirmed</th><th data-i18n="th_recoveries">Recoveries</th><th data-i18n="th_deaths">Deaths</th></tr></thead>
       <tbody>
         <tr id="row-DRC"><th data-i18n="ctry_drc">DR Congo</th><td id="drcC">—</td><td id="drcR">—</td><td id="drcD">—</td></tr>
-        <tr id="row-UGANDA"><th data-i18n="ctry_uga">Uganda</th><td id="ugC">—</td><td id="ugR">—</td><td id="ugD">—</td></tr>
+        <tr id="row-UGANDA" class="resolved"><th><span data-i18n="ctry_uga">Uganda</span><span class="row-status" data-i18n="uga_status_badge">Outbreak over · declared 28 Jul 2026</span></th><td id="ugC">—</td><td id="ugR">—</td><td id="ugD">—</td></tr>
       </tbody>
     </table>
-    <div class="resp-status" id="ugStatus"></div>
     <div class="risk-list">
       <div class="risk"><span class="rg" data-i18n="risk_drc">DRC</span><span class="pill vh" data-i18n="pill_vh">Very high</span></div>
       <div class="risk"><span class="rg" data-i18n="risk_uganda">Uganda</span><span class="pill h" data-i18n="pill_h">High</span></div>
@@ -635,8 +636,6 @@ function renderRespSummary(){
   set('rtRegional',T.rt_regional+': '+nf(totalConfirmed)+' '+T.rt_confirmed+' · '+nf(totalDeaths)+' '+T.rt_deaths+' · '+nf(totalRec)+' '+T.rt_recovered+' · '+cfr(totalDeaths,totalConfirmed));
   set('drcC',nf(drcCases)); set('drcR',nf(DRC_RECOVERED)); set('drcD',nf(drcDeaths));
   set('ugC',nf(UGANDA.confirmed)); set('ugR',nf(UGANDA.recoveries)); set('ugD',nf(UGANDA.deaths));
-  const us=document.getElementById('ugStatus');
-  if(us){const closed=typeof UGANDA_STATUS!=='undefined'&&!UGANDA_STATUS.active;us.textContent=closed?T.ug_status_over:'';us.style.display=closed?'block':'none';}
 }
 function highlightCountry(c){
   document.querySelectorAll('.resp-table tbody tr').forEach(tr=>tr.classList.toggle('hl',tr.id===('row-'+c)));
@@ -729,7 +728,7 @@ const I18N={
     ctx_mob_caveat:"Vodacom/Flowminder CDR, movements 24 Apr–24 May 2026; Vodacom subscribers only. Mobility predicts importation risk, not transmission.",
     resp_title:"National & provincial response",
     resp_confirmed_both:"Confirmed (both countries)",
-    ctry_drc:"DR Congo",ctry_uga:"Uganda",rt_confirmed:"confirmed",rt_deaths:"deaths",rt_recovered:"recovered",rt_both:"both countries",th_confirmed:"Confirmed",th_recoveries:"Recoveries",th_deaths:"Deaths",sum_confirmed:"Cumulative confirmed",sum_admissions:"Current admissions",sum_recoveries:"Recoveries",sum_deaths:"Cumulative deaths",sum_src_drc:"INSP SitRep N°082 · 04 Aug 2026",sum_src_uga:"Uganda MoH · 28 Jul 2026",
+    ctry_drc:"DR Congo",ctry_uga:"Uganda",uga_status_badge:"Outbreak over · declared 28 Jul 2026",rt_confirmed:"confirmed",rt_deaths:"deaths",rt_recovered:"recovered",rt_both:"both countries",th_confirmed:"Confirmed",th_recoveries:"Recoveries",th_deaths:"Deaths",sum_confirmed:"Cumulative confirmed",sum_admissions:"Current admissions",sum_recoveries:"Recoveries",sum_deaths:"Cumulative deaths",sum_src_drc:"INSP SitRep N°082 · 04 Aug 2026",sum_src_uga:"Uganda MoH · 28 Jul 2026",
     resp_deaths:"Deaths · CFR ≈25.3% (provisional)",
     resp_hz:"Health zones with cases (DRC) · INSP SitRep N°082",
     resp_recovered:"Recovered (DRC) · INSP SitRep N°082",
@@ -856,7 +855,7 @@ const I18N={
     ctx_mob_caveat:"Données Vodacom/Flowminder, déplacements du 24 avr. au 24 mai 2026 ; abonnés Vodacom uniquement. La mobilité prédit le risque d'importation, pas la transmission.",
     resp_title:"Riposte nationale et provinciale",
     resp_confirmed_both:"Confirmés (les deux pays)",
-    ctry_drc:"RD Congo",ctry_uga:"Ouganda",rt_confirmed:"confirmés",rt_deaths:"décès",rt_recovered:"guéris",rt_both:"les deux pays",th_confirmed:"Confirmés",th_recoveries:"Guéris",th_deaths:"Décès",sum_confirmed:"Cas confirmés cumulés",sum_admissions:"Admissions en cours",sum_recoveries:"Guéris",sum_deaths:"Décès cumulés",sum_src_drc:"INSP SitRep N°082 · 04 août 2026",sum_src_uga:"MinSanté Ouganda · 28 juillet 2026",
+    ctry_drc:"RD Congo",ctry_uga:"Ouganda",uga_status_badge:"Fin d'épidémie · déclarée le 28 juil 2026",rt_confirmed:"confirmés",rt_deaths:"décès",rt_recovered:"guéris",rt_both:"les deux pays",th_confirmed:"Confirmés",th_recoveries:"Guéris",th_deaths:"Décès",sum_confirmed:"Cas confirmés cumulés",sum_admissions:"Admissions en cours",sum_recoveries:"Guéris",sum_deaths:"Décès cumulés",sum_src_drc:"INSP SitRep N°082 · 04 août 2026",sum_src_uga:"MinSanté Ouganda · 28 juillet 2026",
     resp_deaths:"Décès · TL ≈25,3 %",
     resp_hz:"Zones de santé avec des cas (RDC) · INSP SitRep N°082",
     resp_recovered:"Guéris (RDC) · INSP SitRep N°082",
