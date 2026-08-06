@@ -18,15 +18,18 @@ A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbr
 - Keep the **"verify against WHO before publishing"** note visible in the UI. Do not remove it.
 - **Two GeoJSON files in `data/` look interchangeable but are not.** `zones_sitrep0XX.geojson` carries per-zone `confirmed_cases`/`confirmed_deaths` and is what the live choropleth `fetch()`es. `zones_geometry.geojson` carries **geometry only** (46 zones, no counts) and is staged for a future CSV-driven refactor — it is **not wired up**. Do not point `fetch()` at `zones_geometry.geojson` without also changing how the choropleth reads counts, or the map will render unfilled with no error.
 - `data/zones_timeseries_full.csv` (per-zone) and `data/national_timeseries.csv` (headline figures) are reference series for that refactor and are **not read at runtime**.
-- Health zone count is 48 as of N°074. Adja (Ituri) first appeared in N°066 and Rungu (Haut-Uélé) in N°070. Geometry, centroid and population for both came from the INRB-UMIE archived shapefile (data/shapefiles/archived/DRC_Health_zones.shp), not from INSP.
+- Health zone count is 51 as of N°082. Beyond Adja (N°066) and Rungu (N°070): Kabondo (Tshopo, N°077), Wanie-Rukula (Tshopo, N°079) and Lubero (Nord-Kivu, N°080). Geometry, centroid and population for all five came from the INRB-UMIE archived shapefile, not from INSP. The shapefile spells Wanie-Rukula as "Wanierukula".
 - Zone-name spellings change between sitreps and must be canonicalised on ingest. INSP writes Nia-Nia through N°068 and "Nia Nia" from N°069; Gety through N°068 and "Gethy" from N°069. The repo keys are Nia-Nia and Gety. An un-aliased name does not error — it silently fails to join and the zone drops off the map.
 - SitRep N°069 is a source restatement and breaks the per-zone series. National cumulative moved 2536 -> 2905 while N°069 reported only 97 new confirmations; deaths moved +236 against a stated +62. Counts were re-attributed between zones (Bunia deaths -53, Rwampara +81) and the 17 previously unassigned cases were distributed into named zones. Per-zone figures before and after N°069 are NOT comparable. Any trend rendering spanning N°068->N°069 must show a break or start at N°069.
 - data/zones_timeseries.csv is date-keyed and mixes two sources: rows before 2026-07-08 are backfilled from INRB-UMIE, rows from 2026-07-08 are transcribed from INSP sitrep PDFs. data/zones_timeseries_sourced.csv carries the same rows with a Source column and is the version to cite.
+- Uganda's outbreak was declared over on 28 July 2026. Its figures are final and must not be updated by DRC sitrep cycles. It remains in the regional cumulative; removing it would silently change every historical composite figure.
+- Sitrep coverage has gaps. N°059 and N°063 have no zone rows; N°075 and N°076 are not ingested, leaving a two-day gap between 27 and 30 July. Day-over-day deltas cannot be verified across a gap, and any trend rendering must not interpolate across missing dates.
+- N°081 has 2 Nord-Kivu deaths reported at province level but not attributed to any health zone, so its zone rows sum to 1749 deaths against a headline of 1751. Zone rows are stored as published. The gap closes at N°082. Where a per-zone sum is displayed alongside a headline figure, they will not match for N°081.
 
 ## Source of truth
 
-- Primary source: **INSP situation reports** (insp.cd) through **SitRep N°074 (27 July 2026)** for DRC, plus the **Uganda Ministry of Health Ebola portal (checked 28 July 2026)** for Uganda. WHO Disease Outbreak News, ECDC and NICD are used as cross-checks.
-- Current snapshot: DRC figures as of **27 July 2026** (INSP SitRep N°074), Uganda figures as of **28 July 2026** (Uganda MoH portal).
+- Primary source: **INSP situation reports** (insp.cd) through **SitRep N°082 (04 August 2026)** for DRC, plus the **Uganda Ministry of Health** — outbreak declared over 28 July 2026, figures final at 20 confirmed / 2 deaths / 18 recoveries. WHO Disease Outbreak News, ECDC and NICD are used as cross-checks.
+- Current snapshot: DRC figures as of **04 August 2026** (INSP SitRep N°082); Uganda figures final as of **28 July 2026** (outbreak declared over).
 
 ## Design
 
