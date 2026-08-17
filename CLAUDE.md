@@ -25,11 +25,14 @@ A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbr
 - Uganda's outbreak was declared over on 28 July 2026. Its figures are final and must not be updated by DRC sitrep cycles. It remains in the regional cumulative; removing it would silently change every historical composite figure.
 - Sitrep coverage has gaps. N°059 and N°063 have no zone rows; N°075 and N°076 are not ingested, leaving a two-day gap between 27 and 30 July. Day-over-day deltas cannot be verified across a gap, and any trend rendering must not interpolate across missing dates.
 - N°081 has 2 Nord-Kivu deaths reported at province level but not attributed to any health zone, so its zone rows sum to 1749 deaths against a headline of 1751. Zone rows are stored as published. The gap closes at N°082. Where a per-zone sum is displayed alongside a headline figure, they will not match for N°081.
+- **SPLIT STATE (as of N°093).** The DRC *national* headline is N°093 (15 Aug 2026: 4945 cases / 2325 deaths / CFR 47.0% / 1040 recovered) but the *health-zone* layer — the HZ array, POP, the per-sitrep GeoJSON, the choropleth scale breaks and the trends series — is still N°082 (04 Aug 2026), with sitreps 083–092 pending. National totals therefore do NOT equal the zone sums. The per-zone share denominator (`DRC_CONFIRMED_TOTAL` = 3973) and the Methods CFR (1801/3973 ≈ 45.3%) are deliberately pinned to the N°082 zone table and must not track the national figure. National cases/deaths live in the `DRC_NAT_CASES` / `DRC_NAT_DEATHS` constants, separate from the zone-derived `drcCases` / `drcDeaths`.
+- N°093 recognises a sixth affected province, **Bas-Uélé**, which appears in the national total only. It needs geometry, centroid and population from the INRB-UMIE archived shapefile before it can render as a health zone; until then it is named in the Methods copy but not mapped.
+- `data/national_timeseries.csv` currently jumps from N°065 to the appended N°093 row; 066–092 are absent rather than interpolated (the prepared full series has not been supplied). Do not interpolate across the gap.
 
 ## Source of truth
 
-- Primary source: **INSP situation reports** (insp.cd) through **SitRep N°082 (04 August 2026)** for DRC, plus the **Uganda Ministry of Health** — outbreak declared over 28 July 2026, figures final at 20 confirmed / 2 deaths / 18 recoveries. WHO Disease Outbreak News, ECDC and NICD are used as cross-checks.
-- Current snapshot: DRC figures as of **04 August 2026** (INSP SitRep N°082); Uganda figures final as of **28 July 2026** (outbreak declared over).
+- Primary source: **INSP situation reports** (insp.cd). **Split state:** the DRC *national* headline is **SitRep N°093 (15 August 2026)** while the *health-zone* breakdown remains **SitRep N°082 (04 August 2026)** — zone reconciliation through N°093 is pending (see Data handling). Uganda: **Ministry of Health** — outbreak declared over 28 July 2026, figures final at 20 confirmed / 2 deaths / 18 recoveries. WHO Disease Outbreak News, ECDC and NICD are used as cross-checks.
+- Current snapshot: DRC national as of **15 August 2026** (INSP SitRep N°093); DRC health-zone map as of **04 August 2026** (INSP SitRep N°082); Uganda figures final as of **28 July 2026** (outbreak declared over).
 
 ## Design
 
