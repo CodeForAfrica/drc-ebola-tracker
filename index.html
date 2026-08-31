@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DRC · Uganda — Ebola Bundibugyo 2026 · Interactive Dashboard</title>
-<meta name="description" content="Interactive map dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. DRC national figures from INSP SitRep N°093 (15 Aug 2026); the health-zone map is from SitRep N°082 (04 Aug 2026). Uganda's outbreak was declared over on 28 Jul 2026.">
+<meta name="description" content="Interactive map dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. DRC national figures from INSP SitRep N°106 (28 Aug 2026); the health-zone map is from SitRep N°082 (04 Aug 2026). Uganda's outbreak was declared over on 28 Jul 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -274,7 +274,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <span class="dot"></span>
     <div style="min-width:0">
       <h1 data-i18n-html="app_title_html">Ebola <span>Bundibugyo</span> 2026 · DRC &amp; Uganda</h1>
-      <div class="sub" data-i18n="topbar_sub">Interactive outbreak dashboard · INSP SitRep N°093 + Uganda MoH · as of 15 Aug 2026</div>
+      <div class="sub" data-i18n="topbar_sub">Interactive outbreak dashboard · INSP SitRep N°106 + Uganda MoH · as of 28 Aug 2026</div>
     </div>
   </div>
   <div class="links">
@@ -312,7 +312,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     </div>
 
     <div class="legend-src" id="legSrcChoro" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°082 (04 Aug 2026, DRC only); Uganda (Kampala) is a separate Uganda MoH context marker (28 Jul). ⚠ Verify against WHO before publishing.</div>
-    <div class="legend-src split-note" id="legSplitNote" data-i18n="legend_split_note">National headline is INSP SitRep N°093 (15 Aug); the health-zone breakdown remains N°082 (04 Aug). Zone reconciliation through N°093 is in progress — zone figures will not sum to the national total.</div>
+    <div class="legend-src split-note" id="legSplitNote" data-i18n="legend_split_note">National headline is INSP SitRep N°106 (28 Aug); the health-zone breakdown remains N°082 (04 Aug). Zone reconciliation through N°106 is in progress — zone figures will not sum to the national total.</div>
     <div class="legend-src" id="legSrcCluster" data-i18n="legend_cluster" style="display:none">Bubbles group nearby zones; the number on each marker or bubble is confirmed cases (per zone, or the group total when clustered), coloured by that count. Hover for zone detail; zoom in to separate.</div>
   </div>
 </div>
@@ -409,7 +409,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-h"><h2 data-i18n="modal_data_title">Contributors, Data &amp; Methods</h2><button class="modal-x" data-close>✕</button></div>
     <div class="modal-b">
       <h4 data-i18n="md_h_source">Data source</h4>
-      <p data-i18n="md_source_p">DRC national headline figures are from INSP SitRep N°093 (15 August 2026); the health-zone breakdown is from SitRep N°082 (04 August 2026, Table II), pending zone reconciliation through N°093. Uganda figures are from the Uganda Ministry of Health Ebola portal (28 July 2026). WHO Disease Outbreak News (DON608, 17 Jun) is retained only as a cross-reference.</p>
+      <p data-i18n="md_source_p">DRC national headline figures are from INSP SitRep N°106 (28 August 2026); the health-zone breakdown is from SitRep N°082 (04 August 2026, Table II), pending zone reconciliation through N°106. Uganda figures are from the Uganda Ministry of Health Ebola portal (28 July 2026). WHO Disease Outbreak News (DON608, 17 Jun) is retained only as a cross-reference.</p>
       <p class="src-line"><a href="https://www.who.int/emergencies/disease-outbreak-news/item/2026-DON608" target="_blank" rel="noopener" data-i18n="who_link_text">WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC &amp; Uganda (19 June 2026)</a></p>
       <p data-i18n="md_asof_p">DRC figures are as of 04 August 2026 (INSP SitRep N°082); Uganda figures are as of 28 July 2026 (Uganda Ministry of Health). The headline total is a composite of these two sources.</p>
 
@@ -417,10 +417,10 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <ul>
         <li data-i18n-html="md_method_1">The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many). Click a shaded zone for its detail; hover to highlight it.</li>
         <li data-i18n-html="md_method_2">Each zone polygon is <strong>interactive</strong>: hovering highlights it and shows its figures, and clicking opens the zone's snapshot. Uganda (Kampala) is the only point marker, on a separate context layer.</li>
-        <li data-i18n-html="md_method_3">All six affected provinces — Ituri, North Kivu, South Kivu, Haut-Uélé, Tshopo and Bas-Uélé — are recognised in the national total; the first five are mapped at <strong>health-zone level</strong> from INSP SitRep N°082 (04 Aug 2026), while Bas-Uélé (new at N°093) is not yet mapped. The earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source.</li>
+        <li data-i18n-html="md_method_3">All six affected provinces — Ituri, North Kivu, South Kivu, Haut-Uélé, Tshopo and Bas-Uélé — are recognised in the national total; the first five are mapped at <strong>health-zone level</strong> from INSP SitRep N°082 (04 Aug 2026), while Bas-Uélé is not yet mapped. The earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source.</li>
         <li data-i18n-html="md_method_4">Zone polygons are <strong>approximate health-zone boundaries</strong> for visual placement, not official administrative boundaries.</li>
         <li data-i18n-html="md_method_5">The per-zone Trends tab shows cumulative confirmed cases and deaths from successive INSP SitReps (14 May–04 Aug 2026).</li>
-        <!-- pinned: CFR uses the N°082 zone table (1801/3973 ≈ 45.3%); deliberately NOT the N°093 national (47.0%) -->
+        <!-- pinned: CFR uses the N°082 zone table (1801/3973 ≈ 45.3%); deliberately NOT the N°106 national (48.1%) -->
         <li data-i18n-html="md_method_6">DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (1801/3973 ≈ 45.3%, INSP SitRep N°082). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.</li>
       </ul>
 
@@ -457,7 +457,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
     <div class="modal-b">
       <p data-i18n="terms_p1">This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.</p>
       <h4 data-i18n="terms_h_warranty">No warranty</h4>
-      <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (28 July – 15 August 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
+      <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (28 July – 28 August 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
       <h4 data-i18n="terms_h_rights">Rights</h4>
       <p data-i18n="terms_rights_p">All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.</p>
       <h4 data-i18n="terms_h_sensitive">Sensitive context</h4>
@@ -610,7 +610,7 @@ HZ.push(...TAIL);
 const UGANDA={confirmed:20,deaths:2,admissions:0,recoveries:18};   // Uganda MoH — final; outbreak declared over 28 Jul 2026
 const UGANDA_STATUS={ active:false, declaredStart:"2026-05-15", lastCaseDischarged:"2026-06-16", declaredOver:"2026-07-28", source:"Uganda Ministry of Health" };
 const AWAITING_CASES=0;                // DRC cases awaiting health-zone assignment (INSP SitRep N°082)
-const DRC_RECOVERED=1040;               // INSP SitRep N°093 — national headline (recovered)
+const DRC_RECOVERED=1327;               // INSP SitRep N°106 — national headline (recovered)
 
 // Per-zone population (2024) and cumulative incidence per 100k — INSP / projections.
 const POP={"Bunia":[268128,354.3],"Rwampara":[134068,516.2],"Mongbwalu":[133371,418.4],"Nizi":[141651,304.3],"Katwa":[411346,48.6],"Lita":[128175,117.8],"Nyankunde":[97949,117.4],"Nia-Nia":[71361,156.9],"Mangala":[92662,116.6],"Butembo":[316182,29.1],"Bambu":[148752,46.4],"Beni":[382409,16.7],"Musienene":[249370,18.0],"Tchomia":[110386,40.8],"Fataki":[128262,31.2],"Komanda":[184816,20.6],"Kilo":[55902,51.9],"Isiro":[244412,10.2],"Damas":[116731,15.4],"Mandima":[138196,11.6],"Wamba":[131034,12.2],"Kyondo":[215154,6.0],"Boma Mangbetu":[108493,12.0],"Pawa":[166992,7.2],"Drodro":[154777,7.1],"Adja":[126314,8.7],"Mambasa":[95906,10.4],"Aungba":[158181,6.3],"Logo":[240552,4.2],"Rimba":[211373,4.3],"Kalunguta":[199559,4.0],"Ariwara":[201273,3.5],"Lolwa":[45779,15.3],"Aru":[181110,2.8],"Masereka":[177664,2.8],"Oicha":[336160,1.2],"Mahagi":[174551,2.3],"Makiso-Kisangani":[194771,1.5],"Miti-Murhesa":[239135,1.3],"Vuhovi":[121520,1.6],"Kambala":[123772,1.6],"Boga":[67785,1.5],"Kabondo":[176621,0.6],"Lubero":[266211,0.4],"Mangobo":[193112,0.5],"Gety":[186541,0.5],"Goma":[251728,0.4],"Lubunga":[158178,0.6],"Mabalako":[186148,0.5],"Rungu":[102430,1.0],"Wanie-Rukula":[83522,1.2]};
@@ -621,13 +621,13 @@ let zoneTrends=null, zoneMobility=null;
 // National totals COMPUTED from the data (single source of truth) rather than hardcoded.
 const drcCases=HZ.reduce((s,z)=>s+z.cases,0)+AWAITING_CASES; // 3973 — ZONE SUM (N°082); pinned, feeds the per-zone share denominator only (see DRC_CONFIRMED_TOTAL)
 const drcDeaths=HZ.reduce((s,z)=>s+z.deaths,0);              // 1801 — ZONE SUM (N°082); pinned; the Methods CFR (1801/3973) references these, deliberately not the national figure
-/* National headline — INSP SitRep N°093 (reporting 15 Aug 2026, publication 16 Aug 2026). SPLIT STATE:
-   the health-zone table below remains N°082 (04 Aug); zone reconciliation through N°093 is pending,
+/* National headline — INSP SitRep N°106 (reporting 28 Aug 2026, publication 29 Aug 2026). SPLIT STATE:
+   the health-zone table below remains N°082 (04 Aug); zone reconciliation through N°106 is pending,
    so these national totals do NOT equal the zone sums above (3973 cases / 1801 deaths). */
-const DRC_NAT_CASES=4945;   // INSP SitRep N°093 — national cumulative confirmed
-const DRC_NAT_DEATHS=2325;  // INSP SitRep N°093 — national cumulative confirmed deaths (CFR 47.0%)
-const totalConfirmed=DRC_NAT_CASES+UGANDA.confirmed;       // 4965 — regional cumulative (DRC national N°093 + Uganda, closed)
-const totalDeaths=DRC_NAT_DEATHS+UGANDA.deaths;           // 2327
+const DRC_NAT_CASES=5945;   // INSP SitRep N°106 — national cumulative confirmed
+const DRC_NAT_DEATHS=2862;  // INSP SitRep N°106 — national cumulative confirmed deaths (CFR 48.1%)
+const totalConfirmed=DRC_NAT_CASES+UGANDA.confirmed;       // 5965 — regional cumulative (DRC national N°106 + Uganda, closed)
+const totalDeaths=DRC_NAT_DEATHS+UGANDA.deaths;           // 2864
 const zonesWithCases=HZ.length;                            // 51
 function injectTotals(){ renderRespSummary(); }
 /* ---- country summary: composite total + per-country breakdown ---- */
@@ -649,7 +649,7 @@ function highlightCountry(c){
   document.querySelectorAll('.resp-table tbody tr').forEach(tr=>tr.classList.toggle('hl',tr.id===('row-'+c)));
 }
 
-const DRC_CONFIRMED_TOTAL=drcCases; // 3973 — per-zone share denominator, PINNED to the N°082 zone sum (deliberately NOT the N°093 national 4945, so per-zone shares stay internally consistent)
+const DRC_CONFIRMED_TOTAL=drcCases; // 3973 — per-zone share denominator, PINNED to the N°082 zone sum (deliberately NOT the N°106 national 5945, so per-zone shares stay internally consistent)
 
 /* ============ I18N ============
    French strings below are AI-assisted and MUST be reviewed by a Francophone
@@ -676,7 +676,7 @@ const I18N={
   en:{
     doc_title:"DRC · Uganda — Ebola Bundibugyo 2026 · Interactive Dashboard",
     app_title_html:'Ebola <span>Bundibugyo</span> 2026 · DRC &amp; Uganda',
-    topbar_sub:"Interactive outbreak dashboard · INSP SitRep N°093 + Uganda MoH · as of 15 Aug 2026",
+    topbar_sub:"Interactive outbreak dashboard · INSP SitRep N°106 + Uganda MoH · as of 28 Aug 2026",
     btn_data:"Contributors, Data & Methods",
     btn_terms:"Terms of Use",
     theme_title:"Toggle light/dark mode",
@@ -684,7 +684,7 @@ const I18N={
     hint:"Click a shaded zone to inspect a health zone · scroll to zoom",
     legend_title:"Confirmed cases",
     legend_sub:"DRC health zones · INSP SitRep N°082 · 04 Aug 2026",
-    legend_split_note:"National headline is INSP SitRep N°093 (15 Aug); the health-zone breakdown remains N°082 (04 Aug). Zone reconciliation through N°093 is in progress — zone figures will not sum to the national total.",
+    legend_split_note:"National headline is INSP SitRep N°106 (28 Aug); the health-zone breakdown remains N°082 (04 Aug). Zone reconciliation through N°106 is in progress — zone figures will not sum to the national total.",
     legend_colour:"Colour · case intensity",
     legend_scale:"Scale",
     seg_log:"log",
@@ -752,13 +752,13 @@ const I18N={
     resp_note:"159 health zones categorized affected or at risk (risk-stratification, 8 Jun). Candidate-therapeutics trial underway: MBP134, REGN3479 (treatment); obeldesivir (post-exposure prophylaxis). No licensed vaccine or treatment for BVD.",
     modal_data_title:"Contributors, Data & Methods",
     md_h_source:"Data source",
-    md_source_p:"DRC national headline figures are from INSP SitRep N°093 (15 August 2026); the health-zone breakdown is from SitRep N°082 (04 August 2026, Table II), pending zone reconciliation through N°093. Uganda figures are from the Uganda Ministry of Health Ebola portal (28 July 2026). WHO Disease Outbreak News (DON608, 17 Jun) is retained only as a cross-reference.",
+    md_source_p:"DRC national headline figures are from INSP SitRep N°106 (28 August 2026); the health-zone breakdown is from SitRep N°082 (04 August 2026, Table II), pending zone reconciliation through N°106. Uganda figures are from the Uganda Ministry of Health Ebola portal (28 July 2026). WHO Disease Outbreak News (DON608, 17 Jun) is retained only as a cross-reference.",
     who_link_text:"WHO DON608 — Ebola disease caused by Bundibugyo virus, DRC & Uganda (19 June 2026)",
     md_asof_p:"DRC figures are as of 04 August 2026 (INSP SitRep N°082); Uganda figures are as of 28 July 2026 (Uganda Ministry of Health). The headline total is a composite of these two sources.",
     md_h_method:"Method",
     md_method_1:"The map is a <strong>choropleth</strong>: each health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many). Click a shaded zone for its detail; hover to highlight it.",
     md_method_2:"Each zone polygon is <strong>interactive</strong>: hovering highlights it and shows its figures, and clicking opens the zone's snapshot. Uganda (Kampala) is the only point marker, on a separate context layer.",
-    md_method_3:"All six affected provinces — Ituri, North Kivu, South Kivu, Haut-Uélé, Tshopo and Bas-Uélé — are recognised in the national total; the first five are mapped at <strong>health-zone level</strong> from INSP SitRep N°082 (04 Aug 2026), while Bas-Uélé (new at N°093) is not yet mapped. The earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source.",
+    md_method_3:"All six affected provinces — Ituri, North Kivu, South Kivu, Haut-Uélé, Tshopo and Bas-Uélé — are recognised in the national total; the first five are mapped at <strong>health-zone level</strong> from INSP SitRep N°082 (04 Aug 2026), while Bas-Uélé is not yet mapped. The earlier North and South Kivu province context markers have been retired. Only Uganda (Kampala Metro) remains a separate context marker, as it is reported by a different source.",
     md_method_4:"Zone polygons are <strong>approximate health-zone boundaries</strong> for visual placement, not official administrative boundaries.",
     md_method_5:"The per-zone Trends tab shows cumulative confirmed cases and deaths from successive INSP SitReps (14 May–04 Aug 2026).",
     md_method_6:"DRC case-fatality is provisional — confirmed deaths ÷ confirmed cases (1801/3973 ≈ 45.3%, INSP SitRep N°082). Not comparable to earlier DONs (different case definition) and unstable while most cases remain unresolved.",
@@ -781,7 +781,7 @@ const I18N={
     modal_terms_title:"Terms of Use",
     terms_p1:"This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.",
     terms_h_warranty:"No warranty",
-    terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (28 July – 15 August 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
+    terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (28 July – 28 August 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
     terms_h_rights:"Rights",
     terms_rights_p:"All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.",
     terms_h_sensitive:"Sensitive context",
@@ -804,7 +804,7 @@ const I18N={
   fr:{
     doc_title:"RDC · Ouganda — Ebola Bundibugyo 2026 · Tableau de bord interactif",
     app_title_html:'Ebola <span>Bundibugyo</span> 2026 · RDC et Ouganda',
-    topbar_sub:"Tableau de bord interactif de l'épidémie · SitRep N°093 de l'INSP + MinSanté Ouganda · au 15 aoû 2026",
+    topbar_sub:"Tableau de bord interactif de l'épidémie · SitRep N°106 de l'INSP + MinSanté Ouganda · au 28 aoû 2026",
     btn_data:"Contributeurs, données et méthodes",
     btn_terms:"Conditions d'utilisation",
     theme_title:"Basculer en mode clair/sombre",
@@ -812,7 +812,7 @@ const I18N={
     hint:"Cliquez sur une zone colorée pour examiner une zone de santé · défilez pour zoomer",
     legend_title:"Cas confirmés",
     legend_sub:"Zones de santé de la RDC · INSP SitRep N°082 · 04 août 2026",
-    legend_split_note:"Le bilan national provient du SitRep N°093 de l'INSP (15 aoû) ; la ventilation par zone de santé reste au N°082 (04 aoû). La réconciliation des zones jusqu'au N°093 est en cours — les chiffres par zone ne totalisent pas le total national.",
+    legend_split_note:"Le bilan national provient du SitRep N°106 de l'INSP (28 aoû) ; la ventilation par zone de santé reste au N°082 (04 aoû). La réconciliation des zones jusqu'au N°106 est en cours — les chiffres par zone ne totalisent pas le total national.",
     legend_colour:"Couleur · intensité des cas",
     legend_scale:"Échelle",
     seg_log:"log",
@@ -880,13 +880,13 @@ const I18N={
     resp_note:"159 zones de santé classées touchées ou à risque (stratification du risque, 8 juin). Essai de thérapies candidates en cours : MBP134, REGN3479 (traitement) ; obeldesivir (prophylaxie post-exposition). Aucun vaccin ni traitement homologué contre la MVB.",
     modal_data_title:"Contributeurs, données et méthodes",
     md_h_source:"Source des données",
-    md_source_p:"Le bilan national de la RDC provient du SitRep N°093 de l'INSP (15 août 2026) ; la ventilation par zone de santé provient du SitRep N°082 (04 août 2026, tableau II), en attendant la réconciliation des zones jusqu'au N°093. Les chiffres de l'Ouganda proviennent du portail Ebola du ministère de la Santé (28 juillet 2026). Le Bulletin d'information sur les flambées de l'OMS (DON608) est conservé uniquement comme référence croisée.",
+    md_source_p:"Le bilan national de la RDC provient du SitRep N°106 de l'INSP (28 août 2026) ; la ventilation par zone de santé provient du SitRep N°082 (04 août 2026, tableau II), en attendant la réconciliation des zones jusqu'au N°106. Les chiffres de l'Ouganda proviennent du portail Ebola du ministère de la Santé (28 juillet 2026). Le Bulletin d'information sur les flambées de l'OMS (DON608) est conservé uniquement comme référence croisée.",
     who_link_text:"OMS DON608 — Maladie à virus Ebola Bundibugyo, RDC et Ouganda (19 juin 2026)",
     md_asof_p:"Les données par zone de santé de la RDC sont arrêtées au 04 août 2026 (SitRep N°082 de l'INSP) ; les chiffres nationaux et ougandais du DON608 de l'OMS sont arrêtés aux 17–18 juin. Les totaux affichés constituent donc un composite de deux sources et de deux dates.",
     md_h_method:"Méthode",
     md_method_1:"La carte est une <strong>choroplèthe</strong> : chaque polygone de zone de santé est coloré selon le nombre de cas confirmés sur un dégradé rouge séquentiel (clair = peu, foncé = beaucoup). Cliquez sur une zone colorée pour son détail ; survolez pour la mettre en évidence.",
     md_method_2:"Chaque polygone de zone est <strong>interactif</strong> : le survol le met en évidence et affiche ses chiffres, et le clic ouvre l'aperçu de la zone. L'Ouganda (Kampala) est le seul marqueur ponctuel, sur une couche contextuelle distincte.",
-    md_method_3:"Les six provinces touchées — Ituri, Nord-Kivu, Sud-Kivu, Haut-Uélé, Tshopo et Bas-Uélé — sont prises en compte dans le total national ; les cinq premières sont cartographiées au <strong>niveau des zones de santé</strong> d'après le SitRep N°082 de l'INSP (04 août 2026), tandis que le Bas-Uélé (nouveau au N°093) n'est pas encore cartographié. Les anciens marqueurs contextuels provinciaux du Nord- et du Sud-Kivu ont été retirés. Seul l'Ouganda (aire métropolitaine de Kampala) demeure un marqueur contextuel distinct, car il provient d'une source différente.",
+    md_method_3:"Les six provinces touchées — Ituri, Nord-Kivu, Sud-Kivu, Haut-Uélé, Tshopo et Bas-Uélé — sont prises en compte dans le total national ; les cinq premières sont cartographiées au <strong>niveau des zones de santé</strong> d'après le SitRep N°082 de l'INSP (04 août 2026), tandis que le Bas-Uélé n'est pas encore cartographié. Les anciens marqueurs contextuels provinciaux du Nord- et du Sud-Kivu ont été retirés. Seul l'Ouganda (aire métropolitaine de Kampala) demeure un marqueur contextuel distinct, car il provient d'une source différente.",
     md_method_4:"Les polygones de zones sont des <strong>limites approximatives des zones de santé</strong> destinées au placement visuel, et non des limites administratives officielles.",
     md_method_5:"L'onglet Tendances par zone montre les cas et décès confirmés cumulés des SitReps successifs de l'INSP (14 mai–04 août 2026).",
     md_method_6:"La létalité en RDC est provisoire — décès confirmés ÷ cas confirmés (1801/3973 ≈ 45,3 %, SitRep N°082 de l'INSP). Non comparable aux DON antérieurs (définition de cas différente) et instable tant que la plupart des cas ne sont pas clôturés.",
@@ -909,7 +909,7 @@ const I18N={
     modal_terms_title:"Conditions d'utilisation",
     terms_p1:"Ce tableau de bord reproduit des chiffres accessibles au public issus du Bulletin d'information sur les flambées épidémiques de l'OMS, à des fins d'information humanitaire non commerciale. Il ne constitue pas une publication officielle de l'OMS, de l'INRB ou d'une quelconque autorité gouvernementale.",
     terms_h_warranty:"Aucune garantie",
-    terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (28 juillet – 15 août 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
+    terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (28 juillet – 28 août 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
     terms_h_rights:"Droits",
     terms_rights_p:"L'ensemble des données et chiffres épidémiologiques demeurent la propriété de l'Organisation mondiale de la Santé et des autorités nationales concernées. Les tuiles cartographiques sont © contributeurs OpenStreetMap et © CARTO. Citez toujours la source originale de l'OMS (DON608) pour toute réutilisation.",
     terms_h_sensitive:"Contexte sensible",
