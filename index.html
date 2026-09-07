@@ -78,6 +78,9 @@ h1,h2,h3,h4{font-family:'Archivo',sans-serif;letter-spacing:-.01em;line-height:1
 /* ---------- map ---------- */
 #map{position:absolute;top:var(--topbar-h);left:0;right:0;bottom:0;background:var(--map-bg);z-index:1}
 .leaflet-container{background:var(--map-bg);font-family:'IBM Plex Sans'}
+/* Basemap treatment: OSM standard tiles are colourful, so mute them behind the choropleth.
+   Applied to the tile pane only — markers, polygons and popups are untouched. */
+.leaflet-tile-pane{filter:grayscale(1) invert(1) brightness(.92) contrast(.9);}
 .leaflet-control-attribution{background:rgba(10,19,31,.8)!important;color:#6f879d!important;font-size:10px!important}
 .leaflet-control-attribution a{color:#8aa6c4!important}
 .leaflet-bar a{background:var(--panel)!important;color:#cfe0f0!important;border-color:var(--line)!important}
@@ -247,6 +250,7 @@ tr.resolved td{color:#8ba0b4}
 
 /* ---------- light mode overrides ---------- */
 html[data-theme="light"] .leaflet-control-attribution{background:rgba(237,241,247,.88)!important;color:var(--muted)!important}
+html[data-theme="light"] .leaflet-tile-pane{filter:grayscale(1) brightness(1.07) contrast(.92);}
 html[data-theme="light"] .leaflet-control-attribution a{color:var(--blue)!important}
 html[data-theme="light"] .leaflet-bar a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--line)!important}
 html[data-theme="light"] .leaflet-bar a:hover{background:var(--panel-2)!important}
@@ -446,7 +450,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       </div>
 
       <h4 data-i18n="md_h_attr">Attribution</h4>
-      <p data-i18n="md_attr_p">Epidemiological data © World Health Organization 2026. Basemap © OpenStreetMap contributors, © CARTO. This dashboard is an independent visualisation for humanitarian information purposes and is not an official WHO product. Inspired by the layout of the INRB-UMIE BDBV 2026 Epidemic Dashboard.</p>
+      <p data-i18n="md_attr_p">Epidemiological data © World Health Organization 2026. Basemap © OpenStreetMap contributors. This dashboard is an independent visualisation for humanitarian information purposes and is not an official WHO product. Inspired by the layout of the INRB-UMIE BDBV 2026 Epidemic Dashboard.</p>
     </div>
   </div>
 </div>
@@ -460,7 +464,7 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
       <h4 data-i18n="terms_h_warranty">No warranty</h4>
       <p data-i18n="terms_warranty_p">Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (28 July – 05 September 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.</p>
       <h4 data-i18n="terms_h_rights">Rights</h4>
-      <p data-i18n="terms_rights_p">All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.</p>
+      <p data-i18n="terms_rights_p">All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.</p>
       <h4 data-i18n="terms_h_sensitive">Sensitive context</h4>
       <p data-i18n="terms_sensitive_p">This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.</p>
     </div>
@@ -783,13 +787,13 @@ const I18N={
     dl_csv_trend:"Cumulative trend",
     dl_csv_risk:"WHO risk levels",
     md_h_attr:"Attribution",
-    md_attr_p:"Epidemiological data © World Health Organization 2026. Basemap © OpenStreetMap contributors, © CARTO. This dashboard is an independent visualisation for humanitarian information purposes and is not an official WHO product. Inspired by the layout of the INRB-UMIE BDBV 2026 Epidemic Dashboard.",
+    md_attr_p:"Epidemiological data © World Health Organization 2026. Basemap © OpenStreetMap contributors. This dashboard is an independent visualisation for humanitarian information purposes and is not an official WHO product. Inspired by the layout of the INRB-UMIE BDBV 2026 Epidemic Dashboard.",
     modal_terms_title:"Terms of Use",
     terms_p1:"This dashboard reproduces publicly available figures from WHO Disease Outbreak News for non-commercial humanitarian information purposes. It is not an official publication of WHO, INRB, or any government authority.",
     terms_h_warranty:"No warranty",
     terms_warranty_p:"Figures evolve rapidly and are frequently revised in later reports; counts shown reflect a single point in time (28 July – 05 September 2026) and should not be treated as real-time surveillance. Marker locations are approximate and do not represent official administrative boundaries.",
     terms_h_rights:"Rights",
-    terms_rights_p:"All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors and © CARTO. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.",
+    terms_rights_p:"All epidemiological data and figures remain the property of the World Health Organization and underlying national authorities. Map tiles are © OpenStreetMap contributors. Always cite the original WHO Disease Outbreak News source (DON608) for any onward use.",
     terms_h_sensitive:"Sensitive context",
     terms_sensitive_p:"This is an active public health emergency affecting conflict-affected and displaced communities. Please use this information responsibly.",
     meta_hz:"{prov} Province · {country} · INSP SitRep N°114",
@@ -911,13 +915,13 @@ const I18N={
     dl_csv_trend:"Tendance cumulée",
     dl_csv_risk:"Niveaux de risque OMS",
     md_h_attr:"Attribution",
-    md_attr_p:"Données épidémiologiques © Organisation mondiale de la Santé 2026. Fond de carte © contributeurs OpenStreetMap, © CARTO. Ce tableau de bord est une visualisation indépendante à des fins d'information humanitaire et n'est pas un produit officiel de l'OMS. Inspiré de la présentation du tableau de bord épidémique INRB-UMIE BDBV 2026.",
+    md_attr_p:"Données épidémiologiques © Organisation mondiale de la Santé 2026. Fond de carte © contributeurs OpenStreetMap. Ce tableau de bord est une visualisation indépendante à des fins d'information humanitaire et n'est pas un produit officiel de l'OMS. Inspiré de la présentation du tableau de bord épidémique INRB-UMIE BDBV 2026.",
     modal_terms_title:"Conditions d'utilisation",
     terms_p1:"Ce tableau de bord reproduit des chiffres accessibles au public issus du Bulletin d'information sur les flambées épidémiques de l'OMS, à des fins d'information humanitaire non commerciale. Il ne constitue pas une publication officielle de l'OMS, de l'INRB ou d'une quelconque autorité gouvernementale.",
     terms_h_warranty:"Aucune garantie",
     terms_warranty_p:"Les chiffres évoluent rapidement et sont fréquemment révisés dans les rapports ultérieurs ; les nombres affichés reflètent un instant précis (28 juillet – 05 septembre 2026) et ne doivent pas être considérés comme une surveillance en temps réel. Les emplacements des marqueurs sont approximatifs et ne représentent pas des limites administratives officielles.",
     terms_h_rights:"Droits",
-    terms_rights_p:"L'ensemble des données et chiffres épidémiologiques demeurent la propriété de l'Organisation mondiale de la Santé et des autorités nationales concernées. Les tuiles cartographiques sont © contributeurs OpenStreetMap et © CARTO. Citez toujours la source originale de l'OMS (DON608) pour toute réutilisation.",
+    terms_rights_p:"L'ensemble des données et chiffres épidémiologiques demeurent la propriété de l'Organisation mondiale de la Santé et des autorités nationales concernées. Les tuiles cartographiques sont © contributeurs OpenStreetMap. Citez toujours la source originale de l'OMS (DON608) pour toute réutilisation.",
     terms_h_sensitive:"Contexte sensible",
     terms_sensitive_p:"Il s'agit d'une urgence de santé publique en cours touchant des communautés affectées par les conflits et des populations déplacées. Veuillez utiliser ces informations de manière responsable.",
     meta_hz:"Province : {prov} · {country} · INSP SitRep N°114",
@@ -945,9 +949,9 @@ const countryName=c=>(COUNTRY_I18N[c]&&COUNTRY_I18N[c][lang])||c;
 L.Icon.Default.imagePath='vendor/leaflet/images/';
 const EPI_BOUNDS=[[-2.50,24.80],[3.45,31.15]]; // all 48 DRC health zones (Ituri, N/S-Kivu, Haut-Uélé, Tshopo)
 const map=L.map('map',{zoomControl:true,attributionControl:true,minZoom:4,maxZoom:11}).fitBounds(EPI_BOUNDS,{padding:[16,16]});
-const ATTR='&copy; OpenStreetMap &copy; CARTO &middot; data: INSP SitRep N°114';
-const darkTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
-const lightTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:ATTR,subdomains:'abcd',maxZoom:19});
+const ATTR='&copy; OpenStreetMap contributors &middot; data: INSP SitRep N°114';
+const darkTile=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:ATTR,subdomains:'abc',maxZoom:19});  // OSM standard; theme look via .leaflet-tile-pane filter
+const lightTile=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:ATTR,subdomains:'abc',maxZoom:19});
 darkTile.addTo(map);
 
 /* Choropleth fill ramp — sequential RED (light = few cases, dark = many).
