@@ -239,10 +239,25 @@ tr.resolved td{color:#8ba0b4}
 .figcap{font-size:.76rem;color:var(--dim);margin-top:7px;line-height:1.5}
 
 /* intro hint */
-#hint{position:absolute;left:50%;top:72px;transform:translateX(-50%);z-index:1100;
+#hint{position:absolute;left:50%;top:124px;transform:translateX(-50%);z-index:1100;
   background:var(--hint-rgba);border:1px solid var(--line-2);border-radius:30px;padding:9px 18px;
   font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:9px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
 #hint .d{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+/* zone search — centred over the top of the map */
+#zoneSearch{position:absolute;left:50%;top:70px;transform:translateX(-50%);z-index:1150;width:min(360px,74vw);font-family:'IBM Plex Sans',sans-serif}
+#zoneSearch .zs-box{display:flex;align-items:center;gap:8px;background:var(--panel-rgba);border:1px solid var(--line-2);border-radius:9px;padding:0 10px;box-shadow:0 10px 30px rgba(0,0,0,.4);backdrop-filter:blur(10px)}
+#zoneSearch .zs-ico{color:var(--dim);flex:0 0 auto}
+#zoneSearchInput{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:.86rem;padding:10px 2px}
+#zoneSearchInput::placeholder{color:var(--dim)}
+#zoneSearchClear{flex:0 0 auto;background:transparent;border:0;color:var(--dim);cursor:pointer;font-size:.82rem;line-height:1;padding:5px 4px}
+#zoneSearchClear:hover{color:var(--text)}
+#zoneSearchResults{list-style:none;margin:6px 0 0;padding:4px;background:var(--panel-rgba);border:1px solid var(--line-2);border-radius:9px;box-shadow:0 12px 34px rgba(0,0,0,.45);backdrop-filter:blur(10px);max-height:min(46vh,320px);overflow-y:auto}
+#zoneSearchResults li{padding:8px 10px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+#zoneSearchResults li .zs-nm{color:var(--text);font-size:.82rem}
+#zoneSearchResults li .zs-pv{color:var(--dim);font-size:.6rem;font-family:'IBM Plex Mono';text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+#zoneSearchResults li[aria-selected="true"],#zoneSearchResults li:hover{background:var(--panel-2)}
+#zoneSearchResults li.zs-empty{color:var(--dim);cursor:default;font-size:.78rem;justify-content:flex-start}
+#zoneSearchResults li.zs-empty:hover{background:transparent}
 @media(prefers-reduced-motion:reduce){#topbar .dot{animation:none}}
 
 /* ---------- theme toggle button ---------- */
@@ -290,6 +305,16 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 </div>
 
 <div id="map"></div>
+
+<!-- ZONE SEARCH (centred over the map) -->
+<div id="zoneSearch">
+  <div class="zs-box">
+    <svg class="zs-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7"></circle><line x1="21" y1="21" x2="15.5" y2="15.5"></line></svg>
+    <input id="zoneSearchInput" type="text" role="combobox" aria-expanded="false" aria-controls="zoneSearchResults" aria-autocomplete="list" autocomplete="off" spellcheck="false" data-i18n-placeholder="zone_search_ph" placeholder="Search a health zone…" data-i18n-aria="zone_search_aria" aria-label="Search a health zone">
+    <button id="zoneSearchClear" type="button" data-i18n-aria="zone_search_clear" aria-label="Clear search" hidden>✕</button>
+  </div>
+  <ul id="zoneSearchResults" role="listbox" hidden></ul>
+</div>
 
 <div id="hint"><span class="d"></span> <span data-i18n="hint">Click a shaded zone to inspect a health zone · scroll to zoom</span></div>
 
@@ -692,6 +717,10 @@ const I18N={
     theme_title:"Toggle light/dark mode",
     lang_title:"Changer de langue · Switch language",
     hint:"Click a shaded zone to inspect a health zone · scroll to zoom",
+    zone_search_ph:"Search a health zone…",
+    zone_search_aria:"Search a health zone",
+    zone_search_clear:"Clear search",
+    zone_search_none:"No matching zone",
     legend_title:"Confirmed cases",
     legend_sub:"DRC health zones · INSP SitRep N°114 · 05 Sept 2026",
     legend_zone_note:"Ten health zones reported in N°114 (Bafwasende, Biena, Buta, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo, Viadana) are named but not yet mapped, pending geometry from the INRB-UMIE archived shapefile — 23 confirmed cases and 10 deaths; Bas-Uélé is unmapped as a province for this reason. A further 366 confirmed Ituri deaths are pending classification by health zone (“A ventiler”) and are excluded from zone-level death totals.",
@@ -820,6 +849,10 @@ const I18N={
     theme_title:"Basculer en mode clair/sombre",
     lang_title:"Changer de langue · Switch language",
     hint:"Cliquez sur une zone colorée pour examiner une zone de santé · défilez pour zoomer",
+    zone_search_ph:"Rechercher une zone de santé…",
+    zone_search_aria:"Rechercher une zone de santé",
+    zone_search_clear:"Effacer la recherche",
+    zone_search_none:"Aucune zone correspondante",
     legend_title:"Cas confirmés",
     legend_sub:"Zones de santé de la RDC · INSP SitRep N°114 · 05 sept 2026",
     legend_zone_note:"Dix zones de santé rapportées au N°114 (Bafwasende, Biena, Buta, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo, Viadana) sont nommées mais pas encore cartographiées, en attente de géométrie issue du shapefile archivé INRB-UMIE — 23 cas confirmés et 10 décès ; le Bas-Uélé n'est de ce fait pas cartographié comme province. En outre, 366 décès confirmés en Ituri sont en attente de classification par zone de santé (« À ventiler ») et sont exclus des totaux de décès par zone. [TODO_KIKI: relire]",
@@ -1258,6 +1291,56 @@ function loadZoneData(){
 }
 loadZoneData();
 
+/* ============ ZONE SEARCH (top-centre) ============ */
+(function(){
+  const box=document.getElementById('zoneSearch');
+  const input=document.getElementById('zoneSearchInput');
+  const results=document.getElementById('zoneSearchResults');
+  const clearBtn=document.getElementById('zoneSearchClear');
+  if(!box||!input||!results) return;
+  // keep clicks/scroll on the search UI from reaching the Leaflet map
+  if(window.L&&L.DomEvent){L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);}
+  const norm=s=>s.toLowerCase();   // repo zone-name keys carry no diacritics
+  let matches=[],active=-1;
+  function close(){results.hidden=true;results.innerHTML='';matches=[];active=-1;input.setAttribute('aria-expanded','false');}
+  function pick(z){if(!z)return;close();input.value='';clearBtn.hidden=true;input.blur();selectZone(z);}
+  function paint(){[...results.children].forEach((li,i)=>li.setAttribute('aria-selected',String(i===active)));}
+  function render(){
+    const q=norm(input.value.trim());
+    clearBtn.hidden=!input.value;
+    if(!q){close();return;}
+    matches=HZ.filter(z=>norm(z.name).includes(q)).sort((a,b)=>{
+      const an=norm(a.name),bn=norm(b.name);
+      const as=an.startsWith(q)?0:1,bs=bn.startsWith(q)?0:1;
+      return as-bs||(b.cases-a.cases)||an.localeCompare(bn);
+    }).slice(0,8);
+    const T=I18N[lang];
+    if(!matches.length){
+      const li=document.createElement('li');
+      li.className='zs-empty';li.setAttribute('role','option');li.setAttribute('aria-disabled','true');
+      li.textContent=(T&&T.zone_search_none)||'No matching zone';
+      results.innerHTML='';results.appendChild(li);active=-1;
+    }else{
+      results.innerHTML=matches.map((z,i)=>`<li role="option" data-i="${i}"><span class="zs-nm"></span><span class="zs-pv"></span></li>`).join('');
+      [...results.children].forEach((li,i)=>{li.querySelector('.zs-nm').textContent=matches[i].name;li.querySelector('.zs-pv').textContent=provName(matches[i].prov);});
+      active=0;paint();
+    }
+    results.hidden=false;input.setAttribute('aria-expanded','true');
+  }
+  function move(step){if(!matches.length)return;active=(active+step+matches.length)%matches.length;paint();const el=results.children[active];if(el)el.scrollIntoView({block:'nearest'});}
+  input.addEventListener('input',render);
+  input.addEventListener('focus',()=>{if(input.value)render();});
+  input.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'){e.preventDefault();move(1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();move(-1);}
+    else if(e.key==='Enter'){if(matches.length&&active>=0){e.preventDefault();pick(matches[active]);}}
+    else if(e.key==='Escape'){if(input.value){input.value='';render();}else{close();input.blur();}}
+  });
+  results.addEventListener('mousedown',e=>{const li=e.target.closest('li[data-i]');if(!li)return;e.preventDefault();pick(matches[+li.dataset.i]);});
+  clearBtn.addEventListener('click',()=>{input.value='';render();input.focus();});
+  document.addEventListener('click',e=>{if(!box.contains(e.target))close();});
+})();
+
 /* ============ OUTCOMES DONUT ============ */
 // Outcomes (computed, same source of truth as the cards): recovered = DRC_RECOVERED (115),
 // deaths = totalDeaths (279), active = totalConfirmed - deaths - recovered = 719.
@@ -1419,6 +1502,7 @@ function applyStaticI18n(){
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{const k=el.getAttribute('data-i18n-title');if(T[k]!=null)el.title=T[k];});
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>{const k=el.getAttribute('data-i18n-aria');if(T[k]!=null)el.setAttribute('aria-label',T[k]);});
   document.querySelectorAll('[data-i18n-alt]').forEach(el=>{const k=el.getAttribute('data-i18n-alt');if(T[k]!=null)el.alt=T[k];});
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(T[k]!=null)el.placeholder=T[k];});
 }
 function updateChartsI18n(){
   const T=I18N[lang];
