@@ -115,6 +115,10 @@ html[data-theme="light"] .map-toggle{box-shadow:0 3px 14px rgba(0,0,0,.18)}
 .panel-h .chev{color:var(--dim);font-size:1.1rem;line-height:1;transition:.2s}
 .panel.collapsed .panel-b{display:none}
 .panel.collapsed .chev{transform:rotate(-90deg)}
+/* #legend collapses to just the colour ramp + scale (needed to read the choropleth);
+   the map key and notes (.leg-collapsible) hide. Same toggle pattern, partial carve-out. */
+#legend.collapsed .panel-b{display:block}
+#legend.collapsed .leg-collapsible{display:none}
 .panel-b{padding:15px}
 
 /* legend (bottom-left) */
@@ -290,8 +294,8 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
 <div id="hint"><span class="d"></span> <span data-i18n="hint">Click a shaded zone to inspect a health zone · scroll to zoom</span></div>
 
 <!-- LEGEND / LAYER -->
-<div class="panel" id="legend">
-  <div class="panel-h" data-toggle>
+<div class="panel collapsed" id="legend">
+  <div class="panel-h" data-toggle data-i18n-aria="legend_toggle" aria-label="Show or hide the map legend and notes">
     <div>
       <h3 data-i18n="legend_title">Confirmed cases</h3>
       <div class="leg-sub" data-i18n="legend_sub">DRC health zones · INSP SitRep N°114 · 05 Sept 2026</div>
@@ -300,20 +304,20 @@ html[data-theme="light"] .tb-btn:hover{color:var(--text)}
   </div>
   <div class="panel-b">
 
-    <div class="leg-section"><span id="legHeadChoro" data-i18n="legend_choropleth">Choropleth · confirmed cases</span><span id="legHeadCluster" data-i18n="legend_cluster_head" style="display:none">Clusters · confirmed cases</span></div>
+    <div class="leg-section leg-collapsible"><span id="legHeadChoro" data-i18n="legend_choropleth">Choropleth · confirmed cases</span><span id="legHeadCluster" data-i18n="legend_cluster_head" style="display:none">Clusters · confirmed cases</span></div>
     <div class="ramp"><i style="background:#fee5d9"></i><i style="background:#fcae91"></i><i style="background:#fb6a4a"></i><i style="background:#de2d26"></i><i style="background:#a50f15"></i><i style="background:#67000d"></i></div>
     <div class="ramp-vals"><span>1</span><span>25</span><span>100</span><span>300</span><span>700</span><span>1500</span></div>
 
-    <div class="leg-section" data-i18n="legend_markers">Map</div>
-    <div class="ctx-key">
+    <div class="leg-section leg-collapsible" data-i18n="legend_markers">Map</div>
+    <div class="ctx-key leg-collapsible">
       <div class="ctx-key-row" id="legRowChoro"><span class="ctx-dot" style="background:#de2d26;border-radius:2px;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_zone">Click a shaded zone for detail</span></div>
       <div class="ctx-key-row" id="legRowCluster" style="display:none"><span class="ctx-dot" style="background:#de2d26;border-style:solid;border-color:#fff"></span><span data-i18n="legend_click_marker">Number on each marker/bubble = confirmed cases</span></div>
       <div class="ctx-key-row"><span class="ctx-dot" style="background:rgba(100,116,139,.3);border-color:#64748b"></span><span data-i18n="legend_ctx_uga">Uganda · Kampala metro (20 confirmed · closed)</span></div>
     </div>
 
-    <div class="legend-src" id="legSrcChoro" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°114 (05 Sept 2026, DRC only); Uganda (Kampala) is a separate Uganda MoH context marker (28 Jul). ⚠ Verify against WHO before publishing.</div>
-    <div class="legend-src" id="legZoneNote" data-i18n="legend_zone_note">Ten health zones reported in N°114 (Bafwasende, Biena, Buta, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo, Viadana) are named but not yet mapped, pending geometry from the INRB-UMIE archived shapefile — 23 confirmed cases and 10 deaths; Bas-Uélé is unmapped as a province for this reason. A further 366 confirmed Ituri deaths are pending classification by health zone (“A ventiler”) and are excluded from zone-level death totals.</div>
-    <div class="legend-src" id="legSrcCluster" data-i18n="legend_cluster" style="display:none">Bubbles group nearby zones; the number on each marker or bubble is confirmed cases (per zone, or the group total when clustered), coloured by that count. Hover for zone detail; zoom in to separate.</div>
+    <div class="legend-src leg-collapsible" id="legSrcChoro" data-i18n="legend_src">Each DRC health-zone polygon is shaded by confirmed cases on a sequential red ramp (light = few, dark = many) — click a zone for its detail. Zone figures are INSP SitRep N°114 (05 Sept 2026, DRC only); Uganda (Kampala) is a separate Uganda MoH context marker (28 Jul). ⚠ Verify against WHO before publishing.</div>
+    <div class="legend-src leg-collapsible" id="legZoneNote" data-i18n="legend_zone_note">Ten health zones reported in N°114 (Bafwasende, Biena, Buta, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo, Viadana) are named but not yet mapped, pending geometry from the INRB-UMIE archived shapefile — 23 confirmed cases and 10 deaths; Bas-Uélé is unmapped as a province for this reason. A further 366 confirmed Ituri deaths are pending classification by health zone (“A ventiler”) and are excluded from zone-level death totals.</div>
+    <div class="legend-src leg-collapsible" id="legSrcCluster" data-i18n="legend_cluster" style="display:none">Bubbles group nearby zones; the number on each marker or bubble is confirmed cases (per zone, or the group total when clustered), coloured by that count. Hover for zone detail; zoom in to separate.</div>
   </div>
 </div>
 
@@ -690,6 +694,7 @@ const I18N={
     hint:"Click a shaded zone to inspect a health zone · scroll to zoom",
     legend_title:"Confirmed cases",
     legend_sub:"DRC health zones · INSP SitRep N°114 · 05 Sept 2026",
+    legend_toggle:"Show or hide the map legend and notes",
     legend_zone_note:"Ten health zones reported in N°114 (Bafwasende, Biena, Buta, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo, Viadana) are named but not yet mapped, pending geometry from the INRB-UMIE archived shapefile — 23 confirmed cases and 10 deaths; Bas-Uélé is unmapped as a province for this reason. A further 366 confirmed Ituri deaths are pending classification by health zone (“A ventiler”) and are excluded from zone-level death totals.",
     legend_colour:"Colour · case intensity",
     legend_scale:"Scale",
@@ -818,6 +823,7 @@ const I18N={
     hint:"Cliquez sur une zone colorée pour examiner une zone de santé · défilez pour zoomer",
     legend_title:"Cas confirmés",
     legend_sub:"Zones de santé de la RDC · INSP SitRep N°114 · 05 sept 2026",
+    legend_toggle:"Afficher ou masquer la légende et les notes de la carte",
     legend_zone_note:"Dix zones de santé rapportées au N°114 (Bafwasende, Biena, Buta, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo, Viadana) sont nommées mais pas encore cartographiées, en attente de géométrie issue du shapefile archivé INRB-UMIE — 23 cas confirmés et 10 décès ; le Bas-Uélé n'est de ce fait pas cartographié comme province. En outre, 366 décès confirmés en Ituri sont en attente de classification par zone de santé (« À ventiler ») et sont exclus des totaux de décès par zone. [TODO_KIKI: relire]",
     legend_colour:"Couleur · intensité des cas",
     legend_scale:"Échelle",
