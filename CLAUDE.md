@@ -9,6 +9,19 @@ A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbr
 - There is **NO framework** and **NO build step**. The site runs by opening `index.html` directly in a browser.
 - **Do NOT** convert it to React (or any framework), and **do NOT** add a bundler, package manager, or build tooling. Keep it as vanilla HTML/CSS/JS with CDN scripts.
 
+## Current design — "Epidemic Intelligence" (redesigned)
+
+The dashboard was rebuilt to a new layout ("Epidemic Intelligence · Bundibugyo 2026"): a full-bleed map with a floating map-indicator selector, search box, log-scaled legend and a Latest-only time bar, plus a right sidebar with a national + provincial overview and a per-zone view (snapshot, trends chart, mobility panel). Leaflet is inlined; charts are hand-drawn SVG (no Chart.js). Key points for future edits:
+
+- **Data model:** all data is a single embedded `const D` object — `D.zones` (51 mapped health zones `{z,p,c,d,lat,lon,pop,cfr,k}`), `D.geo` (N°114 polygons, `properties.z`), `D.cent`, `D.trends` (per-zone daily series, extended with a break to the 04 Aug / 05 Sept cumulative readings), `D.nat2` (national time series whose **last row is the live N°114 headline**), `D.tl`, and `D.mob`. National render uses `live=false`, reading the N°114 row from `D.nat2` (6604 cases / 3175 deaths / CFR 48.1% / 1548 recovered / 851 isolation / 85.7% contact tracing). The previous design's `HZ`/`POP` arrays, `fetch()` of the geojson, `applyStaticI18n`, collapsible panels, etc. are gone.
+- **Map base:** OpenStreetMap tiles only (Leaflet), desaturated via the `--tile-filter` CSS. The design's vector base and the Vector/OSM switcher were removed at the maintainer's request; `basePane` is hidden and country labels are a no-op.
+- **Mobility is intentionally empty** (`D.mob={}`) — no Flowminder/flow data is included. The "Mobility volume" indicator, direction toggle and per-zone/province mobility panels all render an explicit "not included in this release" state. Do not populate mobility with invented values.
+- **i18n:** this redesign is **English-only** — the 🌐 button is decorative and the previous trilingual (EN/FR) system was not carried over. Re-adding French is a follow-up if wanted.
+- **Methods modal** (`#mmodal`, the "Data & Methods" button) carries the sources, the coverage disclosures (10 named-but-unmapped zones = 23 cases / 10 deaths incl. Bas-Uélé; 366 "A ventiler" Ituri deaths; mapped zones sum 6581 / 2799 vs national 6604 / 3175) and the CSV downloads. The **"⚠ Verify against WHO before publishing"** note is in the header meta and the modal.
+- Bas-Uélé and the other nine unmapped zones are absent from the map and province picker (no geometry); they are disclosed in Methods only.
+
+The technical notes further below describe the **previous** design (HZ array, POP, per-sitrep GeoJSON fetch, choropleth scale breaks, trilingual i18n, collapsible panels) and no longer match the shipped `index.html`; they remain for historical context and for the `data/` files, which are unchanged and still the N°114 source of truth.
+
 ## Data handling
 
 - The WHO DON607 figures are **embedded inside `index.html`** (in the JS) and are **also mirrored in `data/`** as CSVs.
