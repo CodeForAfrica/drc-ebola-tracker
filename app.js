@@ -4,7 +4,11 @@ const NAMES=()=>({c:tx('opt_c'),d:tx('opt_d'),cfr:tx('opt_cfr'),k:tx('opt_k'),mo
 const fmt=n=>n==null?'—':Math.round(n).toLocaleString(LANG==='fr'?'fr-FR':'en-US');
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const Z={};D.zones.forEach(z=>Z[z.z]=z);
-const PROVS=[...new Set(D.zones.map(z=>z.p))].sort();
+const PT=typeof PROV!=='undefined'?PROV:null;   /* printed province totals, when the config has them */
+const PROVS=[...new Set([...(PT||[]).map(r=>r.p),...D.zones.map(z=>z.p)])].sort();
+function provTot(p){const zs=D.zones.filter(z=>z.p===p),r=PT&&PT.find(x=>x.p===p);
+ const c=r?r.c:zs.reduce((a,z)=>a+(z.c||0),0),d=r?r.d:zs.reduce((a,z)=>a+(z.d||0),0);
+ return{zs,c,d,cfr:r?r.cfr:(c?d/c*100:null),n:r?r.zt:zs.length,u:r?r.u||0:0};}
 
 let LANG=(localStorage.getItem('lang')==='fr')?'fr':'en';
 const MONABBR={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
@@ -230,19 +234,19 @@ function renderNat(){
   +`<p class="note">${tx('nat_note')}</p>`;}
 
 function renderProv(){
- const zs=D.zones.filter(z=>z.p===S.prov);
- const c=zs.reduce((a,z)=>a+(z.c||0),0),d=zs.reduce((a,z)=>a+(z.d||0),0);
+ const P=provTot(S.prov),zs=P.zs,c=P.c,d=P.d;
  const tin=zs.filter(z=>z.hasMob).reduce((a,z)=>a+z.tin,0);
  const tout=zs.filter(z=>z.hasMob).reduce((a,z)=>a+z.tout,0);
  $('#provPick').innerHTML=PROVS.map(p=>`<option ${p===S.prov?'selected':''}>${p}</option>`).join('');
- $('#provHero').innerHTML=heroHTML(c,d,`${zs.length} ${zs.length===1?tx('prov_affected_one'):tx('prov_affected_many')}`,
-   `SitRep ${CFG.zoneRelease.sitrep} · ${prettyDate(CFG.zoneRelease.date)}`,c?(d/c*100).toFixed(1)+'%':'—',
+ $('#provHero').innerHTML=heroHTML(c,d,`${P.n} ${P.n===1?tx('prov_affected_one'):tx('prov_affected_many')}`,
+   `SitRep ${CFG.zoneRelease.sitrep} · ${prettyDate(CFG.zoneRelease.date)}`,P.cfr==null?'—':P.cfr.toFixed(1)+'%',
    `<div class="si"><div class="sl">${tx('prov_mob_in')}</div><div class="sv">${tin?fmt(tin):'—'}</div></div>
     <div class="div"></div>
     <div class="si"><div class="sl">${tx('n_recovered')}</div><div class="sv" style="color:var(--dim)">${tx('n_na')}</div></div>`)
+  +(P.u?`<p class="note">${tx('prov_unassigned').replace('{u}',fmt(P.u))}</p>`:'')
+  +(zs.length<P.n?`<p class="note">${tx('prov_unmapped').replace('{m}',zs.length).replace('{n}',P.n)}</p>`:'')
   +`<p class="note">${tx('prov_note')}</p>`;
- const rows=PROVS.map(p=>{const q=D.zones.filter(z=>z.p===p);
-   return{p,c:q.reduce((a,z)=>a+(z.c||0),0)};}).sort((a,b)=>b.c-a.c);
+ const rows=PROVS.map(p=>({p,c:provTot(p).c})).sort((a,b)=>b.c-a.c);
  const max=Math.max(...rows.map(r=>r.c),1);
  $('#provList').innerHTML=rows.map(r=>`<div class="row ${r.p===S.prov?'on':''}" data-prov="${r.p}" role="button" tabindex="0">
    <span class="fn">${r.p}</span><span class="fb"><i style="width:${r.c/max*100}%;background:var(--r4)"></i></span>
