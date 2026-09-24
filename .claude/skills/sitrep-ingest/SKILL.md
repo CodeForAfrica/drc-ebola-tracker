@@ -232,4 +232,6 @@ that one case was added by data reconciliation and is excluded from the day's ne
 
 Ingestion stops at the CSVs. It does **not** touch `config.drc-bvd-2026.js`, `index.html` or the
 map — updating the dashboard is a separate, explicitly requested step, and per `CLAUDE.md` the
-embedded figures and `data/` must then be changed together.
+embedded figures and `data/` must then be changed together. When that step runs, the dashboard's
+national and province figures must equal this PDF exactly (banner and Tableau 1). List every
+discrepancy and its fix before changing anything, and never redistribute `A ventiler` deaths into zones.

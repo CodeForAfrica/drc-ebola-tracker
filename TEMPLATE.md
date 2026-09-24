@@ -9,7 +9,7 @@ How this dashboard is split so it can be re-used for a different outbreak.
 | `index.html` | Page shell: markup, `data-i18n` hooks, script tags | Partly — see "Shell text" below |
 | `styles.css` | Theme tokens, layout, colour ramp (`--r1`…`--r6`) | No |
 | `app.js` | Engine: map layers, sidebar, zone chart, search, time filter, i18n, modal | **No** — holds no figures, dates or place names |
-| `config.drc-bvd-2026.js` | Content: `CFG`, `D`, `T`, `NAT`, `BASE` | Yes |
+| `config.drc-bvd-2026.js` | Content: `CFG`, `D`, `T`, `NAT`, `PROV`, `BASE` | Yes |
 | `vendor/leaflet/` | Leaflet 1.9.4 | No |
 
 Scripts load in order `leaflet.js` → `config.*.js` → `app.js` as plain classic scripts,
@@ -37,6 +37,7 @@ shell text in `index.html`, and point the `<script src>` at the new config.
   - `mob`: mobility; `{}` when none is published
 - **`T`** — every UI string, `T.en` and `T.fr`. The engine's `tx(key)` falls back to English, then to the key.
 - **`NAT`** — national headline (`cases`, `deaths`, `cfr`, `date`). `NAT.cases` is also the denominator for each zone's "share of national".
+- **`PROV`** (optional) — province totals exactly as printed in the source's province table: `{p,c,d,cfr,zt,zn,u}` = province, cases, deaths, printed CFR, zones affected, zones in province, deaths not assigned to any zone. The province picker, snapshot and list read these, so province figures match the source even when some zones are unmapped. Without `PROV` the engine sums the mapped zones in `D.zones`.
 - **`BASE`** — the country and province outlines for the vector base (hidden while OSM tiles are the base).
 
 ## Shell text (still in `index.html`)
@@ -53,7 +54,7 @@ Most of this is also in `T` and gets replaced by `applyStaticI18n()`. The `<titl
 
 Each of these limits what a config can express. Revisit only when an outbreak needs it.
 
-1. **One country, flat province → zone geography.** Each zone has one `p` string. There is no drill-down. The province picker and search are built from `D.zones`.
+1. **One country, flat province → zone geography.** Each zone has one `p` string. There is no drill-down. The province picker and search are built from `PROV` plus `D.zones`.
 2. **Polygons first, dots as fallback.** Zones with a polygon in `D.geo` are drawn as a choropleth. Zones with only `lat/lon` are drawn as dots on the same ramp. The scale is log over the current indicator.
 3. **Fixed indicator set.** The indicators are `c`, `d`, `cfr`, `k` (per 100k), `mob` (in/out) and `risk`. `risk` is a percentile blend of cases, deaths and mobility, computed in `app.js`.
 4. **Time filter = cumulative-at-date.** Zone values at a past date come from the last `D.trends` row on or before it. No row means no data, never interpolation.
