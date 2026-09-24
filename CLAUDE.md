@@ -4,16 +4,16 @@ Context for Claude Code working in this repository.
 
 ## What this project is
 
-A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. It is **plain HTML/CSS/JS in one `index.html`**, using **Leaflet** and **Chart.js** loaded from CDN.
+A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbreak in DRC and Uganda. It is **plain HTML/CSS/JS**, split into a reusable engine (`index.html` shell, `styles.css`, `app.js`) and one outbreak config (`config.drc-bvd-2026.js`) — see [TEMPLATE.md](TEMPLATE.md). Leaflet is vendored in `vendor/leaflet/`; there is no Chart.js.
 
 - There is **NO framework** and **NO build step**. The site runs by opening `index.html` directly in a browser.
-- **Do NOT** convert it to React (or any framework), and **do NOT** add a bundler, package manager, or build tooling. Keep it as vanilla HTML/CSS/JS with CDN scripts.
+- **Do NOT** convert it to React (or any framework), and **do NOT** add a bundler, package manager, or build tooling. Keep it as vanilla HTML/CSS/JS loaded with plain `<script src>` tags (no `fetch()` of local files, so `file://` keeps working).
 
 ## Current design — "Epidemic Intelligence" (redesigned)
 
-The dashboard was rebuilt to a new layout ("Epidemic Intelligence · Bundibugyo 2026"): a full-bleed map with a floating map-indicator selector, search box, log-scaled legend and a Latest-only time bar, plus a right sidebar with a national + provincial overview and a per-zone view (snapshot, trends chart, mobility panel). Leaflet is inlined; charts are hand-drawn SVG (no Chart.js). Key points for future edits:
+The dashboard was rebuilt to a new layout ("Epidemic Intelligence · Bundibugyo 2026"): a full-bleed map with a floating map-indicator selector, search box, log-scaled legend and a Latest-only time bar, plus a right sidebar with a national + provincial overview and a per-zone view (snapshot, trends chart, mobility panel). Leaflet is vendored (`vendor/leaflet/`); charts are hand-drawn SVG (no Chart.js). Key points for future edits:
 
-- **Data model:** all data is a single embedded `const D` object — `D.zones` (51 mapped health zones `{z,p,c,d,lat,lon,pop,cfr,k}`), `D.geo` (N°114 polygons, `properties.z`), `D.cent`, `D.trends` (per-zone daily series, extended with a break to the 04 Aug / 05 Sept cumulative readings), `D.nat2` (national time series whose **last row is the live N°114 headline**), `D.tl`, and `D.mob`. National render uses `live=false`, reading the N°114 row from `D.nat2` (6604 cases / 3175 deaths / CFR 48.1% / 1548 recovered / 851 isolation / 85.7% contact tracing). The previous design's `HZ`/`POP` arrays, `fetch()` of the geojson, `applyStaticI18n`, collapsible panels, etc. are gone.
+- **Data model:** all data is a single `const D` object in `config.drc-bvd-2026.js` — `D.zones` (51 mapped health zones `{z,p,c,d,lat,lon,pop,cfr,k}`), `D.geo` (N°114 polygons, `properties.z`), `D.cent`, `D.trends` (per-zone daily series, extended with a break to the 04 Aug / 05 Sept cumulative readings), `D.nat2` (national time series whose **last row is the live N°114 headline**), `D.tl`, and `D.mob`. National render uses `live=false`, reading the N°114 row from `D.nat2` (6604 cases / 3175 deaths / CFR 48.1% / 1548 recovered / 851 isolation / 85.7% contact tracing). The previous design's `HZ`/`POP` arrays, `fetch()` of the geojson, `applyStaticI18n`, collapsible panels, etc. are gone.
 - **Map base:** OpenStreetMap tiles only (Leaflet), desaturated via the `--tile-filter` CSS. The design's vector base and the Vector/OSM switcher were removed at the maintainer's request; `basePane` is hidden and country labels are a no-op.
 - **Mobility is intentionally empty** (`D.mob={}`) — no Flowminder/flow data is included. The "Mobility volume" indicator, direction toggle and per-zone/province mobility panels all render an explicit "not included in this release" state. Do not populate mobility with invented values.
 - **i18n (EN / FR):** the 🌐 button toggles English ⇄ French. Strings live in a `T={en,fr}` dictionary; static markup carries `data-i18n` / `data-i18n-html` / `data-i18n-ph` / `data-i18n-aria` / `data-i18n-label` and is filled by `applyStaticI18n()`, while the dynamic renderers call `tx(key)`. `setLang()` swaps `LANG`, re-applies static i18n and re-runs the renderers; the choice persists in `localStorage.lang`. **The translate function is `tx`, not `t`** — the render functions already use `t` as a local for the current timeline row, so `t` must not be shadowed. French copy is AI-assisted and needs Francophone review (TODO_KIKI).
@@ -24,8 +24,8 @@ The technical notes further below describe the **previous** design (HZ array, PO
 
 ## Data handling
 
-- The WHO DON607 figures are **embedded inside `index.html`** (in the JS) and are **also mirrored in `data/`** as CSVs.
-- If any figures change, **keep both copies in sync** — update the embedded data in `index.html` and the corresponding file(s) in `data/` together.
+- The figures are **embedded in `config.drc-bvd-2026.js`** (`D`, `NAT`, `CFG`, `T`) and are **also mirrored in `data/`** as CSVs. A few release labels also sit in the `index.html` shell markup (header meta, stamps, download links).
+- If any figures change, **keep all copies in sync** — the config, the `index.html` shell text, and the corresponding file(s) in `data/`. `app.js` holds no figures; if an update needs an `app.js` edit, a value has leaked into the engine.
 - **Never invent or estimate numbers.** Use only figures explicitly cited by **WHO** (Disease Outbreak News) or **Africa CDC**. If a number isn't in a cited source, leave it out rather than guessing.
 - Keep all outputs **aggregated to health-zone level** (or coarser: province/country). Do not produce or display anything more granular than health zone.
 - Keep the **"verify against WHO before publishing"** note visible in the UI. Do not remove it.
@@ -56,8 +56,13 @@ The technical notes further below describe the **previous** design (HZ array, PO
 
 ```
 drc-ebola-tracker/
-├── index.html   # the dashboard (data embedded here)
-├── data/        # six CSV datasets mirrored from index.html
+├── index.html              # page shell: markup only, loads the scripts below
+├── styles.css              # dashboard styles (theme, layout, colour ramp)
+├── app.js                  # engine: map, sidebar, chart, search, time filter, i18n — no figures
+├── config.drc-bvd-2026.js  # outbreak content: CFG settings, D dataset, T strings, NAT, BASE
+├── vendor/leaflet/         # Leaflet 1.9.4
+├── data/                   # CSV/GeoJSON datasets mirrored from the config
+├── TEMPLATE.md             # how to reuse the engine for another outbreak
 ├── README.md
 └── CLAUDE.md
 ```
