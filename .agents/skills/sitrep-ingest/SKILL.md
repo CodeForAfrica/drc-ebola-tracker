@@ -64,7 +64,7 @@ https://insp.cd/wp-json/wp/v2/posts?categories=308&per_page=25&page=1&_fields=id
 - Results are newest-first. `page=1` is enough for a daily run; paginate only for a backfill.
   Requesting a page past the end returns HTTP 400 — treat that as "end of list", not an error.
 - Sitreps are published irregularly: several can appear on one day, and some numbers are never
-  posted (63, 75, 76, 43, 45, 48 are missing as of N°101). Drive off what exists, never off
+  posted (63, 75, 76, 43, 45, 48 are missing as of N°101; 115 as of N°131). Drive off what exists, never off
   "yesterday's number + 1".
 
 Skip any post whose sitrep number already has both CSVs in `data/`.
@@ -164,6 +164,15 @@ contact-tracing rate.
 
 Cross-check `suspects_today` against the narrative in §1.1.3, which restates it
 ("277 (20,7%) ont été validées comme cas suspects"). If banner and narrative disagree, stop.
+The wording varies ("Toutes les 408 alertes validées comme cas suspects", "413 (26,3%) alertes ont été
+validées"), and the Total row is sometimes on the same line as `Total`, sometimes on the next. Its
+numbers use thousands spaces (`1 155 174 …` is 1155 then 174), so split it into its nine columns with
+the checks received vivants + décédés = total, and investigated ≤ validated, rather than on spaces.
+
+Layout drift seen in N°116–131: the zone count on page 1 can share a line with the narrative column
+(`62 Zones de santé des décès du jour à 35.`), so match it at line start. The contact-tracing
+figure is garbled more than one way (`78 (D , u 3 Jou r % )`, `8 ( 9 Du , J 3 ou % r)`): take all
+digits after the recovered figure and put the decimal point before the last one.
 
 ## Step 7 — Parse the zone table
 
@@ -181,8 +190,16 @@ Line-parsing rules:
 - Ituri has an `A ventiler` row: deaths recorded in CTEs but **not yet assigned to a zone**
   (250 in N°101). Keep it as its own row so deaths reconcile — `confirmed_cases`,
   `population_2024`, `zone_cfr_pct` and `cases_per_100k` are all empty for it.
-- Province names in the PDF use accents (`Haut-Uélé`, `Bas Uélé`). Normalise to the CSV forms
-  `Haut-Uele`, `Bas-Uele`, `Nord-Kivu`, `Sud-Kivu`, `Ituri`, `Tshopo`.
+- The row is also printed `A ventiler *`, `A ventiler*` or `À ventiler*`. Normalise all of them
+  to `A ventiler`, or the row fails to match and its text runs into the next row.
+- `Létalité` can have two decimals (`100,00%`, from N°119), and is occasionally not printed at all
+  (Buta in N°116: `Buta 1 1 1 0`). Leave `zone_cfr_pct` empty when it is missing. Never compute it.
+- Province names in the PDF use accents (`Haut-Uélé`, `Bas Uélé`, `Sud Ubangi`). Normalise to the CSV forms
+  `Haut-Uele`, `Bas-Uele`, `Nord-Kivu`, `Sud-Kivu`, `Ituri`, `Tshopo`, `Sud-Ubangi`.
+- There is a health zone called `Tshopo` inside Tshopo province. Treat a province name as a subtotal
+  only the first time it appears.
+- Fail the run if any zone name contains a digit or `%`, or text is left over at the end of the table.
+  That is the sign of a row that did not match and ran into its neighbour.
 - Keep zone names exactly as the PDF spells them (`Gethy`, not the older `Gety`).
 
 ## Step 8 — Enrich and compute
