@@ -158,15 +158,16 @@ function arrow(pts,colour,at){const i=Math.max(1,Math.floor(pts.length*at)),p=pt
    <path d="M2.8 2 L10 6.5 L2.8 11 Z" fill="${colour}"/></svg>`})});}
 /* both directions drawn when a zone is selected, per the sidebar */
 function drawFlows(){flowLayer.clearLayers();
- if(!S.sel)return;const m=D.mob[S.sel];if(!m)return;
+ if(S.ind!=='mob'||!S.sel)return;const m=D.mob[S.sel];if(!m)return;
  const home=D.cent[S.sel]||(Z[S.sel]?[Z[S.sel].lat,Z[S.sel].lon]:null);if(!home)return;
  const put=(pairs,colour,inbound)=>{const max=Math.max(...pairs.map(p=>p[1]),1);
-  pairs.slice(0,5).forEach(([name,v])=>{const other=D.cent[name];if(!other)return;
+  pairs.slice(0,5).forEach(([name,v,lo,hi])=>{const other=D.cent[name];if(!other)return;
    const from=inbound?other:home,to=inbound?home:other;
    const pts=curve(from,to,inbound?.13:-.13),w=1.3+(v/max)*4.6;
+   const rng=(lo!=null&&hi!=null)?`<br><span style="color:var(--dim)">${tx('mob_range')} ${fmt(lo)}–${fmt(hi)}</span>`:'';
    L.polyline(pts,{color:colour,weight:w,opacity:.76,lineCap:'round'})
     .bindTooltip(`<b>${inbound?name:S.sel}</b> → <b>${inbound?S.sel:name}</b><br>`+
-      `${inbound?'Inbound to':'Outbound from'} ${S.sel}<br><b>${fmt(v)}</b> estimated relocations`,{sticky:true})
+      `${inbound?tx('mob_inbound'):tx('mob_outbound')} ${S.sel}<br><b>${fmt(v)}</b> ${tx('mob_reloc')}${rng}`,{sticky:true})
     .addTo(flowLayer);
    flowLayer.addLayer(arrow(pts,colour,.64));flowLayer.addLayer(arrow(pts,colour,.93));
    L.circleMarker(other,{radius:3,color:colour,weight:1.4,fillOpacity:.95,interactive:false}).addTo(flowLayer);});};
@@ -183,7 +184,7 @@ function repaint(){gj.setStyle(style);drawDots();drawFlows();drawLabels();
  const sc=scale();
  $('#legTitle').textContent=NAMES()[S.ind]+(S.ind==='mob'?` — ${S.dir==='in'?tx('leg_dir_in'):tx('leg_dir_out')}`:'');
  $('#legHi').textContent=S.ind==='cfr'?Math.round(sc.max)+'%':S.ind==='risk'?Math.round(sc.max):fmt(sc.max);
- $('#fkey').hidden=true; /* mobility flows not included in this release */
+ $('#fkey').hidden=!(S.ind==='mob'&&S.sel); /* flow key shows when a zone's mobility arrows are drawn */
  $('#legNote').textContent=S.ind==='mob'
   ?tx('leg_note_mob')
   :tx('leg_note_default');}
@@ -334,19 +335,21 @@ function renderZoneMob(z){
  const m=D.mob[z.z],host=$('#zmob');
  if(!m){host.innerHTML=`<p class="note" style="text-align:center;padding:14px 0">${tx('mob_none_pre')} ${z.z}.<br>${tx('mob_none_post')}</p>`;return;}
  const rows=(pairs,colour)=>{const max=Math.max(...pairs.map(p=>p[1]),1);
-  return pairs.slice(0,5).map(([n,v])=>`<div class="row" data-goto="${n}" role="button" tabindex="0">
+  return pairs.slice(0,5).map(([n,v,lo,hi])=>{const t=(lo!=null&&hi!=null)?` title="${tx('mob_range')} ${fmt(lo)}–${fmt(hi)}"`:'';
+   return `<div class="row" data-goto="${n}" role="button" tabindex="0"${t}>
    <span class="fn">${n}</span><span class="fb"><i style="width:${v/max*100}%;background:${colour}"></i></span>
-   <span class="fv mono">${fmt(v)}</span></div>`).join('');};
+   <span class="fv mono">${fmt(v)}</span></div>`;}).join('');};
+ const supp=n=>n>0?`<span class="mobsupp"> · +${n} ${tx('mob_supp')}</span>`:'';
  host.innerHTML=`
   <div class="mini" style="grid-template-columns:1fr 1fr">
-    <div class="m"><div class="ml">Total in</div><div class="mv" style="color:var(--teal)">${fmt(m.tin)}</div></div>
-    <div class="m"><div class="ml">Total out</div><div class="mv" style="color:var(--accent)">${fmt(m.tout)}</div></div>
+    <div class="m"><div class="ml">${tx('mob_total_in')}</div><div class="mv" style="color:var(--teal)">${fmt(m.tin)}</div></div>
+    <div class="m"><div class="ml">${tx('mob_total_out')}</div><div class="mv" style="color:var(--accent)">${fmt(m.tout)}</div></div>
   </div>
-  <div class="dirhead"><span class="pill in">→ In</span> top origins moving into ${z.z}</div>
+  <div class="dirhead"><span class="pill in">${tx('mob_pill_in')}</span> ${tx('mob_in_head')} ${z.z}${supp(m.inSup)}</div>
   ${rows(m.in,'var(--teal)')}
-  <div class="dirhead"><span class="pill out">Out →</span> top destinations from ${z.z}</div>
+  <div class="dirhead"><span class="pill out">${tx('mob_pill_out')}</span> ${tx('mob_out_head')} ${z.z}${supp(m.outSup)}</div>
   ${rows(m.out,'var(--accent)')}
-  <p class="note">${CFG.mobNote}</p>`;
+  <p class="note">${tx('mob_note')}</p>`;
  host.querySelectorAll('[data-goto]').forEach(el=>{
   const go=()=>{const n=el.dataset.goto;if(Z[n])select(n);else map.flyTo(D.cent[n],8,{duration:.6});};
   el.onclick=go;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});}
