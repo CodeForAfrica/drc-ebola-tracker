@@ -198,7 +198,11 @@ function drawFlows(){flowLayer.clearLayers();
    /* same 3 fixed-size arrowheads on every flow, all following the curve toward the destination */
    FLOW_AT.forEach(at=>flowLayer.addLayer(arrow(pts,colour,at)));
    L.circleMarker(other,{radius:3,color:colour,weight:1.4,fillOpacity:.95,interactive:false}).addTo(flowLayer);});};
- put(m.in,css('--teal'),true);put(m.out,css('--accent'),false);}
+ /* the In/Out toggle filters the map too: each put() draws a direction's lines
+    AND its arrowheads together, so only the selected direction is shown (lines
+    and arrows always filtered consistently). */
+ if(S.dir==='in')put(m.in,css('--teal'),true);
+ else put(m.out,css('--accent'),false);}
 
 const tip=$('#tip');
 function tipZone(ev,n){const z=Z[n];if(!z)return;
@@ -212,6 +216,8 @@ function repaint(){gj.setStyle(style);drawDots();drawFlows();drawLabels();
  $('#legTitle').textContent=NAMES()[S.ind]+(S.ind==='mob'?` — ${S.dir==='in'?tx('leg_dir_in'):tx('leg_dir_out')}`:'');
  $('#legHi').textContent=S.ind==='cfr'?Math.round(sc.max)+'%':S.ind==='risk'?Math.round(sc.max):fmt(sc.max);
  $('#fkey').hidden=!(S.ind==='mob'&&S.sel); /* flow key shows when a zone's mobility arrows are drawn */
+ if(S.ind==='mob'&&S.sel){const fr=$('#fkey').querySelectorAll('.fkey'); /* show only the active direction's key row */
+  if(fr[0])fr[0].style.display=S.dir==='in'?'':'none';if(fr[1])fr[1].style.display=S.dir==='out'?'':'none';}
  $('#legNote').textContent=S.ind==='mob'
   ?tx('leg_note_mob')
   :tx('leg_note_default');}
