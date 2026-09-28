@@ -161,10 +161,11 @@ function arrow(pts,colour,at){const n=pts.length,i=Math.max(0,Math.min(n-1,Math.
  let a=i,b=i,pa=PT(i),pb=PT(i),g=0;
  while(Math.hypot(pb.x-pa.x,pb.y-pa.y)<8&&(a>0||b<n-1)&&g++<n){if(a>0)a--;if(b<n-1)b++;pa=PT(a);pb=PT(b);}
  const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
+ /* bold, solid, outlined arrowhead (constant 22px) — unmistakably a direction marker */
  return L.marker(pts[i],{interactive:false,keyboard:false,icon:L.divIcon({className:'arrowhead',
-  iconSize:[13,13],iconAnchor:[6.5,6.5],
-  html:`<svg width="13" height="13" viewBox="0 0 13 13" style="transform:rotate(${ang}deg)">
-   <path d="M2.8 2 L10 6.5 L2.8 11 Z" fill="${colour}"/></svg>`})});}
+  iconSize:[22,22],iconAnchor:[11,11],
+  html:`<svg width="22" height="22" viewBox="0 0 24 24" style="transform:rotate(${ang}deg)">
+   <path d="M3 3.5 L21.5 12 L3 20.5 L8.5 12 Z" fill="${colour}" stroke="#0a0e13" stroke-width="1.5" stroke-linejoin="round"/></svg>`})});}
 /* fixed positions for the 3 arrowheads on every flow; the last stays just short
    of the endpoint so it points at — rather than sits on — the destination marker */
 const FLOW_AT=[.38,.60,.82];
@@ -300,12 +301,16 @@ function drawZoneChart(name){
  const P=k=>pts.map((p,i)=>p[k]==null?null:[X(i),Y(p[k])]).filter(Boolean);
  const areaC=(()=>{const g=P('c');if(g.length<2)return'';
   return `${smooth(g)} L ${g[g.length-1][0]},${mt+ih} L ${g[0][0]},${mt+ih} Z`;})();
- /* x-axis: ~6 evenly-spaced ticks over the real-dated rows (break rows have x=''),
-    formatted "D Mon". Labels only; the underlying dates are not changed. */
+ /* x-axis: evenly-spaced ticks over the real-dated rows (break rows have x='').
+    The number of ticks and the label format adapt to the chart's rendered width
+    so more dates show without overlapping. Labels only; dates are not changed. */
  const MON=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
- const fmtD=x=>{const a=(x||'').split('-');return a.length===2?(+a[1])+' '+(MON[+a[0]]||''):x;};
  const realIdx=pts.map((p,i)=>p.x?i:-1).filter(i=>i>=0);
- const nT=Math.min(6,realIdx.length);
+ const HW=host.clientWidth||W,iwPx=HW*(iw/W);          // rendered plot-area width in px
+ let nT=Math.max(4,Math.min(realIdx.length,Math.floor(iwPx/42)));  // ~one label per 42px
+ const dense=nT>7;                                     // compact numeric format when crowded
+ const fmtD=x=>{const a=(x||'').split('-');if(a.length!==2)return x||'';
+   return dense?(+a[1])+'/'+(+a[0]):(+a[1])+' '+(MON[+a[0]]||'');};
  const tickIdx=nT<=1?realIdx.slice()
    :[...new Set(Array.from({length:nT},(_,k)=>realIdx[Math.round(k/(nT-1)*(realIdx.length-1))]))];
  const xticks=tickIdx.map((i,pos)=>{
