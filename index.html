@@ -93,8 +93,8 @@
       </div>
       <div class="rlab"><span id="legLo">0</span><span id="legHi">—</span></div>
       <div id="fkey" hidden>
-        <div class="fkey"><svg width="26" height="9"><line x1="0" y1="4.5" x2="18" y2="4.5" stroke="var(--teal)" stroke-width="2.4"/><path d="M18 1.2 L25 4.5 L18 7.8Z" fill="var(--teal)"/></svg> inbound → zone</div>
-        <div class="fkey"><svg width="26" height="9"><line x1="0" y1="4.5" x2="18" y2="4.5" stroke="var(--accent)" stroke-width="2.4"/><path d="M18 1.2 L25 4.5 L18 7.8Z" fill="var(--accent)"/></svg> zone → outbound</div>
+        <div class="fkey"><svg width="26" height="9"><line x1="0" y1="4.5" x2="18" y2="4.5" stroke="var(--teal)" stroke-width="2.4"/><path d="M18 1.2 L25 4.5 L18 7.8Z" fill="var(--teal)"/></svg> <span data-i18n="fkey_in">inbound → zone</span></div>
+        <div class="fkey"><svg width="26" height="9"><line x1="0" y1="4.5" x2="18" y2="4.5" stroke="var(--accent)" stroke-width="2.4"/><path d="M18 1.2 L25 4.5 L18 7.8Z" fill="var(--accent)"/></svg> <span data-i18n="fkey_out">zone → outbound</span></div>
       </div>
       <div class="legnote" id="legNote">Log-scaled. Hatched outline = no data reported.</div>
     </div>
@@ -156,7 +156,7 @@
     <p data-i18n-html="mm_cov1">Twelve health zones reported in N°135 are named but <b>not yet mapped</b> — Bafwasende, Biena, Bulu, Buta, Dungu, Ganga, Gombari, Kayna, Manguredjipa, Mutwanga, Tshopo and Viadana (68 confirmed cases / 22 deaths). Bas-Uélé and Sud-Ubangi remain unmapped as provinces for this reason. They are absent from the map, so the 51 mapped zones sum to <b>7,999 cases / 3,386 deaths</b>.</p>
     <p data-i18n-html="mm_cov2">A further <b>493 confirmed Ituri deaths</b> are pending classification by health zone (&ldquo;A ventiler&rdquo;) and are excluded from zone-level death totals: national deaths 3,901 = 3,408 zone-level + 493. Per-zone case shares use the national total (8,067). Province totals are the SitRep&rsquo;s printed figures, so Ituri&rsquo;s 2,834 deaths include these 493, and provinces with unmapped zones still show their full reported totals.</p>
     <h4 data-i18n="mm_h_methods">Methods</h4>
-    <p data-i18n-html="mm_methods">CFR is confirmed deaths ÷ confirmed cases and is right-censored while cases remain unresolved. Recovered is reported nationally only. Cumulative trends are by SitRep report date, not symptom onset; gaps are missing SitReps and are not interpolated. <b>Mobility flows are not included in this release.</b></p>
+    <p data-i18n-html="mm_methods">CFR is confirmed deaths ÷ confirmed cases and is right-censored while cases remain unresolved. Recovered is reported nationally only. Cumulative trends are by SitRep report date, not symptom onset; gaps are missing SitReps and are not interpolated. <b>Mobility flows are Flowminder / Vodacom estimated relocations for April 2026</b> (Vodacom subscribers only; Flowminder-derived estimates, not exact counts of people), from the INRB-UMIE open data release. Flows are shown only between mapped health zones; directed pairs under 15 are redacted at source and are never counted as zero. Uncertainty ranges (published lower–upper bounds) are shown on flow tooltips.</p>
     <h4 data-i18n="mm_h_dl">Download</h4>
     <div class="dl">
       <a href="data/zones_sitrep135.csv" download data-i18n="mm_dl1">Cases by health zone (N°135)</a>
