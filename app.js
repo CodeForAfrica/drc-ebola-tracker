@@ -169,15 +169,26 @@ function arrow(pts,colour,at){const n=pts.length,i=Math.max(0,Math.min(n-1,Math.
 /* fixed positions for the 3 arrowheads on every flow; the last stays just short
    of the endpoint so it points at — rather than sits on — the destination marker */
 const FLOW_AT=[.38,.60,.82];
+/* IN and OUT of the same route share one base curve, then get a constant ±5px
+   lateral offset (opposite per direction) so they read as two parallel lanes —
+   clearly the same route, but never superimposed. The offset is a fixed pixel
+   amount (not derived from the flow value) so separation is visible even for
+   short adjacent-zone flows, and identical for every flow. */
+const FLOW_OFFSET_PX=5;
+function flowPath(home,other,inbound){
+ const from=inbound?other:home,to=inbound?home:other;
+ const pts=curve(from,to,inbound?.13:-.13);           // identical base route both ways
+ const H=map.latLngToLayerPoint(home),O=map.latLngToLayerPoint(other);
+ let nx=-(O.y-H.y),ny=(O.x-H.x);const L2=Math.hypot(nx,ny)||1;nx/=L2;ny/=L2; // unit perp to the route
+ const s=(inbound?1:-1)*FLOW_OFFSET_PX;
+ return pts.map(p=>{const q=map.latLngToLayerPoint(p);return map.layerPointToLatLng(L.point(q.x+nx*s,q.y+ny*s));});}
 /* both directions drawn when a zone is selected, per the sidebar */
 function drawFlows(){flowLayer.clearLayers();
  if(S.ind!=='mob'||!S.sel)return;const m=D.mob[S.sel];if(!m)return;
  const home=D.cent[S.sel]||(Z[S.sel]?[Z[S.sel].lat,Z[S.sel].lon]:null);if(!home)return;
  const put=(pairs,colour,inbound)=>{
   pairs.slice(0,5).forEach(([name,v,lo,hi])=>{const other=D.cent[name];if(!other)return;
-   const from=inbound?other:home,to=inbound?home:other;
-   /* curve inbound and outbound opposite ways so overlapping flows stay distinct */
-   const pts=curve(from,to,inbound?.13:-.13);
+   const pts=flowPath(home,other,inbound);
    const rng=(lo!=null&&hi!=null)?`<br><span style="color:var(--dim)">${tx('mob_range')} ${fmt(lo)}–${fmt(hi)}</span>`:'';
    /* constant weight: the flow value is NEVER encoded in arrow size — only in the label/tooltip */
    L.polyline(pts,{color:colour,weight:2.4,opacity:.82,lineCap:'round'})
