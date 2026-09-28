@@ -41,7 +41,7 @@ D.zones.forEach(z=>{const m=D.mob[z.z];z.tin=m?m.tin:null;z.tout=m?m.tout:null;z
  D.zones.forEach(z=>{const p=[f[0](z.c),f[1](z.d),f[2](z.tin),f[3](z.tout)].filter(x=>x!=null);
   z.risk=p.length?p.reduce((a,b)=>a+b,0)/p.length*100:null;});})();
 
-let S={ind:'c',dir:'in',sel:null,prov:CFG.defaultProv,t:null,month:null,playing:false};
+let S={ind:'c',dir:'all',sel:null,prov:CFG.defaultProv,t:null,month:null,playing:false};
 /* keep the latest-release snapshot so "Latest" can always be restored */
 D.zones.forEach(z=>{z.c0=z.c;z.d0=z.d;z.cfr0=z.cfr;z.k0=z.k;});
 const TL=D.tl, MONTHS=[...new Set(TL.map(t=>t.d.slice(0,7)))];
@@ -69,7 +69,9 @@ function applyTime(){
   z.c=v.c; z.d=v.d;
   z.cfr=(v.c&&v.d!=null)?v.d/v.c*100:null;
   z.k=(z.pop&&v.c)?v.c/z.pop*1e5:null;});}
-const value=z=>S.ind==='mob'?(S.dir==='in'?z.tin:z.tout):z[S.ind];
+const value=z=>S.ind==='mob'
+ ?(S.dir==='in'?z.tin:S.dir==='out'?z.tout:(z.tin==null&&z.tout==null?null:(z.tin||0)+(z.tout||0)))
+ :z[S.ind];
 const fmtVal=z=>{const v=value(z);if(v==null)return null;
  if(S.ind==='cfr')return v.toFixed(0)+'%';
  if(S.ind==='risk'||S.ind==='k')return v.toFixed(0);return fmt(v);};
@@ -198,11 +200,11 @@ function drawFlows(){flowLayer.clearLayers();
    /* same 3 fixed-size arrowheads on every flow, all following the curve toward the destination */
    FLOW_AT.forEach(at=>flowLayer.addLayer(arrow(pts,colour,at)));
    L.circleMarker(other,{radius:3,color:colour,weight:1.4,fillOpacity:.95,interactive:false}).addTo(flowLayer);});};
- /* the In/Out toggle filters the map too: each put() draws a direction's lines
-    AND its arrowheads together, so only the selected direction is shown (lines
-    and arrows always filtered consistently). */
- if(S.dir==='in')put(m.in,css('--teal'),true);
- else put(m.out,css('--accent'),false);}
+ /* the All/In/Out toggle filters the map too: each put() draws a direction's
+    lines AND its arrowheads together, so lines and arrows are always filtered
+    consistently. ALL draws both (kept on separate lanes via flowPath). */
+ if(S.dir!=='out')put(m.in,css('--teal'),true);
+ if(S.dir!=='in')put(m.out,css('--accent'),false);}
 
 const tip=$('#tip');
 function tipZone(ev,n){const z=Z[n];if(!z)return;
@@ -213,19 +215,20 @@ function tipZone(ev,n){const z=Z[n];if(!z)return;
 function hideTip(){tip.style.display='none';}
 function repaint(){gj.setStyle(style);drawDots();drawFlows();drawLabels();
  const sc=scale();
- $('#legTitle').textContent=NAMES()[S.ind]+(S.ind==='mob'?` — ${S.dir==='in'?tx('leg_dir_in'):tx('leg_dir_out')}`:'');
+ $('#legTitle').textContent=NAMES()[S.ind]+(S.ind==='mob'?` — ${S.dir==='in'?tx('leg_dir_in'):S.dir==='out'?tx('leg_dir_out'):tx('leg_dir_all')}`:'');
  $('#legHi').textContent=S.ind==='cfr'?Math.round(sc.max)+'%':S.ind==='risk'?Math.round(sc.max):fmt(sc.max);
  $('#fkey').hidden=!(S.ind==='mob'&&S.sel); /* flow key shows when a zone's mobility arrows are drawn */
- if(S.ind==='mob'&&S.sel){const fr=$('#fkey').querySelectorAll('.fkey'); /* show only the active direction's key row */
-  if(fr[0])fr[0].style.display=S.dir==='in'?'':'none';if(fr[1])fr[1].style.display=S.dir==='out'?'':'none';}
+ if(S.ind==='mob'&&S.sel){const fr=$('#fkey').querySelectorAll('.fkey'); /* show the active direction's key row(s); ALL shows both */
+  if(fr[0])fr[0].style.display=S.dir==='out'?'none':'';if(fr[1])fr[1].style.display=S.dir==='in'?'none':'';}
  $('#legNote').textContent=S.ind==='mob'
   ?tx('leg_note_mob')
   :tx('leg_note_default');}
 
 $('#indicator').addEventListener('change',e=>{S.ind=e.target.value;
  $('#mobRow').classList.toggle('on',S.ind==='mob');repaint();});
-$('#mIn').onclick=()=>setDir('in');$('#mOut').onclick=()=>setDir('out');
-function setDir(d){S.dir=d;$('#mIn').setAttribute('aria-pressed',String(d==='in'));
+$('#mAll').onclick=()=>setDir('all');$('#mIn').onclick=()=>setDir('in');$('#mOut').onclick=()=>setDir('out');
+function setDir(d){S.dir=d;$('#mAll').setAttribute('aria-pressed',String(d==='all'));
+ $('#mIn').setAttribute('aria-pressed',String(d==='in'));
  $('#mOut').setAttribute('aria-pressed',String(d==='out'));repaint();}
 
 /* ================= SIDEBAR ================= */
