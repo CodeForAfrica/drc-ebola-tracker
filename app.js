@@ -150,26 +150,41 @@ function curve(a,b,bend){const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,dx=b[0]-a[0],dy
  for(let t=0;t<=1.0001;t+=1/26){const u=1-t;
   p.push([u*u*a[0]+2*u*t*cx+t*t*b[0],u*u*a[1]+2*u*t*cy+t*t*b[1]]);}
  return p;}
-function arrow(pts,colour,at){const i=Math.max(1,Math.floor(pts.length*at)),p=pts[i-1],q=pts[i];
- const ang=Math.atan2(q[1]-p[1],q[0]-p[0])*180/Math.PI;
- return L.marker(q,{interactive:false,keyboard:false,icon:L.divIcon({className:'arrowhead',
+/* Fixed-size arrowhead placed at fraction `at` of the curve, rotated to the
+   local tangent. Angle is taken in projected pixel space so it follows the
+   curve correctly and stays right at every zoom. Size is constant — it never
+   encodes the flow value. */
+function arrow(pts,colour,at){const n=pts.length,i=Math.max(0,Math.min(n-1,Math.round(n*at)));
+ const PT=k=>map.latLngToLayerPoint(pts[Math.max(0,Math.min(n-1,k))]);
+ /* widen the tangent window around i until the chord is long enough for a stable
+    angle: local (curve-following) on long flows, the whole chord on short ones */
+ let a=i,b=i,pa=PT(i),pb=PT(i),g=0;
+ while(Math.hypot(pb.x-pa.x,pb.y-pa.y)<8&&(a>0||b<n-1)&&g++<n){if(a>0)a--;if(b<n-1)b++;pa=PT(a);pb=PT(b);}
+ const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
+ return L.marker(pts[i],{interactive:false,keyboard:false,icon:L.divIcon({className:'arrowhead',
   iconSize:[13,13],iconAnchor:[6.5,6.5],
   html:`<svg width="13" height="13" viewBox="0 0 13 13" style="transform:rotate(${ang}deg)">
    <path d="M2.8 2 L10 6.5 L2.8 11 Z" fill="${colour}"/></svg>`})});}
+/* fixed positions for the 3 arrowheads on every flow; the last stays just short
+   of the endpoint so it points at — rather than sits on — the destination marker */
+const FLOW_AT=[.38,.60,.82];
 /* both directions drawn when a zone is selected, per the sidebar */
 function drawFlows(){flowLayer.clearLayers();
  if(S.ind!=='mob'||!S.sel)return;const m=D.mob[S.sel];if(!m)return;
  const home=D.cent[S.sel]||(Z[S.sel]?[Z[S.sel].lat,Z[S.sel].lon]:null);if(!home)return;
- const put=(pairs,colour,inbound)=>{const max=Math.max(...pairs.map(p=>p[1]),1);
+ const put=(pairs,colour,inbound)=>{
   pairs.slice(0,5).forEach(([name,v,lo,hi])=>{const other=D.cent[name];if(!other)return;
    const from=inbound?other:home,to=inbound?home:other;
-   const pts=curve(from,to,inbound?.13:-.13),w=1.3+(v/max)*4.6;
+   /* curve inbound and outbound opposite ways so overlapping flows stay distinct */
+   const pts=curve(from,to,inbound?.13:-.13);
    const rng=(lo!=null&&hi!=null)?`<br><span style="color:var(--dim)">${tx('mob_range')} ${fmt(lo)}–${fmt(hi)}</span>`:'';
-   L.polyline(pts,{color:colour,weight:w,opacity:.76,lineCap:'round'})
+   /* constant weight: the flow value is NEVER encoded in arrow size — only in the label/tooltip */
+   L.polyline(pts,{color:colour,weight:2.4,opacity:.82,lineCap:'round'})
     .bindTooltip(`<b>${inbound?name:S.sel}</b> → <b>${inbound?S.sel:name}</b><br>`+
       `${inbound?tx('mob_inbound'):tx('mob_outbound')} ${S.sel}<br><b>${fmt(v)}</b> ${tx('mob_reloc')}${rng}`,{sticky:true})
     .addTo(flowLayer);
-   flowLayer.addLayer(arrow(pts,colour,.64));flowLayer.addLayer(arrow(pts,colour,.93));
+   /* same 3 fixed-size arrowheads on every flow, all following the curve toward the destination */
+   FLOW_AT.forEach(at=>flowLayer.addLayer(arrow(pts,colour,at)));
    L.circleMarker(other,{radius:3,color:colour,weight:1.4,fillOpacity:.95,interactive:false}).addTo(flowLayer);});};
  put(m.in,css('--teal'),true);put(m.out,css('--accent'),false);}
 
@@ -278,9 +293,27 @@ function drawZoneChart(name){
  const W=344,H=152,ml=34,mr=10,mt=12,mb=24,iw=W-ml-mr,ih=H-mt-mb;
  const max=Math.max(...pts.map(p=>Math.max(p.c||0,p.d||0)),1);
  const X=i=>ml+(pts.length===1?iw/2:i/(pts.length-1)*iw),Y=v=>mt+ih-(v/max)*ih;
- const P=k=>pts.map((p,i)=>p[k]==null?null:[X(i),Y(p[k])]);
- const areaC=(()=>{const g=P('c').filter(Boolean);if(g.length<2)return'';
+ /* Keep only real observations (drop null/missing dates) so the line is drawn
+    continuously across gaps. No values are invented: missing dates are simply
+    skipped and the surrounding real points are connected. Their true x-position
+    (by row index) is preserved, so the gap still reads as a wider span. */
+ const P=k=>pts.map((p,i)=>p[k]==null?null:[X(i),Y(p[k])]).filter(Boolean);
+ const areaC=(()=>{const g=P('c');if(g.length<2)return'';
   return `${smooth(g)} L ${g[g.length-1][0]},${mt+ih} L ${g[0][0]},${mt+ih} Z`;})();
+ /* x-axis: ~6 evenly-spaced ticks over the real-dated rows (break rows have x=''),
+    formatted "D Mon". Labels only; the underlying dates are not changed. */
+ const MON=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ const fmtD=x=>{const a=(x||'').split('-');return a.length===2?(+a[1])+' '+(MON[+a[0]]||''):x;};
+ const realIdx=pts.map((p,i)=>p.x?i:-1).filter(i=>i>=0);
+ const nT=Math.min(6,realIdx.length);
+ const tickIdx=nT<=1?realIdx.slice()
+   :[...new Set(Array.from({length:nT},(_,k)=>realIdx[Math.round(k/(nT-1)*(realIdx.length-1))]))];
+ const xticks=tickIdx.map((i,pos)=>{
+   const last=pos===tickIdx.length-1,first=pos===0;
+   const anchor=first?'start':last?'end':'middle',tx0=first?ml:last?W-mr:X(i);
+   return `<line x1="${X(i)}" y1="${mt+ih}" x2="${X(i)}" y2="${mt+ih+3}" stroke="var(--chart-tick)"/>`
+     +`<text x="${tx0}" y="${H-4}" font-size="8" fill="var(--chart-tick)" text-anchor="${anchor}">${fmtD(pts[i].x)}</text>`;
+  }).join('');
  host.innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img"
    aria-label="Cumulative confirmed cases and deaths over time for ${name}">
   <defs><linearGradient id="gz" x1="0" y1="0" x2="0" y2="1">
@@ -290,8 +323,8 @@ function drawZoneChart(name){
   <path d="${areaC}" fill="url(#gz)"/>
   <path d="${smooth(P('c'))}" fill="none" stroke="var(--r4)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="${smooth(P('d'))}" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  <g id="gpts">${pts.map((p,i)=>`<g class="hpt" data-i="${i}">
-    <circle cx="${X(i)}" cy="${Y(p.c||0)}" r="2.4" fill="var(--r4)"/>
+  <g id="gpts">${pts.map((p,i)=>p.c==null?'':`<g class="hpt" data-i="${i}">
+    <circle cx="${X(i)}" cy="${Y(p.c)}" r="2.4" fill="var(--r4)"/>
     ${p.d!=null?`<circle cx="${X(i)}" cy="${Y(p.d)}" r="2.1" fill="var(--teal)"/>`:''}
     <rect x="${X(i)-iw/pts.length/2}" y="${mt}" width="${iw/pts.length}" height="${ih}" fill="transparent"/>
    </g>`).join('')}</g>
@@ -300,8 +333,7 @@ function drawZoneChart(name){
      return i<0?'':`<line x1="${X(i)}" y1="${mt}" x2="${X(i)}" y2="${mt+ih}" stroke="var(--blue)" stroke-width="1.2" stroke-dasharray="3 2"/>`;})()}
   <text x="2" y="${mt+7}" font-size="8.5" fill="var(--chart-tick)">${fmt(max)}</text>
   <text x="2" y="${mt+ih+3}" font-size="8.5" fill="var(--chart-tick)">0</text>
-  <text x="${ml}" y="${H-5}" font-size="8.5" fill="var(--chart-tick)">${pts[0].x}</text>
-  <text x="${W-mr}" y="${H-5}" font-size="8.5" fill="var(--chart-tick)" text-anchor="end">${pts[pts.length-1].x}</text>
+  ${xticks}
  </svg>`;
  host.querySelectorAll('.hpt').forEach(g=>{
   const i=+g.dataset.i,p=pts[i];
