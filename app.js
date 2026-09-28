@@ -161,22 +161,34 @@ function arrow(pts,colour,at){const n=pts.length,i=Math.max(0,Math.min(n-1,Math.
  let a=i,b=i,pa=PT(i),pb=PT(i),g=0;
  while(Math.hypot(pb.x-pa.x,pb.y-pa.y)<8&&(a>0||b<n-1)&&g++<n){if(a>0)a--;if(b<n-1)b++;pa=PT(a);pb=PT(b);}
  const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
+ /* bold, solid, outlined arrowhead (constant 22px) — unmistakably a direction marker */
  return L.marker(pts[i],{interactive:false,keyboard:false,icon:L.divIcon({className:'arrowhead',
-  iconSize:[13,13],iconAnchor:[6.5,6.5],
-  html:`<svg width="13" height="13" viewBox="0 0 13 13" style="transform:rotate(${ang}deg)">
-   <path d="M2.8 2 L10 6.5 L2.8 11 Z" fill="${colour}"/></svg>`})});}
+  iconSize:[22,22],iconAnchor:[11,11],
+  html:`<svg width="22" height="22" viewBox="0 0 24 24" style="transform:rotate(${ang}deg)">
+   <path d="M3 3.5 L21.5 12 L3 20.5 L8.5 12 Z" fill="${colour}" stroke="#0a0e13" stroke-width="1.5" stroke-linejoin="round"/></svg>`})});}
 /* fixed positions for the 3 arrowheads on every flow; the last stays just short
    of the endpoint so it points at — rather than sits on — the destination marker */
 const FLOW_AT=[.38,.60,.82];
+/* IN and OUT of the same route share one base curve, then get a constant ±5px
+   lateral offset (opposite per direction) so they read as two parallel lanes —
+   clearly the same route, but never superimposed. The offset is a fixed pixel
+   amount (not derived from the flow value) so separation is visible even for
+   short adjacent-zone flows, and identical for every flow. */
+const FLOW_OFFSET_PX=5;
+function flowPath(home,other,inbound){
+ const from=inbound?other:home,to=inbound?home:other;
+ const pts=curve(from,to,inbound?.13:-.13);           // identical base route both ways
+ const H=map.latLngToLayerPoint(home),O=map.latLngToLayerPoint(other);
+ let nx=-(O.y-H.y),ny=(O.x-H.x);const L2=Math.hypot(nx,ny)||1;nx/=L2;ny/=L2; // unit perp to the route
+ const s=(inbound?1:-1)*FLOW_OFFSET_PX;
+ return pts.map(p=>{const q=map.latLngToLayerPoint(p);return map.layerPointToLatLng(L.point(q.x+nx*s,q.y+ny*s));});}
 /* both directions drawn when a zone is selected, per the sidebar */
 function drawFlows(){flowLayer.clearLayers();
  if(S.ind!=='mob'||!S.sel)return;const m=D.mob[S.sel];if(!m)return;
  const home=D.cent[S.sel]||(Z[S.sel]?[Z[S.sel].lat,Z[S.sel].lon]:null);if(!home)return;
  const put=(pairs,colour,inbound)=>{
   pairs.slice(0,5).forEach(([name,v,lo,hi])=>{const other=D.cent[name];if(!other)return;
-   const from=inbound?other:home,to=inbound?home:other;
-   /* curve inbound and outbound opposite ways so overlapping flows stay distinct */
-   const pts=curve(from,to,inbound?.13:-.13);
+   const pts=flowPath(home,other,inbound);
    const rng=(lo!=null&&hi!=null)?`<br><span style="color:var(--dim)">${tx('mob_range')} ${fmt(lo)}–${fmt(hi)}</span>`:'';
    /* constant weight: the flow value is NEVER encoded in arrow size — only in the label/tooltip */
    L.polyline(pts,{color:colour,weight:2.4,opacity:.82,lineCap:'round'})
@@ -300,12 +312,16 @@ function drawZoneChart(name){
  const P=k=>pts.map((p,i)=>p[k]==null?null:[X(i),Y(p[k])]).filter(Boolean);
  const areaC=(()=>{const g=P('c');if(g.length<2)return'';
   return `${smooth(g)} L ${g[g.length-1][0]},${mt+ih} L ${g[0][0]},${mt+ih} Z`;})();
- /* x-axis: ~6 evenly-spaced ticks over the real-dated rows (break rows have x=''),
-    formatted "D Mon". Labels only; the underlying dates are not changed. */
+ /* x-axis: evenly-spaced ticks over the real-dated rows (break rows have x='').
+    The number of ticks and the label format adapt to the chart's rendered width
+    so more dates show without overlapping. Labels only; dates are not changed. */
  const MON=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
- const fmtD=x=>{const a=(x||'').split('-');return a.length===2?(+a[1])+' '+(MON[+a[0]]||''):x;};
  const realIdx=pts.map((p,i)=>p.x?i:-1).filter(i=>i>=0);
- const nT=Math.min(6,realIdx.length);
+ const HW=host.clientWidth||W,iwPx=HW*(iw/W);          // rendered plot-area width in px
+ let nT=Math.max(4,Math.min(realIdx.length,Math.floor(iwPx/42)));  // ~one label per 42px
+ const dense=nT>7;                                     // compact numeric format when crowded
+ const fmtD=x=>{const a=(x||'').split('-');if(a.length!==2)return x||'';
+   return dense?(+a[1])+'/'+(+a[0]):(+a[1])+' '+(MON[+a[0]]||'');};
  const tickIdx=nT<=1?realIdx.slice()
    :[...new Set(Array.from({length:nT},(_,k)=>realIdx[Math.round(k/(nT-1)*(realIdx.length-1))]))];
  const xticks=tickIdx.map((i,pos)=>{
