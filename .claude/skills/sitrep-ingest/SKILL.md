@@ -17,6 +17,8 @@ This is plain Markdown — any agent can follow it, not just Claude Code.
    is absent, leave the cell empty.
 2. **Stop on a failed validation gate** (step 9). Do not write partial or "best effort" CSVs, and
    do not "fix" a number so the totals balance. Report what failed and which page it came from.
+   The one exception is the **single-cell rule** in step 9: a table-vs-narrative disagreement on a
+   field that feeds exactly one CSV cell leaves that cell empty instead of stopping the run.
 3. **One PDF in, two CSVs out.** Never merge figures from two different sitreps into one row.
 4. Figures are French-formatted: `48,0%` is 48.0 percent; `5 584` (narrow/non-breaking space)
    is 5584. Normalise before parsing.
@@ -66,8 +68,14 @@ https://insp.cd/wp-json/wp/v2/posts?categories=308&per_page=25&page=1&_fields=id
 - Sitreps are published irregularly: several can appear on one day, and some numbers are never
   posted (63, 75, 76, 43, 45, 48 are missing as of N°101; 115 as of N°131). Drive off what exists, never off
   "yesterday's number + 1".
+- INSP sometimes posts the same report twice: N°131 has two posts (`…_22_09_2026.pdf` and
+  `…_22_09_2026-1.pdf`), and the PDFs are byte-identical. Compare the PDFs before treating a second
+  post as a correction. A real correction shows up as a changed `modified` date on the post (add
+  `modified` to `_fields`), different PDF bytes, or a `…-1.pdf` upload.
 
-Skip any post whose sitrep number already has both CSVs in `data/`.
+Skip any post whose sitrep number already has both CSVs in `data/`, **except** a report ingested
+with a cell left empty under the single-cell rule (step 9; see *Open items* at the end). Re-check
+those on every run, and if a corrected upload has appeared, re-ingest that report.
 
 ## Step 2 — Resolve the PDF URL
 
@@ -88,7 +96,7 @@ If neither matches, stop and report the post URL — do not guess a `wp-content/
 | Field | Source | Notes |
 |---|---|---|
 | `sitrep_number` | post **title** | `SitRep N°101/MVEBDB/23/08/2026` → `101`. Strip leading zeros (`N°0100` → `100`). Cross-check against the PDF header line; if they disagree, trust the PDF and report the mismatch. |
-| `report_date` | **PDF** page 1: `Date de rapportage : 23 août 2026` | Map French month names. |
+| `report_date` | **PDF** page 1: `Date de rapportage : 23 août 2026` | Map French month names. The label changed in N°137: `Date de rapportage :` through N°136, `Date du rapport :` from N°137. Match either one: `Date (?:de rapportage\|du rapport)\s*:`. |
 | `publication_date` | **PDF** page 1: `Date de publication : 24 août 2026` | **Not the WordPress post date** — they routinely differ (N°101 was published 24 Aug per the PDF but posted 25 Aug). Use the WP `date` only if the PDF line is missing, and note the substitution. |
 | `status` | **PDF filename** | See below. |
 
@@ -162,12 +170,52 @@ contact-tracing rate.
 | `suspects_today` | alerts table (§"Situation des alertes notifiées"), Total row: *Alertes vérifiées et validées (cas suspect)* **vivants + décédés** | 165 + 112 = 277 |
 | `contact_tracing_pct` | banner `TAUX DE SUIVI DES CONTACTS (Du Jour)` | 83.4 |
 
-Cross-check `suspects_today` against the narrative in §1.1.3, which restates it
-("277 (20,7%) ont été validées comme cas suspects"). If banner and narrative disagree, stop.
-The wording varies ("Toutes les 408 alertes validées comme cas suspects", "413 (26,3%) alertes ont été
-validées"), and the Total row is sometimes on the same line as `Total`, sometimes on the next. Its
-numbers use thousands spaces (`1 155 174 …` is 1155 then 174), so split it into its nine columns with
-the checks received vivants + décédés = total, and investigated ≤ validated, rather than on spaces.
+Cross-check `suspects_today` against the narrative in §2.1.1 (§1.1.3 in older reports), which
+restates it. If the alerts table and the narrative disagree, apply the **single-cell rule** in
+step 9: leave `suspects_today` empty. Never pick one of the two figures.
+
+The narrative wording varies. Match a number, then an optional `(x,x %)`, an optional `alertes`,
+an optional `ont été`, then `validées comme`. **Do not require the word "alertes"**:
+
+| Report | Text |
+|---|---|
+| N°101 | `277 (20,7%) ont été validées comme cas suspects` |
+| older | `Toutes les 408 alertes validées comme cas suspects`, `413 (26,3%) alertes ont été validées` |
+| N°132 | `353 alertes ont été validées comme cas suspects` |
+| N°136 | `Parmi les alertes vérifiées, 283 (15,9 %) ont été validées comme cas suspects` |
+| N°137 | `dont 420 (16,5 %) ont été validées comme cas suspects` |
+| N°138 | `Les 334 (16,9 %) alertes validées comme cas suspects ont tous été investiguées` |
+
+**Splitting the Total row into its nine columns.** The Total row is sometimes on the same line as
+`Total` and sometimes on the next. Its numbers use thousands spaces (`1 155 174 …` is 1155 then 174),
+so split it with the checks "received vivants + décédés = total" and "investigated ≤ validated",
+not on spaces:
+
+- A token longer than 3 digits is a whole number printed without a thousands space (Ituri's `1119`
+  in N°131). Only join tokens when the first has 1–3 digits and each following token has exactly 3.
+- Several splits can pass those checks. `… 1 496 0 283 115` reads as `1496, 0, 283, 115` or as
+  `1, 496, 0, 283115`. Pick the split that equals the column sums of the province rows, which
+  normally gives exactly one. Validated suspects (columns 4 + 5) are usually the same in every split;
+  check that rather than assume it.
+
+**A province row with a blank cell (first seen in N°136).** The Nord-Kivu row printed 8 of its 9 cells
+(`761 761 77 21 630 0 98 46`). The received-deceased cell was blank, and the row was also
+inconsistent elsewhere: invalidated-alive was 630 against the 634 the Total row implies.
+
+- Never fill a blank cell, and never "correct" a row. A short row fails the province-sum check above.
+- `suspects_today` is still determined if validated suspects (vivants + décédés) is the same in
+  every possible Total-row split *and* equals the narrative.
+- Accepting the report in that case is a **per-run maintainer decision**. It is never a default,
+  and the parser must not make it by itself. A parser may expose the decision as an opt-in flag
+  (the N°136 run used `--accept-t3-row-anomaly`). That flag must default to off, must be passed by
+  hand for the one report a maintainer approved, and must **never** appear in a scripted,
+  scheduled or looped invocation. Record the row and the reasoning in the commit message, as was
+  done for N°136.
+- Any other short-row case is a stop.
+
+**Contact tracing.** Also cross-check `contact_tracing_pct` against the narrative. Both forms occur:
+`soit une proportion de suivi de 82,0%` and `La proportion de suivi au décours du 27 septembre
+2026 était de 75,9 %` (N°135, N°136). The single-cell rule applies to this field too.
 
 Layout drift seen in N°116–131: the zone count on page 1 can share a line with the narrative column
 (`62 Zones de santé des décès du jour à 35.`), so match it at line start. The contact-tracing
@@ -215,8 +263,11 @@ Line-parsing rules:
 
 Do not write any file until all of these pass:
 
-1. Zone rows summed per province equal the province subtotal, for **cases and deaths**, in all
-   six provinces (count the `A ventiler` deaths toward Ituri).
+1. Zone rows summed per province equal the province subtotal, for **cases and deaths**, in every
+   province that Tableau 1 lists (count the `A ventiler` deaths toward Ituri). Validate against the
+   provinces the PDF actually lists, never a fixed count: there were six from N°093 and seven from
+   N°128 (Sud-Ubangi). Tableau 1 and Tableau 2 must list the same provinces, and their number must
+   equal "*N* Provinces touchées" on page 1.
 2. All provinces summed equal the `Total` row, and that total equals the page-1 banner cumulative
    cases and deaths.
 3. Zone row count (excluding `A ventiler`) equals the "*N* Zones de santé touchées" figure on page 1
@@ -229,6 +280,32 @@ Do not write any file until all of these pass:
 Report the reconciliation table (computed vs printed, per province) in the run summary even when
 everything passes — it is the evidence that the extraction is correct.
 
+### The single-cell rule (from N°138)
+
+Some fields are printed twice in the PDF, once in a table or the banner and once in the narrative:
+`suspects_today` (alerts table vs narrative) and `contact_tracing_pct` (banner vs narrative). Each
+of these feeds exactly one CSV cell. When the two printings disagree on **one** such field and
+**every other gate passes**:
+
+- leave that cell **empty**, and write and ingest the report;
+- say in the run report, the commit message and the PR description what each printing gave and
+  why the cell is empty;
+- list the report under *Open items* below, and re-check insp.cd for a corrected upload on later
+  runs. If one appears, re-ingest the report and fill the cell.
+
+The empty cell means the source disagrees with itself. It does not mean the value is zero, and
+it must not be filled with either figure.
+
+The stop rule still applies in full to any disagreement that touches **cases, deaths, zone
+counts or the national totals** (gates 1–4), to a field that can't be parsed on one side, and to
+disagreements on more than one such field in the same report. Hold the report in those cases.
+
+Precedent: in N°138 the alerts table gives 277 + 70 = **347** validated suspects, and the table is
+internally consistent (347 + 1624 invalidated = 1971 verified; all 347 investigated). The
+narrative says **"Les 334 (16,9 %)"**, and 334 is the figure that matches 16.9 % of 1971.
+`suspects_today` is empty in `summary_sitrep138_2026-09-30.csv`. Under the earlier stop rule this
+report would have been held; the maintainer chose to ingest it.
+
 ## Step 10 — Write the CSVs
 
 Write both files to `data/` with the step-0 names. UTF-8, `\n` line endings, no BOM,
@@ -237,6 +314,8 @@ name ascending, with `A ventiler` last.
 
 If a file with that name already exists, compare: identical → no-op; different → the sitrep was
 re-published (INSP does re-upload corrected PDFs). Overwrite, and say so, noting which figures moved.
+A corrected upload that resolves a single-cell disagreement is the usual case. Re-ingest, fill
+the cell, and remove the report from *Open items*.
 
 ## Step 11 — Report
 
@@ -244,6 +323,8 @@ State: sitrep number, report and publication dates, status and the filename it c
 counts, the province reconciliation, how many zones lack a population denominator, and the two
 output paths. Flag anything the PDF said but the schema cannot hold (e.g. N°100 carried a footnote
 that one case was added by data reconciliation and is excluded from the day's new confirmations).
+Also list every cell left empty under the single-cell rule, every row anomaly accepted by
+maintainer decision, and the result of re-checking the reports under *Open items*.
 
 ## Not in scope
 
@@ -252,3 +333,11 @@ map — updating the dashboard is a separate, explicitly requested step, and per
 embedded figures and `data/` must then be changed together. When that step runs, the dashboard's
 national and province figures must equal this PDF exactly (banner and Tableau 1). List every
 discrepancy and its fix before changing anything, and never redistribute `A ventiler` deaths into zones.
+
+## Open items
+
+Re-check these on every run (see step 1):
+
+| Report | Issue | Action when a corrected upload appears |
+|---|---|---|
+| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
