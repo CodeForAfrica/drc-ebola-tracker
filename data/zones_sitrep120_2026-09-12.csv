@@ -22,7 +22,7 @@ sitrep_number,report_date,publication_date,status,zone,province,confirmed_cases,
 120,2026-09-11,2026-09-12,final,Damas,Ituri,36,9,116731,25.0,30.8
 120,2026-09-11,2026-09-12,final,Kilo,Ituri,33,12,55902,36.4,59.0
 120,2026-09-11,2026-09-12,final,Lolwa,Ituri,31,8,45779,25.8,67.7
-120,2026-09-11,2026-09-12,final,Boma,Haut-Uele,29,14,,48.3,
+120,2026-09-11,2026-09-12,final,Boma Mangbetu,Haut-Uele,29,14,,48.3,
 120,2026-09-11,2026-09-12,final,Kalunguta,Nord-Kivu,29,12,199559,41.4,14.5
 120,2026-09-11,2026-09-12,final,Kyondo,Nord-Kivu,29,18,215154,62.1,13.5
 120,2026-09-11,2026-09-12,final,Mabalako,Nord-Kivu,19,9,186148,47.4,10.2
@@ -47,7 +47,7 @@ sitrep_number,report_date,publication_date,status,zone,province,confirmed_cases,
 120,2026-09-11,2026-09-12,final,Kabondo,Tshopo,4,1,,25.0,
 120,2026-09-11,2026-09-12,final,Mahagi,Ituri,4,1,,25.0,
 120,2026-09-11,2026-09-12,final,Ganga,Bas-Uele,3,2,,66.7,
-120,2026-09-11,2026-09-12,final,Mangbetu Gombari,Haut-Uele,3,1,,33.3,
+120,2026-09-11,2026-09-12,final,Gombari,Haut-Uele,3,1,,33.3,
 120,2026-09-11,2026-09-12,final,Mangobo,Tshopo,3,2,,66.7,
 120,2026-09-11,2026-09-12,final,Miti-Murhesa,Sud-Kivu,3,1,239135,33.3,1.3
 120,2026-09-11,2026-09-12,final,Boga,Ituri,2,2,,100.0,
