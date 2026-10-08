@@ -76,6 +76,13 @@ https://insp.cd/wp-json/wp/v2/posts?categories=308&per_page=25&page=1&_fields=id
   `…_22_09_2026-1.pdf`), and the PDFs are byte-identical. Compare the PDFs before treating a second
   post as a correction. A real correction shows up as a changed `modified` date on the post (add
   `modified` to `_fields`), different PDF bytes, or a `…-1.pdf` upload.
+- **A `-N` suffix on its own is not a re-upload.** N°144's post embeds `…_05_10_2026-2.pdf`, and
+  the post was edited the day after it went up, yet the media library
+  (`/wp-json/wp/v2/media?search=SitRep_MVEBDB_144`) holds a single file uploaded with the post,
+  and the base, `-1` and `-3` names return 404. WordPress adds the suffix when a filename is already
+  taken. Before treating a suffixed file or an edited post as a correction, check the media library
+  for more than one upload and compare the PDF bytes. Status and number parsing handle the suffix
+  as is.
 
 Skip any post whose sitrep number already has both CSVs in `data/`, **except** a report ingested
 with a cell left empty under the single-cell rule (step 9; see *Open items* at the end). Re-check
@@ -171,7 +178,16 @@ page-1 characters ≥ 12 pt lying 14–52 pt below it; sort them by x; and start
 horizontal gap > 15 pt. This yields exactly six cells, e.g. `['8442', '4080', '48,3%', '846',
 '2213', '73,1%']`. It reproduces the committed values of N°131–138 exactly. Gate: six cells, four
 integers and two `nn,n%`, and cells 1–2 must equal Tableau 2's Total row. The positional reading
-below is only a fallback.
+below is only a fallback, and **it no longer works while the callout is overprinted**: from N°143
+the `LETALITE` label line is garbled too, so nothing usable follows it in the extracted text
+(N°143–145). Use the glyph-size reader; if it fails its gate, stop rather than fall back.
+
+**The overprinted callout is stale and is never data.** The "Nouvelle zone de santé touchée :
+Alimbongo (Nord-Kivu), avec 4 cas confirmés dont 2 décès" box from N°141 is still printed on the
+banner in N°143, 144 and 145, unchanged. In N°145 Alimbongo's Tableau 2 row is **5 cases / 3
+deaths**, not the box's 4 / 2. Never read figures from this box, and never treat it as a new-zone
+announcement for gate 8. Only the report's own narrative and Tableau 2 count, and Tableau 2 is
+authoritative for zone figures. A zone already in the previous report needs no announcement anyway.
 
 | CSV field | Where | N°101 value |
 |---|---|---|
@@ -397,5 +413,5 @@ Re-check these on every run (see step 1):
 
 | Report | Issue | Action when a corrected upload appears |
 |---|---|---|
-| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1 and 6 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
-| N°142 (≈3 Oct 2026) | Not published. Checked 6 Oct 2026: not in the sitrep category, no search hit in any category, no media file. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
+| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6 and 8 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
+| N°142 (≈3 Oct 2026) | Not published. Checked 6 and 8 Oct 2026: not in the sitrep category, no search hit in any category, no media file, likely filenames (`_142_02/03/04_10_2026.pdf`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
