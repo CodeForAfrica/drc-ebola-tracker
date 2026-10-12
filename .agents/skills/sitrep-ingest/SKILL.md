@@ -274,10 +274,17 @@ inconsistent elsewhere: invalidated-alive was 630 against the 634 the Total row 
   done for N°136.
 - Any other short-row case is a stop.
 
-**A province that did not report (from N°147).** Tableau 3 prints `ND` in all nine cells of a
-province that sent no alert data (`Ituri ND ND ND ND ND ND ND ND ND`; Ituri in N°147 and N°149,
-Sud Ubangi in N°147–149). Leave the row out of the province sums and report which provinces were
-ND. Never read `ND` as 0. The Total row and the narrative then cover the reporting provinces only
+**A province that did not report (ND).** Tableau 3 prints `ND` in the cells of a province that
+sent no alert data: all nine cells (`Ituri ND ND ND ND ND ND ND ND ND`; N°119–121, 147–149), or
+`ND` with `NA` or `0` in one cell (`Sud Ubangi ND ND NA ND ND ND ND ND NA`, N°123;
+`ND ND 0 ND …`, N°128; `ND ND NA ND …`, N°114 and N°129–130). Older layouts mark it in the
+suspects and contact-tracing tables instead (`Haut-Uélé ND ND ND`, N°061–065). Rows seen so far:
+Sud-Kivu (N°062, 064, 114, 119), Sud-Ubangi (N°119–121, 123, 128–130, 147–149), Haut-Uélé
+(N°062, 129) and Ituri (N°147, 149); contact tracing ND for Haut-Uélé (N°061–065), Sud-Ubangi
+(N°148) and Ituri + Sud-Ubangi (N°149). Leave the row out of the province sums and report which
+provinces were ND. Never read `ND` as 0. Report it as a flag in the run summary: the dashboard
+marks every figure whose SitRep records a province as ND (`D.nat2[].nd`,
+`data/not_reported_provinces.csv`), so a later dashboard update needs the list. The Total row and the narrative then cover the reporting provinces only
 (N°149: "l'Ituri et le Sud-Ubangi n'ont pas transmis de données actualisées (ND)"), so the
 printed suspects figure is not comparable with other days. Whether to keep it is a **per-run
 maintainer decision**: N°147 (270) and N°149 (310) left `suspects_today` empty because Ituri, the
