@@ -264,11 +264,19 @@ function renderNat(){
     <div class="si"><div class="sl">${iso!=null?tx('n_isolation'):tx('n_ituri')}</div>
       <div class="sv">${iso!=null?fmt(iso):NAT.ituri+'%'}</div></div>`)
   +(ct!=null?`<div class="strip" style="margin-top:var(--s2)">
-     <div class="si"><div class="sl">${tx('n_contact')}</div><div class="sv">${ct.toFixed(1)}%</div></div>
+     <div class="si"><div class="sl">${tx('n_contact')}</div><div class="sv">${ct.toFixed(1)}%${ndMark(row,'ct')}</div></div>
      <div class="div"></div>
-     <div class="si"><div class="sl">${tx('n_suspects')}</div><div class="sv">${fmt(row.sus)}</div></div>
-   </div>`:'')
+     <div class="si"><div class="sl">${tx('n_suspects')}</div><div class="sv">${fmt(row.sus)}${ndMark(row,'sus')}</div></div>
+   </div>`+ndNote(row,'ct')+ndNote(row,'sus'):'')
   +`<p class="note">${tx('nat_note')}</p>`;}
+/* provinces a SitRep records as not reported (ND) for a figure: row.nd={ct:[…],sus:[…]}, names from the config */
+const ND_SYM={ct:'*',sus:'†'};
+const ndList=(row,f)=>(row&&row.nd&&row.nd[f]&&row.nd[f].length)?row.nd[f]:null;
+const ndText=(row,f)=>{const p=ndList(row,f);if(!p)return '';
+ const names=p.length<2?p[0]:p.slice(0,-1).join(', ')+' '+tx('and')+' '+p[p.length-1];
+ return tx(f==='sus'&&row.sus==null?'nd_sus_empty':'nd_'+f).replace('{p}',names);};
+const ndMark=(row,f)=>ndList(row,f)?`<sup class="ndm" title="${ndText(row,f)}">${ND_SYM[f]}</sup>`:'';
+const ndNote=(row,f)=>ndList(row,f)?`<p class="note ndn">${ND_SYM[f]} ${ndText(row,f)}</p>`:'';
 
 function renderProv(){
  const P=provTot(S.prov),zs=P.zs,c=P.c,d=P.d;

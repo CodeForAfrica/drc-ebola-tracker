@@ -224,6 +224,8 @@ html[data-theme="light"] .b-vh{color:#7d0a10}
 .b-m{color:var(--accent);border-color:rgba(255,90,60,.4);background:rgba(255,90,60,.1)}
 .b-l{color:var(--teal);border-color:rgba(43,179,163,.45);background:rgba(43,179,163,.12)}
 .note{font-size:10px;color:var(--dim);line-height:1.55;margin:var(--s3) 0 0}
+.ndm{color:var(--accent);font-size:9px;margin-left:2px;cursor:help}
+.note.ndn{margin-top:var(--s2)}
 .hint{margin-top:var(--s6);padding:14px;border:1px dashed var(--line-2);border-radius:var(--rad);
  font-size:11.5px;color:var(--dim);text-align:center;line-height:1.6}
 .hint b{color:var(--muted);font-weight:600}
