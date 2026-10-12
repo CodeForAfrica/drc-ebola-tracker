@@ -1,0 +1,2 @@
+sitrep_number,report_date,publication_date,provinces,zones,confirmed_deaths,fatality_rate_pct,patients_in_isolation,recovered_patients,suspects_today,contact_tracing_pct,source_pdf
+147,2026-10-08,2026-10-09,7,65,4275,48.3,950,2320,,83.5,SitRep_MVEBDB_147_08_10_2026.pdf

@@ -58,18 +58,38 @@ returns **403** to non-browser clients; the REST API returns 200 from plain `cur
 with no headers or auth.
 
 ```
-https://insp.cd/wp-json/wp/v2/posts?categories=308&per_page=25&page=1&_fields=id,date,slug,title,content
+https://insp.cd/wp-json/wp/v2/posts?categories=308&per_page=25&page=1&_fields=id,date,modified,slug,title,content
+https://insp.cd/wp-json/wp/v2/posts?categories=219&per_page=25&page=1&_fields=id,date,modified,slug,title,content
 ```
 
 - Category `308` is `sitrep`. Re-resolve it if it ever 404s:
   `https://insp.cd/wp-json/wp/v2/categories?search=sitrep`
+- **Query category `219` (Actualités) as well, and merge the two by sitrep number.** INSP sometimes
+  posts a sitrep under `219` only. N°115 (7 Sept 2026, `SitRep_MVEBDB_115_06_09_2026.pdf`) never
+  reached `308`, so every `308`-only run treated it as unpublished until 12 Oct 2026. N°146 first went
+  up on 9 Oct under `219` only (post 25689) and was re-posted to `308` on 11 Oct as `…-1.pdf`; the
+  two PDFs are byte-identical. `219` also carries news, so keep only posts whose title matches
+  `SitRep`.
 - Results are newest-first. `page=1` is enough for a daily run; paginate only for a backfill.
   Requesting a page past the end returns HTTP 400 — treat that as "end of list", not an error.
 - Sitreps are published irregularly: several can appear on one day, and some numbers are never
-  posted (63, 75, 76, 43, 45, 48 are missing as of N°101; 115 as of N°131; 142 as of N°143). Drive off what exists, never off
-  "yesterday's number + 1". To confirm a number is missing rather than overlooked, also search all
-  categories (`/wp-json/wp/v2/posts?search=142`) and the media library
-  (`/wp-json/wp/v2/media?search=SitRep_MVEBDB_142`). N°142: nothing found as of 6 Oct 2026. The
+  posted. Drive off what exists, never off "yesterday's number + 1". To confirm a number is missing
+  rather than overlooked, check categories `308` and `219`, search all categories
+  (`/wp-json/wp/v2/posts?search=142`), and list the PDFs **uploaded** around the expected date
+  (`/wp-json/wp/v2/media?after=2026-10-02T00:00:00&before=2026-10-12T23:59:59&per_page=100`).
+  Search the media library by date, not only by name: early filenames vary
+  (`SitRep_MVE_RDC_20260701_OK.pdf`, `…_N_63_…`, `…_NA°046_…`), and a file can be uploaded with
+  no post at all.
+- Full sweep of N°1–149 on 12 Oct 2026 (both categories, search, media by upload date):
+  - **No post and no file anywhere:** N°3, 29, 43, 45, 75, 76, 142.
+  - **N°48 has a post** in `308` (3 July, `SitRep_MVE_RDC_20260701_OK.pdf`); it was recorded as
+    missing only because its filename carries a date, not a number.
+  - **N°63 exists only as a media file** with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`,
+    uploaded 17 July). `data/national_timeseries.csv` has it as `missing`, citing a filename
+    without `_Final` that returns 404.
+  - **N°115 is posted under `219` only** (see above). Not yet ingested.
+  - N°6, N°131 and N°146 each have two posts of the same PDF.
+  N°142: nothing found as of 12 Oct 2026. The
   cumulative jump from N°141 to N°143 (+161) is larger than N°143's own new cases (59); the
   difference belongs to the unpublished day. Never interpolate it.
 - INSP sometimes posts the same report twice: N°131 has two posts (`…_22_09_2026.pdf` and
@@ -254,6 +274,29 @@ inconsistent elsewhere: invalidated-alive was 630 against the 634 the Total row 
   done for N°136.
 - Any other short-row case is a stop.
 
+**A province that did not report (from N°147).** Tableau 3 prints `ND` in all nine cells of a
+province that sent no alert data (`Ituri ND ND ND ND ND ND ND ND ND`; Ituri in N°147 and N°149,
+Sud Ubangi in N°147–149). Leave the row out of the province sums and report which provinces were
+ND. Never read `ND` as 0. The Total row and the narrative then cover the reporting provinces only
+(N°149: "l'Ituri et le Sud-Ubangi n'ont pas transmis de données actualisées (ND)"), so the
+printed suspects figure is not comparable with other days. Whether to keep it is a **per-run
+maintainer decision**: N°147 (270) and N°149 (310) left `suspects_today` empty because Ituri, the
+largest source of alerts, was ND; N°148 kept 473 because only Sud-Ubangi (2 suspects in N°146) was
+ND. A parser may expose the choice as an opt-in flag (`--suspects-empty-nd`, which also requires at
+least one ND province), with the same rules as `--accept-t3-row-anomaly` below. Record the reason
+in the commit message.
+
+**An inconsistent Total row (first seen in N°147).** The province rows were consistent, but the
+Total row printed invalidated-alive as 1 452 against a province sum of 1 450 (its own cells add up
+to 1 724 against 1 722 received), and the narrative repeated 1 452. The same opt-in flag accepts
+this case **only** when the value that feeds the CSV (validated suspects, vivants + décédés) is
+confirmed independently by all three of: every reading of the Total row, the sum of the province
+rows, and the narrative. Disagreement in cells that feed no CSV field is tolerated; any
+disagreement on the validated cells, or with the narrative, still stops the run (as N°138 showed,
+the narrative can disagree with the table). N°147 (270) was accepted by maintainer decision on
+12 Oct 2026. Report the closest Total-row reading against the province sum, so the reviewer sees
+which column differs.
+
 **Contact tracing.** Also cross-check `contact_tracing_pct` against the narrative. Both forms occur:
 `soit une proportion de suivi de 82,0%` and `La proportion de suivi au décours du 27 septembre
 2026 était de 75,9 %` (N°135, N°136). The single-cell rule applies to this field too.
@@ -295,8 +338,9 @@ Line-parsing rules:
 - "Known zones" means the zone names in the **most recent earlier report's** zones CSV (in `data/`,
   or written earlier in the same run). Never use the union of all files: a bad name in any one
   file would then count as "known".
-- The `A ventiler` row has also been printed with `AN` for `NA` (`A ventiler AN 493 NA 0`, N°140).
-  Normalise it in that row only.
+- The `A ventiler` row has also been printed with `AN` for `NA` (`A ventiler AN 493 NA 0`, N°140)
+  and with `NA!` for the CFR cell (`A ventiler NA 493 NA! 0`, N°148). Normalise them in that row only.
+  Unnormalised, the row is dropped, the 493 deaths go missing and Ituri's zone sum fails.
 - A `Létalité` cell occasionally wraps onto the next line (seen in N°100 for `Gethy`). If a zone
   line yields fewer than three numbers, pull the remainder from the next line.
 - Ituri has an `A ventiler` row: deaths recorded in CTEs but **not yet assigned to a zone**
@@ -344,7 +388,8 @@ Do not write any file until all of these pass:
 7. Every non-empty numeric cell parses as a number; no cell contains a stray `%`, `,` or space.
 8. **Every zone name is known or announced** (from N°140). Each zone in Tableau 2 must appear in the
    most recent earlier report's zones CSV, or be announced as new in this report
-   (`Nouvelle zone de santé touchée : Alimbongo (Nord-Kivu)`, N°141). Older reports announce new
+   (`Nouvelle zone de santé touchée : Alimbongo (Nord-Kivu)`, N°141; `Avec l'ajout de la zone de
+   santé de Dakwa au Bas Uélé, 65 zones de santé …`, N°147, in the page-1 narrative). Older reports announce new
    zones in other words ("une nouvelle province a été touchée … à travers la zone de santé de
    Bulu", N°119), so an unmatched announcement is a stop for a person to check, never a reason to
    add the name automatically. This is the only gate that catches the wrapped-name error above.
@@ -413,5 +458,7 @@ Re-check these on every run (see step 1):
 
 | Report | Issue | Action when a corrected upload appears |
 |---|---|---|
-| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6 and 8 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
-| N°142 (≈3 Oct 2026) | Not published. Checked 6 and 8 Oct 2026: not in the sitrep category, no search hit in any category, no media file, likely filenames (`_142_02/03/04_10_2026.pdf`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
+| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6, 8 and 12 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf` or `-2.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
+| N°142 (≈3 Oct 2026) | Not published. Checked 6, 8 and 12 Oct 2026: not in category `308` or `219`, no search hit in any category, no PDF uploaded 2–12 Oct other than N°139–149 and weekly tables, likely filenames (`_142_02/03_10_2026.pdf`, `-1`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
+| N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
+| N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |
