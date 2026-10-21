@@ -274,6 +274,9 @@ const ND_SYM={ct:'*',sus:'†'};
 const ndList=(row,f)=>(row&&row.nd&&row.nd[f]&&row.nd[f].length)?row.nd[f]:null;
 const ndText=(row,f)=>{const p=ndList(row,f);if(!p)return '';
  const names=p.length<2?p[0]:p.slice(0,-1).join(', ')+' '+tx('and')+' '+p[p.length-1];
+ if(f==='ct'&&row.nd.ctn){   /* the SitRep names the provinces it counts as transmitting: word it from that list */
+  const w=tx('num_words').split(',')[row.nd.ctn]||String(row.nd.ctn);
+  return tx(p.length<2?'nd_ct_list_one':'nd_ct_list_many').replace('{d}',prettyDate(row.d)).replace('{n}',w).replace('{p}',names);}
  return tx(f==='sus'&&row.sus==null?'nd_sus_empty':'nd_'+f).replace('{p}',names);};
 const ndMark=(row,f)=>ndList(row,f)?`<sup class="ndm" title="${ndText(row,f)}">${ND_SYM[f]}</sup>`:'';
 const ndNote=(row,f)=>ndList(row,f)?`<p class="note ndn">${ND_SYM[f]} ${ndText(row,f)}</p>`:'';
