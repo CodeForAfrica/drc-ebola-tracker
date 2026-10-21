@@ -60,11 +60,14 @@ with no headers or auth.
 ```
 https://insp.cd/wp-json/wp/v2/posts?categories=308&per_page=25&page=1&_fields=id,date,modified,slug,title,content
 https://insp.cd/wp-json/wp/v2/posts?categories=219&per_page=25&page=1&_fields=id,date,modified,slug,title,content
+https://insp.cd/wp-json/wp/v2/posts?categories=307&per_page=25&page=1&_fields=id,date,modified,slug,title,content
 ```
 
 - Category `308` is `sitrep`. Re-resolve it if it ever 404s:
   `https://insp.cd/wp-json/wp/v2/categories?search=sitrep`
-- **Query category `219` (Actualités) as well, and merge the two by sitrep number.** INSP sometimes
+- **Query categories `219` (Actualités) and `307` (Activité COUSP) as well, and merge all three by
+  sitrep number.** Don't rely on `308` catching everything. N°156 and N°158 were filed under `307` and
+  `308` only, N°157 under `219` and `308`. INSP sometimes
   posts a sitrep under `219` only. N°115 (7 Sept 2026, `SitRep_MVEBDB_115_06_09_2026.pdf`) never
   reached `308`, so every `308`-only run treated it as unpublished until 12 Oct 2026. N°146 first went
   up on 9 Oct under `219` only (post 25689) and was re-posted to `308` on 11 Oct as `…-1.pdf`; the
@@ -128,7 +131,7 @@ If neither matches, stop and report the post URL — do not guess a `wp-content/
 |---|---|---|
 | `sitrep_number` | post **title** | `SitRep N°101/MVEBDB/23/08/2026` → `101`. Strip leading zeros (`N°0100` → `100`). Allow a space before the slash (`SitRep N°143 /MVE-BDBV/…`, in both the title and the PDF header). Cross-check against the PDF header line; if they disagree, trust the PDF and report the mismatch. |
 | `report_date` | **PDF** page 1: `Date de rapportage : 23 août 2026` | Map French month names. The label changed in N°137: `Date de rapportage :` through N°136, `Date du rapport :` from N°137. Match either one: `Date (?:de rapportage\|du rapport)\s*:`. The first of the month is printed as an ordinal, `1er octobre 2026` (N°139): accept `\d+(?:er)?`. The header line's date (`SitRep N°141/MVE-BDBV/01/10/2026`) can disagree with this line (N°141 reports 2 Oct). Take `report_date` from `Date du rapport`, check it against the filename, and flag the mismatch. **Exception (N°150):** when `Date du rapport` disagrees with *both* the filename and the report's other printings (header line, table titles `au 11 octobre 2026`, narrative `En terme du 11 octobre`) *and* would collide with an adjacent sitrep's `report_date`, take the date the rest of the document supports and record the substitution in the run report and commit message. N°150 prints `Date du rapport : 12 octobre 2026` while its filename, header, both table titles and narrative say 11 Oct, and N°151 is 12 Oct: its `report_date` is 2026-10-11. In N°141 the filename backed `Date du rapport`, so the rule there stays as above. |
-| `publication_date` | **PDF** page 1: `Date de publication : 24 août 2026` | **Not the WordPress post date** — they routinely differ (N°101 was published 24 Aug per the PDF but posted 25 Aug). Use the WP `date` only if the PDF line is missing, and note the substitution. |
+| `publication_date` | **PDF** page 1: `Date de publication : 24 août 2026` | The day and month can run together (`Date de publication : 20octobre 2026`, N°158): insert a space after the day digits before reading the month, but never split an ordinal (`1er octobre` must stay whole; an over-eager first fix broke N°139). **Not the WordPress post date** — they routinely differ (N°101 was published 24 Aug per the PDF but posted 25 Aug). Use the WP `date` only if the PDF line is missing, and note the substitution. |
 | `status` | **PDF filename** | See below. |
 
 ### Deriving `status` from the filename
@@ -239,6 +242,10 @@ an optional `ont été`, then `validées comme`. **Do not require the word "aler
 | N°151 | `dont 522 (16,8 %) validées comme cas suspects` |
 | N°153 | `dont\n612(15,3 %) validées comme cas suspects`: no space before the parenthesis; allow `\s*` between the figure and `(` |
 
+**A page number inside the Total block (N°157).** When a page break falls right after the Total row,
+the page number (`4`) sits on its own line before `Figure 1` and is read as a tenth Total-row token,
+so no split matches. Skip a lone 1–2-digit line inside the Total block.
+
 **Splitting the Total row into its nine columns.** The Total row is sometimes on the same line as
 `Total` and sometimes on the next. Its numbers use thousands spaces (`1 155 174 …` is 1155 then 174),
 so split it with the checks "received vivants + décédés = total" and "investigated ≤ validated",
@@ -320,6 +327,16 @@ données" is not marked (maintainer decision, 19 Oct 2026). A province on its **
 affected** is expected to be missing from the transmission lists (Nord-Ubangi in N°155) and is
 not marked either; the dashboard's `mm_cov_nd` mentions it instead.
 
+**Contact tracing: a named list counts as explicit (maintainer decision, 21 Oct 2026).** When the
+contact-tracing narrative *names* the provinces that transmitted, and that list is complete (its
+per-province contacts add up to the narrative's own totals), the affected provinces not on it go in
+`nd.ct`. N°156 names six (Sud-Ubangi, Bas-Uélé, Haut-Uélé, Tshopo, Nord-Kivu, Ituri; 35 162 contacts
+and 28 144 seen, exactly the totals), so Sud-Kivu and Nord-Ubangi are marked. A narrative that only
+*counts* (`sept provinces ayant transmis`, N°157), or names fewer provinces than its count (N°158
+names six of "sept"; Ituri is left out of the breakdown though its contacts are in the total), is
+not a list: leave `nd.ct` empty. N°157's "(Tableau 4)" points at the PoE/PoC table, not at contact
+tracing.
+
 Layout drift seen in N°116–131: the zone count on page 1 can share a line with the narrative column
 (`62 Zones de santé des décès du jour à 35.`), so match it at line start. The contact-tracing
 figure is garbled more than one way (`78 (D , u 3 Jou r % )`, `8 ( 9 Du , J 3 ou % r)`): take all
@@ -372,7 +389,8 @@ Line-parsing rules:
 - Province names in the PDF use accents (`Haut-Uélé`, `Bas Uélé`, `Sud Ubangi`). Normalise to the CSV forms
   `Haut-Uele`, `Bas-Uele`, `Nord-Kivu`, `Sud-Kivu`, `Ituri`, `Tshopo`, `Sud-Ubangi`, `Nord-Ubangi`.
   A new province must be added to the parser's province list for Tableaux 1, 2 and 3 (`Nord Ubangi`,
-  N°155), or its Tableau 2 subtotal row is read as a zone and every province gate fails.
+  N°155), or its Tableau 2 subtotal row is read as a zone and every province gate fails. From N°157
+  Nord-Ubangi also has its own Tableau 3 row (`Nord Ubangi 6 1 7 6 1 0 0 7 4`).
 - There is a health zone called `Tshopo` inside Tshopo province. Treat a province name as a subtotal
   only the first time it appears.
 - Fail the run if any zone name contains a digit or `%`, or text is left over at the end of the table.
@@ -486,8 +504,8 @@ Re-check these on every run (see step 1):
 
 | Report | Issue | Action when a corrected upload appears |
 |---|---|---|
-| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6, 8, 12, 14 and 19 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf` or `-2.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
-| N°142 (≈3 Oct 2026) | Not published. Checked 6, 8, 12, 14 and 19 Oct 2026: not in category `308` or `219`, no search hit in any category, no PDF uploaded 2–12 Oct other than N°139–149 and weekly tables, likely filenames (`_142_02/03_10_2026.pdf`, `-1`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
-| N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
+| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6, 8, 12, 14, 19 and 21 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf` or `-2.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
+| N°142 (≈3 Oct 2026) | Not published. Checked 6, 8, 12, 14, 19 and 21 Oct 2026: not in category `308` or `219`, no search hit in any category, no PDF uploaded 2–12 Oct other than N°139–149 and weekly tables, likely filenames (`_142_02/03_10_2026.pdf`, `-1`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
+| N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19 and 21 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
 | N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |
