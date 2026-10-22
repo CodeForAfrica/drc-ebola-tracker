@@ -136,6 +136,10 @@ If neither matches, stop and report the post URL — do not guess a `wp-content/
 
 ### Deriving `status` from the filename
 
+The filename's case varies: N°159 is `SITREP_MVEBDB_159_20_10_2026.pdf` (upper-case `SITREP`), every
+earlier report `SitRep_…`. Match the filename case-insensitively wherever it is parsed (sitrep number,
+date, status), and look PDFs up by the exact name the post embeds.
+
 `provisional` if the filename stem contains a draft marker; otherwise `final`;
 `unknown` if the filename carries no signal at all.
 
@@ -241,6 +245,22 @@ an optional `ont été`, then `validées comme`. **Do not require the word "aler
 | N°150 | `dont 334 (13,3 %)` + page number `4` + page break + `validées comme cas suspects`: allow a lone page number (`\d{1,2}`) between the figure and `validées`, only immediately before `validées`, or the page number is read as the figure |
 | N°151 | `dont 522 (16,8 %) validées comme cas suspects` |
 | N°153 | `dont\n612(15,3 %) validées comme cas suspects`: no space before the parenthesis; allow `\s*` between the figure and `(` |
+
+**Total-row numbers above `Total Général` (N°159).** The nine Total numbers can be printed on their own
+line *before* the label, with no `Total` prefix (`3 648 147 3 856 517 146 2 918 1 656 293` then
+`Total Général`). Treat a numbers-only line directly followed by `Total Général` as the Total row.
+Not yet handled by the scratch parser (N°159 was verified by hand: every column equals the province sums).
+
+**`NA` cells in a province row (N°159) are not ND.** Nord-Ubangi printed `227 0 227 17 0 NA NA 17 3`:
+received, validated, investigated and transferred are printed; only the two *invalidated* cells are
+`NA`. The narrative explains it ("213 alertes ne disposent pas de classification définitive… dont 210 au
+Nord-Ubangi et 3 au Sud-Ubangi") and counts Nord-Ubangi among the provinces "ayant transmis leurs
+données". So `NA` here means *classification not yet final*, not *not reported*: the row contributes its
+printed cells to the Total (received 3 648 and validated 517 include it), the `NA` cells contribute
+nothing (invalidated 2 918 is the other provinces' sum), and the province gets **no** `nd.sus`
+(maintainer decision, 22 Oct 2026). A row whose cells are all `ND` (or `ND` with one `NA`/`0`, below) is
+the not-reported case. Split such a row on its printed cells only; never fill an `NA`. Not yet handled
+by the scratch parser.
 
 **A page number inside the Total block (N°157).** When a page break falls right after the Total row,
 the page number (`4`) sits on its own line before `Figure 1` and is read as a tenth Total-row token,
