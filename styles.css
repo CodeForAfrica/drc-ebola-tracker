@@ -247,3 +247,16 @@ html[data-theme="light"] .b-vh{color:#7d0a10}
 #mmodal .dl{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 #mmodal .dl a{font-size:.78rem;padding:6px 11px;border:1px solid var(--line-2);border-radius:8px;background:var(--panel-2);color:var(--text);text-decoration:none}
 #mmodal .dl a:hover{border-color:var(--blue)}
+
+/* ---- other countries: header line, country table, context markers ---- */
+.ctrys{margin-top:2px;font-size:10.5px;color:var(--muted);letter-spacing:.02em;white-space:nowrap}
+.ctab{width:100%;border-collapse:collapse;font-size:11px;margin-top:var(--s2)}
+.ctab th,.ctab td{padding:5px 3px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;font-family:'IBM Plex Mono',monospace;font-weight:600}
+.ctab thead th{font-family:inherit;font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim)}
+.ctab thead th:first-child,.ctab th[scope=row]{text-align:left;font-family:inherit}
+.ctab .cmeta{display:block;font-size:9px;color:var(--dim);font-weight:400;margin-top:1px;line-height:1.35}
+.ctab tfoot th,.ctab tfoot td{border-bottom:0;border-top:1px solid var(--line-2)}
+.ctxm{stroke:var(--muted);fill:var(--muted);fill-opacity:.16;stroke-width:1.6;stroke-dasharray:3 2}
+.ctxm-active{stroke:var(--accent);fill:var(--accent)}
+.ctxkey{display:flex;align-items:center;gap:6px;font-size:9.5px;color:var(--dim);margin-top:6px;line-height:1.4}
+.ctxtip{font-size:11px;line-height:1.45}

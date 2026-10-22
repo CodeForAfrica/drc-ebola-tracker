@@ -28,7 +28,7 @@ function setLang(l){LANG=(l==='fr')?'fr':'en';try{localStorage.setItem('lang',LA
  document.documentElement.lang=LANG;
  const lb=document.getElementById('lang'); if(lb)lb.textContent='🌐 '+(LANG==='fr'?'FR':'EN');
  applyStaticI18n();
- renderNat();renderProv();if(S.sel)renderZone();repaint();syncTime();
+ renderNat();renderCtry();drawCtry();renderProv();if(S.sel)renderZone();repaint();syncTime();
 }
 
 document.getElementById("lang").addEventListener("click",()=>setLang(LANG==="fr"?"en":"fr"));
@@ -119,6 +119,7 @@ function enableOsm(on){
  document.getElementById('bOsm').setAttribute('aria-pressed',String(on));
 }
 const flowLayer=L.layerGroup().addTo(map),dotLayer=L.layerGroup().addTo(map),lblLayer=L.layerGroup().addTo(map);
+const ctxLayer=L.layerGroup().addTo(map);   /* other countries' context markers (CTRY in the config) */
 let layerByZone={},gj;
 function scale(){const v=D.zones.map(value).filter(x=>x!=null&&x>0),max=Math.max(...v,1);
  return{max,col:x=>{if(x==null||x<=0)return null;
@@ -280,6 +281,31 @@ const ndText=(row,f)=>{const p=ndList(row,f);if(!p)return '';
  return tx(f==='sus'&&row.sus==null?'nd_sus_empty':'nd_'+f).replace('{p}',names);};
 const ndMark=(row,f)=>ndList(row,f)?`<sup class="ndm" title="${ndText(row,f)}">${ND_SYM[f]}</sup>`:'';
 const ndNote=(row,f)=>ndList(row,f)?`<p class="note ndn">${ND_SYM[f]} ${ndText(row,f)}</p>`:'';
+
+/* ================= OTHER COUNTRIES (CTRY in the config; each from its own ministry, not INSP) ================= */
+const CT=typeof CTRY!=='undefined'?CTRY:[];
+const asOf=iso=>prettyDate(iso)+' '+iso.slice(0,4);
+function renderCtry(){
+ const el=$('#ctryTable'); if(!el)return;
+ if(!CT.length){el.closest('.block').hidden=true;return;}
+ const nat=D.nat2[D.nat2.length-1];
+ const rows=[{n:tx('ctry_drc'),c:nat.c,d:nat.dd,r:nat.rec,meta:`INSP SitRep N°${nat.s} · ${asOf(nat.d)}`}]
+  .concat(CT.map(x=>({n:x.n[LANG]||x.n.en,c:x.c,d:x.d,r:x.r,meta:`${x.src} · ${asOf(x.asof)} · ${tx('ctry_st_'+x.st)}`})));
+ const sum=f=>rows.reduce((a,r)=>a+(r[f]||0),0), allRec=rows.every(r=>r.r!=null);
+ const cell=r=>`<th scope="row">${r.n}<span class="cmeta">${r.meta}</span></th><td>${fmt(r.c)}</td><td>${fmt(r.d)}</td><td>${fmt(r.r)}</td>`;
+ el.innerHTML=`<table class="ctab"><thead><tr><th>${tx('ctry_h_country')}</th><th>${tx('ctry_h_c')}</th><th>${tx('ctry_h_d')}</th><th>${tx('ctry_h_r')}</th></tr></thead>`
+  +`<tbody>${rows.map(r=>`<tr>${cell(r)}</tr>`).join('')}</tbody>`
+  +`<tfoot><tr>${cell({n:tx('ctry_total'),c:sum('c'),d:sum('d'),r:allRec?sum('r'):null,meta:tx('ctry_total_asof')})}</tr></tfoot></table>`
+  +`<p class="note">${tx('ctry_note')}</p>`;}
+function drawCtry(){ctxLayer.clearLayers();
+ CT.forEach(x=>{
+  const contacts=[x.cl!=null?`${fmt(x.cl)} ${tx('ctry_tip_cl')}`:'',x.ci!=null?`${fmt(x.ci)} ${tx('ctry_tip_ci')}`:'',x.ct!=null?`${fmt(x.ct)} ${tx('ctry_tip_ct')}`:''].filter(Boolean).join(', ');
+  const tip=`<b>${x.n[LANG]||x.n.en}</b> — ${tx('ctry_tip_national')} (${x.src}, ${asOf(x.asof)})<br>`
+   +`${tx('ctry_tip_c')} ${fmt(x.c)} · ${tx('ctry_tip_d')} ${fmt(x.d)} · ${tx('ctry_tip_r')} ${fmt(x.r)}`
+   +(contacts?`<br>${tx('ctry_tip_contacts')}: ${contacts}`:'')
+   +`<br><i>${tx('ctry_st_'+x.st)}</i>`+(x.note?`<br>${tx(x.note)}`:'');
+  L.circleMarker([x.lat,x.lon],{radius:7,className:'ctxm ctxm-'+x.st,weight:1.6,keyboard:true})
+   .bindTooltip(tip,{direction:'top',className:'ctxtip'}).addTo(ctxLayer);});}
 
 function renderProv(){
  const P=provTot(S.prov),zs=P.zs,c=P.c,d=P.d;
@@ -547,7 +573,7 @@ $('#theme').addEventListener('click',e=>{const light=document.documentElement.da
  repaint();});
 
 /* ================= INIT ================= */
-document.getElementById('lang').textContent='🌐 '+(LANG==='fr'?'FR':'EN');document.documentElement.lang=LANG;applyStaticI18n();syncTime();renderNat();renderProv();repaint();drawCountryLabels();
+document.getElementById('lang').textContent='🌐 '+(LANG==='fr'?'FR':'EN');document.documentElement.lang=LANG;applyStaticI18n();syncTime();renderNat();renderCtry();drawCtry();renderProv();repaint();drawCountryLabels();
 setTimeout(()=>{map.invalidateSize();drawLabels();drawCountryLabels();},150);
 addEventListener('resize',()=>map.invalidateSize());
 
