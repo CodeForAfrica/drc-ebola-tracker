@@ -214,6 +214,19 @@ below is only a fallback, and **it no longer works while the callout is overprin
 the `LETALITE` label line is garbled too, so nothing usable follows it in the extracted text
 (N°143–145). Use the glyph-size reader; if it fails its gate, stop rather than fall back.
 
+**A blank or mis-spaced banner cell (N°164, N°166).** Read each cell under its own label column, never by
+position alone, and keep the spacing inside a cell. N°164 prints no isolation figure at all: no glyph lies
+under `ISOLEMENT/CTE`, so gap-splitting finds five cells and a positional reader would shift recovered into
+isolation. When fewer than six cells are found, place each one under the nearest label word (`CAS`, `DÉCÈS`,
+`LETALITE`, `ISOLEMENT/CTE`, `GUÉRIS`, `CONTACTS`) and mark the column with no glyphs as blank. Inside a cell,
+keep a gap > 2 pt as a space: thousands spaces are 3–4.5 pt (`2 708`). N°166 prints isolation as `9 36` (a
+3.4 pt gap after the 9); a reader that drops the space turns it into 936. An integer cell must read
+`\d{1,3}( \d{3})*` or `\d+`. A blank or malformed cell fails the gate and stops the run; never fill it from the
+narrative or anywhere else. Maintainer decisions (30 Oct 2026): N°164's `patients_in_isolation` is empty; N°166's
+is empty because its narrative never prints 936 (it gives Ituri 359, Nord-Kivu 523, Tshopo 22 and Haut-Uélé 32
+hospitalised, which add to 936, but a sum is not a printing). Both are under *Open items*. From N°164 the banner
+also extracts as clean text (`10060 4887 48,6% 2 684 81,6 %`), but read it by glyphs as before.
+
 **The overprinted callout is stale and is never data.** The "Nouvelle zone de santé touchée :
 Alimbongo (Nord-Kivu), avec 4 cas confirmés dont 2 décès" box from N°141 is still printed on the
 banner in N°143, 144 and 145, unchanged. In N°145 Alimbongo's Tableau 2 row is **5 cases / 3
@@ -322,17 +335,30 @@ provinces were ND. Never read `ND` as 0. Report it as a flag in the run summary:
 marks every figure whose SitRep records a province as ND (`D.nat2[].nd`,
 `data/not_reported_provinces.csv`), so a later dashboard update needs the list. The Total row and the narrative then cover the reporting provinces only
 (N°149: "l'Ituri et le Sud-Ubangi n'ont pas transmis de données actualisées (ND)"), so the
-printed suspects figure is not comparable with other days. Whether to keep it is a **per-run
-maintainer decision**: N°147 (270) and N°149 (310) left `suspects_today` empty because Ituri, the
-largest source of alerts, was ND; N°148 kept 473 because only Sud-Ubangi (2 suspects in N°146) was
-ND. For N°160–163 (maintainer decision, 26 Oct 2026) the test was the ND provinces' combined validated
-suspects in the last report where each did report, as a share of that report's national suspects: keep the
-figure under 5 %, leave it empty at 5 % or more. N°160–162 (Sud-Ubangi 0 + Nord-Ubangi 17, both N°159, of 663
-= 2.6 %) kept 481, 451 and 549; N°163 (Bas-Uélé 24 + Tshopo 6 of N°162's 549 = 5.5 %, plus Sud-Ubangi 0 of
-N°159's 663) left 424 empty. The `sus` marker goes on every report with an ND province either way.
-A parser may expose the choice as an opt-in flag (`--suspects-empty-nd`, which also requires at
-least one ND province), with the same rules as `--accept-t3-row-anomaly` below. Record the reason
-in the commit message.
+printed suspects figure is not comparable with other days.
+
+**The ND share rule (standing rule from 30 Oct 2026; apply it without a flag or a maintainer decision).**
+For each province Tableau 3 records as ND, go back report by report to the last one where that province
+has a printed row (a row with `NA` cells, like Nord-Ubangi in N°159, counts: read its printed validated
+cells). Take its validated suspects there (vivants + décédés) as a share of *that* report's national
+validated suspects (its Tableau 3 province rows summed, which must equal its Total row; use the table,
+not the summary CSV, whose cell may be empty). Add the shares of all ND provinces. **Under 5 %: keep
+`suspects_today`. 5 % or more: leave it empty.** Report each province's figure, report number and share
+in the run summary and the commit message. The dashboard's `sus` marker goes on every report with an ND
+province, whichever way the rule goes. If an earlier report's Tableau 3 cannot be read, stop: that is
+for a person. The earlier PDFs are found by the `source_pdf` name in each `data/summary_sitrep*.csv`
+(media-library search by filename); from Python send a `User-Agent` header, since insp.cd answers 403 to
+urllib's default agent.
+
+Precedents: N°147 (270) and N°149 (310) left `suspects_today` empty because Ituri, the largest source of
+alerts, was ND; N°148 kept 473 because only Sud-Ubangi (2 suspects in N°146) was ND (maintainer decisions,
+before the rule). The rule was first applied by maintainer decision to N°160–163 (26 Oct 2026):
+N°160–162 (Sud-Ubangi 0 + Nord-Ubangi 17, both N°159, of 663 = 2.6 %) kept 481, 451 and 549; N°163
+(Bas-Uélé 24 + Tshopo 6 of N°162's 549 = 5.46 %, plus Sud-Ubangi 0 of N°159's 663) left 424 empty. As a
+standing rule: N°164 (Ituri 183 + Nord-Ubangi 5 of N°163's 424 = 44.34 %) left 249 empty; N°165
+(Nord-Ubangi 5 of N°163's 424 = 1.18 %) kept 581; N°166 (Sud-Ubangi 1 of N°165's 581 = 0.17 % + Nord-Ubangi
+1.18 % = 1.35 %) kept 632; N°167 (Nord-Ubangi 1.18 %) kept 611. The scratch parser applies the rule itself
+and reproduces the committed N°163 CSVs byte for byte. The former `--suspects-empty-nd` flag is retired.
 
 **An inconsistent Total row (first seen in N°147).** The province rows were consistent, but the
 Total row printed invalidated-alive as 1 452 against a province sum of 1 450 (its own cells add up
@@ -382,6 +408,11 @@ not in the output schema, and their column alignment shifts between reports.
 
 Line-parsing rules:
 
+- **Start at the first `Ituri <digit>` line after `Tableau 2`; never match the column-header text.** The
+  header extracts differently from report to report: N°164–166 garble it (`Zone de santé Cas (n) Décès (n)
+  Létalité Nouv. Ca s communautaires …`) and N°167 splits `Zone de` / `santé` over two lines, so a parser
+  that looks for a fixed header line, or reads the header's words as a zone name, trips on all four. The
+  same holds for Tableau 3 (start at its first province row).
 - Zone names wrap across lines (`Boma\nMangbetu`, `Makiso-\nKisangani`). Join a line that has no
   numbers with the following line before parsing.
 - **A wrapped name can straddle its own numbers line**, and its second half then lands just before
@@ -454,6 +485,9 @@ Do not write any file until all of these pass:
    From N°160 the **whole** Total row, zone cell included, is on the line above a bare `Total`
    (`71 9 765 4 727 48,4% 63/167 (37,7 %)` then `Total`), and N°163 splits the denominator
    (`66/17 8(37,1%)` for 66/178): join that line to `Total` and close the split before parsing.
+   **Tableau 1 prints `n/m(p%)` with no space before the parenthesis** in some rows (`1/11(9,1%)` for
+   Nord-Ubangi from N°161, `2/11(18,2%)` in N°167, `66/178(37,1%)` in N°166's Total): match `(\d+)/(\d+)`
+   and never require a space before `(`, as for the N°153 suspects narrative (`612(15,3 %)`).
 2. All provinces summed equal the `Total` row, and that total equals the page-1 banner cumulative
    cases and deaths.
 3. Zone row count (excluding `A ventiler`) equals the "*N* Zones de santé touchées" figure on page 1
@@ -481,6 +515,13 @@ Do not write any file until all of these pass:
    Bulu", N°119), so an unmatched announcement is a stop for a person to check, never a reason to
    add the name automatically. This is the only gate that catches the wrapped-name error above.
    Report every newly announced zone, since a zone without geometry stays off the map.
+   **Unannounced new zone, N°167 (maintainer decision, 30 Oct 2026; not a default):** Yakoma (Nord-Ubangi,
+   3 cases / 0 deaths) is in Tableau 2 although the narrative says "Aucune nouvelle zone de santé n'a été
+   touchée au cours des dernières 24 heures". It was accepted because it is in no Tableau 2 of N°164–166 and
+   gates 1–4 pass on 67 zones: page 1 "67 Zones de santé touchées sur 178", 67 Tableau 2 rows, Tableau 1
+   Nord-Ubangi 2/11 and Total 67/178, Nord-Ubangi subtotal 6 / 1. Its 3 cases are not in any day's new
+   cases: N°167's cumulative rises by 81 (10 193 → 10 274) while it reports 78 new (Nord-Ubangi 0). The
+   next unannounced zone is again a stop for a person.
 
 Report the reconciliation table (computed vs printed, per province) in the run summary even when
 everything passes — it is the evidence that the extraction is correct.
@@ -545,10 +586,12 @@ Re-check these on every run (see step 1):
 
 | Report | Issue | Action when a corrected upload appears |
 |---|---|---|
-| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6, 8, 12, 14, 19, 21 and 26 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf` or `-2.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
-| N°162 (23 Oct 2026) | `contact_tracing_pct` left empty (single-cell rule): the banner and §2.1.1 print 88,4 % (32 023/36 218 seen), the Messages Clés box prints 88,1 % (31 923/36 218). N°163 cites 88,4 % for the day before. Post 25768, file `SITREP_MVEBDB_163_23_10_2026.pdf` (filename number wrong, see step 3). | Re-ingest N°162, fill `contact_tracing_pct`, remove this row. |
-| N°142 (≈3 Oct 2026) | Not published. Checked 6, 8, 12, 14, 19, 21 and 26 Oct 2026: not in category `308` or `219`, no search hit in any category, no PDF uploaded 2–12 Oct other than N°139–149 and weekly tables, likely filenames (`_142_02/03_10_2026.pdf`, `-1`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
-| N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19, 21 and 26 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
+| N°138 (29 Sept 2026) | `suspects_today` left empty: the alerts table gives 347, the narrative 334. Checked 1, 6, 8, 12, 14, 19, 21, 26 and 30 Oct 2026: post unmodified, PDF byte-identical, no `-1.pdf` or `-2.pdf`. | Re-ingest N°138, fill `suspects_today`, remove this row. |
+| N°164 (25 Oct 2026) | `patients_in_isolation` left empty: the page-1 banner prints no isolation figure (no glyph under `ISOLEMENT/CTE`). Not filled from the narrative or anywhere else (maintainer decision, 30 Oct 2026). | Re-ingest N°164 if a corrected upload prints it, fill the cell, remove this row. |
+| N°166 (27 Oct 2026) | `patients_in_isolation` left empty: the banner prints `9 36`, and the narrative never prints 936 (its per-province hospitalised figures, Ituri 359 + Nord-Kivu 523 + Tshopo 22 + Haut-Uélé 32, add to 936, but a sum is not a printing; maintainer decision, 30 Oct 2026). | Re-ingest N°166 if a corrected upload prints a well-formed figure, fill the cell, remove this row. |
+| N°162 (23 Oct 2026) | `contact_tracing_pct` left empty (single-cell rule): the banner and §2.1.1 print 88,4 % (32 023/36 218 seen), the Messages Clés box prints 88,1 % (31 923/36 218). N°163 cites 88,4 % for the day before. Post 25768, file `SITREP_MVEBDB_163_23_10_2026.pdf` (filename number wrong, see step 3). Checked 30 Oct 2026: post and media unmodified, PDF byte-identical, no `-1.pdf`. | Re-ingest N°162, fill `contact_tracing_pct`, remove this row. |
+| N°142 (≈3 Oct 2026) | Not published. Checked 6, 8, 12, 14, 19, 21, 26 and 30 Oct 2026: not in category `308` or `219`, no search hit in any category, no PDF uploaded 2–12 Oct other than N°139–149 and weekly tables, likely filenames (`_142_02/03_10_2026.pdf`, `-1`) 404. | If it appears, ingest it and remove this row; until then it is a gap, never interpolated. |
+| N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19, 21, 26 and 30 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical through 26 Oct, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
 | Earlier reports, `nd.ct` (found 21 Oct 2026) | Under the named-list rule (step 6), earlier sitreps whose contact-tracing narrative names a complete list of transmitting provinces without Sud-Kivu (or another affected province) could carry `nd.ct` for the missing ones. Not backfilled in the N°156–158 PR. | A separate pass: re-read each committed report's contact-tracing paragraph, check the named list is complete (its per-province contacts sum to the totals), add `nd.ct` with `ctn`, and mirror it in `data/not_reported_provinces.csv`. |
 | N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |
