@@ -78,6 +78,10 @@ drc-ebola-tracker/
 ├── config.drc-bvd-2026.js  # outbreak content: CFG settings, D dataset, T strings, NAT, BASE
 ├── vendor/leaflet/         # Leaflet 1.9.4
 ├── data/                   # CSV/GeoJSON datasets mirrored from the config
+├── tools/                  # offline data scripts, not part of the site and not a build step: SitRep ingest
+│                           #   (sitrep_ingest.py), dashboard data (sitrep_build.py), v1 zone mapping (v1_zone.py),
+│                           #   their regression test (test_sitrep_ingest.py), Flowminder adapters (*.js).
+│                           #   Python deps come from `uv run --with …`; no package files. See the sitrep-ingest skill.
 ├── TEMPLATE.md             # how to reuse the engine for another outbreak
 ├── README.md
 └── CLAUDE.md

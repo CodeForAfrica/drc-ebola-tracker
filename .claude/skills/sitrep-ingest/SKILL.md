@@ -22,6 +22,39 @@ This is plain Markdown — any agent can follow it, not just Claude Code.
 3. **One PDF in, two CSVs out.** Never merge figures from two different sitreps into one row.
 4. Figures are French-formatted: `48,0%` is 48.0 percent; `5 584` (narrow/non-breaking space)
    is 5584. Normalise before parsing.
+5. **Use the committed scripts in `tools/`, and never patch them in an unattended run** (see below).
+
+## The committed scripts (use them; do not rebuild them)
+
+Every run uses the scripts in `tools/`. They are the parser and build helpers this skill describes; an
+unattended run cannot rebuild them, and must not try.
+
+| Script | What it does |
+|---|---|
+| `tools/sitrep_ingest.py` | Steps 3–10 for one PDF: identity, banner, Tableaux 1–3, narrative cross-checks, every hard gate, the single-cell rule, the ND share rule, both CSVs. Dry run by default; `--write` writes only when every gate passes. |
+| `tools/sitrep_build.py` | Dashboard data from the committed CSVs: `append N … --nd nd.json` (dry run prints the discrepancy list; `--write` adds the rows and mirrors), `check N …` (rebuilds a committed report's artefacts and diffs them). |
+| `tools/v1_zone.py` | Maps a newly reported zone from the INRB-UMIE archived v1 shapefile (polygon to 5 dp, v1 Population, DMS centroid), after checking that the file reproduces Wapinda exactly. |
+| `tools/test_sitrep_ingest.py` | Regression test: re-parses every committed report from N°126 (plus the held N°150) and checks the CSVs are byte-identical to `data/`, that each maintainer-decision report fails exactly the gates its decision names, and that `sitrep_build.py check` finds no difference from N°131. PDFs are fetched at test time; none is committed. |
+
+```bash
+UV_HTTP_TIMEOUT=180 uv run --with pdfplumber --python 3.12 python -I tools/sitrep_ingest.py <pdf> data --title-number <N from the post title>          # dry run
+UV_HTTP_TIMEOUT=180 uv run --with pdfplumber --python 3.12 python -I tools/sitrep_ingest.py <pdf> data --title-number <N> --write
+uv run --with pdfplumber --python 3.12 python -I tools/test_sitrep_ingest.py            # before and after any parser change
+```
+
+Ingest reports in order (each one's known zones and the ND share rule read the earlier reports in `data/`).
+`--today` is only for re-parsing past reports (gate 5). `--accept-t3-row-anomaly` is a per-run maintainer
+decision (step 6) and is off by default; it never appears in a scripted, scheduled or looped run.
+
+**When a new layout breaks the parser:**
+- **Unattended run** (scheduled, routine, no maintainer in the session): stop and report. Name the report, the
+  gate or exception, the page and the printed text that broke it, and write nothing for that report or any later
+  one. Never patch the parser, the gates or the figures, and never pass an accept flag.
+- **Attended session** (a maintainer is directing the work): fix `tools/sitrep_ingest.py`, document the layout
+  case in this skill, add the report to `CASES` in `tools/test_sitrep_ingest.py` (with the gates it is expected to
+  fail, if a maintainer decision covers it), and run the test: every case must still pass before the fix is
+  committed. A report a maintainer accepts despite a failed gate is a `CASES` entry with its `fails`, never a
+  new default.
 
 ## Outputs
 
@@ -177,7 +210,8 @@ Validated against all 95 sitrep posts on insp.cd as of N°101: **56 final, 29 pr
 
 ## Step 4 — Download the PDF
 
-Fetch `pdf_url` to a scratch directory. `curl`/`urllib` with no special headers is sufficient.
+Fetch `pdf_url` to a scratch directory. `curl` with no special headers is sufficient; from Python send a
+`User-Agent` header (insp.cd answers 403 to urllib's default agent; `tools/sitrep_build.fetch_pdf` does).
 Verify the response is a PDF (magic bytes `%PDF`) and non-trivial in size (> 100 KB; the reports
 run ~700 KB / 10 pages). Keep the original filename.
 
@@ -267,8 +301,13 @@ an optional `ont été`, then `validées comme`. **Do not require the word "aler
 **Total-row numbers above `Total Général` (N°159).** The nine Total numbers can be printed on their own
 line *before* the label, with no `Total` prefix (`3 648 147 3 856 517 146 2 918 1 656 293` then
 `Total Général`). Treat a numbers-only line directly followed by `Total Général` as the Total row.
-N°159 was verified by hand (every column equals the province sums); the scratch parser handles it from N°160
-(N°160–163 all use this layout).
+`tools/sitrep_ingest.py` handles this layout (N°159–167 all use it). **N°159's Total row has a typo the parser
+stops on:** it prints received total **3 856**, while its own received cells (3 648 + 147) and the province rows
+both give **3 795**; every other column, validated suspects included (517 + 146 = 663, = the narrative), equals
+the province sums. The committed N°159 (suspects 663) was accepted by hand in PR #59; the earlier note here that
+"every column equals the province sums" was wrong for that cell. `--accept-t3-row-anomaly` does not cover it
+(its Total-row check needs received alive + dead = total), so a re-parse stops, and the regression test expects
+that stop. See *Open items*.
 
 **`NA` cells in a province row (N°159) are not ND.** Nord-Ubangi printed `227 0 227 17 0 NA NA 17 3`:
 received, validated, investigated and transferred are printed; only the two *invalidated* cells are
@@ -278,8 +317,9 @@ données". So `NA` here means *classification not yet final*, not *not reported*
 printed cells to the Total (received 3 648 and validated 517 include it), the `NA` cells contribute
 nothing (invalidated 2 918 is the other provinces' sum), and the province gets **no** `nd.sus`
 (maintainer decision, 22 Oct 2026). A row whose cells are all `ND` (or `ND` with one `NA`/`0`, below) is
-the not-reported case. Split such a row on its printed cells only; never fill an `NA`. Not yet handled
-by the scratch parser.
+the not-reported case. Split such a row on its printed cells only; never fill an `NA`.
+`tools/sitrep_ingest.py` reads a nine-cell row with `NA` (and no `ND`) as printed, counting each `NA` as
+contributing nothing to the column sums, and flags it.
 
 **A page number inside the Total block (N°157).** When a page break falls right after the Total row,
 the page number (`4`) sits on its own line before `Figure 1` and is read as a tenth Total-row token,
@@ -316,8 +356,8 @@ inconsistent elsewhere: invalidated-alive was 630 against the 634 the Total row 
 - `suspects_today` is still determined if validated suspects (vivants + décédés) is the same in
   every possible Total-row split *and* equals the narrative.
 - Accepting the report in that case is a **per-run maintainer decision**. It is never a default,
-  and the parser must not make it by itself. A parser may expose the decision as an opt-in flag
-  (the N°136 run used `--accept-t3-row-anomaly`). That flag must default to off, must be passed by
+  and the parser must not make it by itself. `tools/sitrep_ingest.py` exposes the decision as an opt-in flag
+  (`--accept-t3-row-anomaly`, first used for N°136). That flag must default to off, must be passed by
   hand for the one report a maintainer approved, and must **never** appear in a scripted,
   scheduled or looped invocation. Record the row and the reasoning in the commit message, as was
   done for N°136.
@@ -357,8 +397,9 @@ N°160–162 (Sud-Ubangi 0 + Nord-Ubangi 17, both N°159, of 663 = 2.6 %) kept 4
 (Bas-Uélé 24 + Tshopo 6 of N°162's 549 = 5.46 %, plus Sud-Ubangi 0 of N°159's 663) left 424 empty. As a
 standing rule: N°164 (Ituri 183 + Nord-Ubangi 5 of N°163's 424 = 44.34 %) left 249 empty; N°165
 (Nord-Ubangi 5 of N°163's 424 = 1.18 %) kept 581; N°166 (Sud-Ubangi 1 of N°165's 581 = 0.17 % + Nord-Ubangi
-1.18 % = 1.35 %) kept 632; N°167 (Nord-Ubangi 1.18 %) kept 611. The scratch parser applies the rule itself
-and reproduces the committed N°163 CSVs byte for byte. The former `--suspects-empty-nd` flag is retired.
+1.18 % = 1.35 %) kept 632; N°167 (Nord-Ubangi 1.18 %) kept 611. `tools/sitrep_ingest.py` applies the rule
+itself and reproduces every committed report from N°126 on, including N°147–149 (decided before the rule) and
+N°163, byte for byte. The former `--suspects-empty-nd` flag is retired.
 
 **An inconsistent Total row (first seen in N°147).** The province rows were consistent, but the
 Total row printed invalidated-alive as 1 452 against a province sum of 1 450 (its own cells add up
@@ -374,7 +415,11 @@ which column differs.
 **Contact tracing.** Also cross-check `contact_tracing_pct` against the narrative. Both forms occur:
 `soit une proportion de suivi de 82,0%` and `La proportion de suivi au décours du 27 septembre
 2026 était de 75,9 %` (N°135, N°136); from N°151 `soit un taux de suivi de 77,6 %` (match
-`(?:proportion|taux) de suivi`). The single-cell rule applies to this field too. A province missing
+`(?:proportion|taux) de suivi`). The key-messages box restates the rate too (`Le taux de suivi des contacts
+recule à 88,1 % (31 923/36 218)`, N°162; `progresse, passant de 79,7 % la veille à 84,8 %`, N°160): its two
+columns interleave in the extracted text, so take the first `à nn,n %` within 160 characters after `suivi des
+contacts`. Every printing must agree with the banner. The single-cell rule applies to this field too
+(N°162: banner and §2.1.1 88,4 %, key messages 88,1 % -> empty). A province missing
 from contact tracing is written in prose, not as `ND`: `Aucune donnée n'a été transmise par le
 Sud-Ubangi` (N°151), `l'Ituri et le Sud-Ubangi n'ont pas transmis de données actualisées (ND)` (N°149).
 Both count as ND for the dashboard's `nd.ct`. The same holds for alerts: `Le Sud-Kivu n'a pas
@@ -575,7 +620,8 @@ maintainer decision, and the result of re-checking the reports under *Open items
 ## Not in scope
 
 Ingestion stops at the CSVs. It does **not** touch `config.drc-bvd-2026.js`, `index.html` or the
-map — updating the dashboard is a separate, explicitly requested step, and per `CLAUDE.md` the
+map — updating the dashboard is a separate, explicitly requested step (`tools/sitrep_build.py append`, plus
+hand edits to the release labels and Methods prose it lists; map a new zone first with `tools/v1_zone.py`), and per `CLAUDE.md` the
 embedded figures and `data/` must then be changed together. When that step runs, the dashboard's
 national and province figures must equal this PDF exactly (banner and Tableau 1). List every
 discrepancy and its fix before changing anything, and never redistribute `A ventiler` deaths into zones.
@@ -594,4 +640,6 @@ Re-check these on every run (see step 1):
 | N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19, 21, 26 and 30 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical through 26 Oct, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
 | Earlier reports, `nd.ct` (found 21 Oct 2026) | Under the named-list rule (step 6), earlier sitreps whose contact-tracing narrative names a complete list of transmitting provinces without Sud-Kivu (or another affected province) could carry `nd.ct` for the missing ones. Not backfilled in the N°156–158 PR. | A separate pass: re-read each committed report's contact-tracing paragraph, check the named list is complete (its per-province contacts sum to the totals), add `nd.ct` with `ctn`, and mirror it in `data/not_reported_provinces.csv`. |
 | N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
+| N°159 (20 Oct 2026) | Tableau 3 Total row prints received total 3 856 against 3 795 (its own 3 648 + 147, and the province rows); the CSV value (663) is confirmed by the province rows and the narrative. Found 30 Oct 2026 when the parser was committed; the parser stops on it and the regression test expects the stop. | Maintainer decision: record it as an accepted Total-row anomaly like N°147 (and decide whether the accept flag should cover a typo in the received cells), or leave the stop in the test. |
+| N°116–125 | Not reproduced by `tools/sitrep_ingest.py`: these came from the N°116–130 backfill, written to other conventions (CFR rounded to one decimal where the PDF prints two, e.g. Ganga `66.7` for `66,67%`, N°120–124), and older layouts stop the parser (N°116 no known-zones file; N°117–124 no contact-tracing narrative match; N°125 a one-cell `Sud Ubangi 0` Tableau 3 row and a `Total` / numbers / `Général` layout). Not in the regression test. | Maintainer decision whether to re-ingest them with the parser. |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |
