@@ -2,9 +2,10 @@
 
     uv run --with pdfplumber --python 3.12 python -I tools/test_sitrep_ingest.py [--pdf-dir DIR] [N ...]
 
-Re-parses committed SitReps and checks that the CSVs the parser produces are byte-identical to the committed ones in
+First checks the file-name reader (status, number, date) over every file-name form the skill lists. Then re-parses
+committed SitReps and checks that the CSVs the parser produces are byte-identical to the committed ones in
 data/, and that every report a maintainer decision covers fails exactly the gates that decision names (and still
-produces the committed CSVs). Then rebuilds the dashboard artefacts of N°131 onward and compares them with the
+produces the committed CSVs). Then rebuilds the dashboard artefacts of N°131 onward (reports on the dashboard) and compares them with the
 committed config and data/ mirrors (tools/sitrep_build.py check).
 
 PDFs are fetched from insp.cd at test time by the committed source_pdf name and cached in --pdf-dir (default:
@@ -75,9 +76,57 @@ CASES = {
     167: dict(case="Yakoma unannounced (maintainer decision); 'Zone de / santé' header split; '2/11(18,2%)'",
               fails=["every zone name is already known or announced as new in this report (unknown: ['Yakoma']; announced: [])"]),
 }
+CASES[169] = dict(case="not ingested (pending): Ituri data harmonisation restates deaths 3436 -> 3750 and removes the "
+                      "A ventiler row; Tableau 1 Ituri '3 769 *' footnote marker; Tableau 3 gains a tenth column. The "
+                      "1 Nov run crashed on its file name ('N_169', dashes in the date); it must now stop at named gates",
+                 held=True,
+                 fails=['Tableau 1 and Tableau 2 list the same provinces (8: Ituri, Nord-Kivu, Haut-Uele, Tshopo, Sud-Kivu, Bas-Uele, Sud-Ubangi, Nord-Ubangi)',
+                        'Ituri: Tableau 1 (new,cases,deaths) == Tableau 2 subtotal',
+                        'Ituri: zone rows 28 == Tableau 1 zones touchées None',
+                        'zone rows 67 == page-1 zones 67 == Σ province zones touchées',
+                        "Tableau 3 Total None: unique 9-column split = Σ province rows (7 rows, 6 short/inconsistent: "
+                        "['93 3 96 15 3 78 0 15 3 6', '194 4 198 16 4 178 0 20 0 0', '1 180 52 1 232 92 52 1 088 0 142 2 76', "
+                        "'47 0 47 1 0 46 0 1 0 1', 'ND ND ND ND ND ND ND ND ND ND', '100 0 100 8 0 92 0 0 8 0'])",
+                        'suspects Tableau 3 None == narrative 465'])
 FIRST = 126
-HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf'}
-HELD_DATES = {150: '2026-10-14'}
+HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf', 169: 'final_draft_SitRep_MVE_RDC_N_169_30-10-2026.pdf'}
+HELD_DATES = {150: '2026-10-14', 169: '2026-11-01'}
+
+# File names: the skill's step-3 table, other forms seen on insp.cd, and N°168 / N°169 (status, number, date).
+D_ = lambda s: dt.date.fromisoformat(s)
+FILENAMES = [
+    ('SitRep_MVEBDB_101_23_08_2026.pdf', 'final', 101, D_('2026-08-23')),
+    ('Draft_SitRep_MVE_RDC_N°055_08_07_2026.pdf', 'provisional', 55, D_('2026-07-08')),
+    ('Draft2_SitRep_MVE_RDC_N°054_07_07_2026.pdf', 'provisional', 54, D_('2026-07-07')),
+    ('Draft-1-SitRep_MVE_RDC_N°040_23_06_2026.pdf', 'provisional', 40, D_('2026-06-23')),
+    ('Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1.pdf', 'provisional', 18, D_('2026-06-01')),
+    ('Draft-Final-SitRep_MVE_RDC_N°037_20_06_2026.pdf', 'provisional', 37, D_('2026-06-20')),
+    ('SitRep_MVE_RDC_N_64_17-07-2026_OKK.pdf', 'final', 64, D_('2026-07-17')),
+    ('Final-SitRep_MVE_RDC_N°044_27_06_2026.pdf', 'final', 44, D_('2026-06-27')),
+    ('100.pdf', 'unknown', 100, None), ('99.pdf', 'unknown', 99, None), ('97-1.pdf', 'unknown', 97, None),
+    ('85.pdf', 'unknown', 85, None),
+    ('SitRep_MVE_RDC_20260701_OK.pdf', 'final', None, D_('2026-07-01')),
+    ('SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf', 'final', 63, D_('2026-07-16')),
+    ('SitRep_MVE_RDC_N_081_03_08_2026_VF.pdf', 'final', 81, D_('2026-08-03')),
+    ('SitRep_MVE_RDC_N_080_02-08-2026.pdf', 'final', 80, D_('2026-08-02')),
+    ('SitRep_MVEBDB_144_05_10_2026-2.pdf', 'final', 144, D_('2026-10-05')),
+    ('SITREP_MVEBDB_159_20_10_2026.pdf', 'final', 159, D_('2026-10-20')),
+    ('SITREP_MVEBDB_163_23_10_2026.pdf', 'final', 163, D_('2026-10-23')),     # N°162's file: the name says 163
+    ('SitRep_MVEBDB_166_27_10_2026_VF.pdf', 'final', 166, D_('2026-10-27')),
+    ('final_draft_SitRep_MVEBDB_168_29_10_2026.pdf', 'provisional', 168, D_('2026-10-29')),
+    ('final_draft_SitRep_MVE_RDC_N_169_30-10-2026.pdf', 'provisional', 169, D_('2026-10-30')),
+]
+
+
+def test_filenames():
+    bad = []
+    for name, status, number, date in FILENAMES:
+        got = si.filename_info(name)
+        if (got['status'], got['number'], got['date']) != (status, number, date):
+            bad.append(f"{name}: got {got['status']}, {got['number']}, {got['date']}; expected {status}, {number}, {date}")
+    print(f"{'PASS' if not bad else 'FAIL'}  file-name reader: {len(FILENAMES) - len(bad)}/{len(FILENAMES)} names")
+    for b in bad: print('        ' + b)
+    return bad
 
 
 def committed():
@@ -100,6 +149,8 @@ def run_ingest(n, summ, pdf_dir, tmp):
     problems = []
     if sorted(r['fails']) != sorted(c.get('fails', [])):
         problems.append(f"gates failed {r['fails']}, expected {c.get('fails', [])}")
+    if any(f.startswith('parser error') for f in r['fails']): problems.append('the parser crashed instead of failing a gate')
+    if r['written']: problems.append(f"wrote files in a dry run: {r['written']}")
     if not c.get('held'):
         for fname, text in r['outs'].items():
             kind = fname.split('_')[0]
@@ -123,6 +174,8 @@ def main(argv):
     if only: ns = [n for n in ns if n in only]
     tmp = tempfile.mkdtemp(prefix='sitrep_test_')
     failed = []
+    name_bad = test_filenames()
+    print()
     print(f'Re-parsing {len(ns)} report(s); PDFs in {pdf_dir}\n')
     for n in ns:
         c = CASES.get(n, {})
@@ -130,17 +183,18 @@ def main(argv):
             problems, logs = run_ingest(n, reports.get(n), pdf_dir, tmp)
         except Exception as e:                       # a crash is a failure, never a skip
             problems, logs = [f'{type(e).__name__}: {e}'], []
-        what = ('held, refused' if c.get('held') else
+        what = ('not ingested, stops at the expected gates' if c.get('held') else
                 'expected stop, CSVs match' if c.get('fails') else 'all gates pass, CSVs byte-identical')
         print(f"{'PASS' if not problems else 'FAIL'}  N°{n:<4} {what}" + (f"  [{c['case']}]" if c.get('case') else ''))
         for p in problems: print('        ' + p)
         if problems: failed.append(n)
-    bns = [n for n in ns if n >= 131 and n in reports]
+    on_dashboard = {int(r['s']) for r in sb.load_config()[2]['nat2']}   # ingested reports not yet on the dashboard are skipped
+    bns = [n for n in ns if n >= 131 and n in reports and n in on_dashboard]
     print(f'\nDashboard artefacts (sitrep_build.py check, {len(bns)} report(s)):')
     bad = sb.check(bns, pdf_dir) if bns else []
-    print(f"\n{len(ns) - len(failed)}/{len(ns)} ingest case(s) pass" + (f'; FAILED: {failed}' if failed else '')
-          + f"; {len(bad)} dashboard artefact difference(s)" + (f': {bad}' if bad else ''))
-    return 1 if failed or bad else 0
+    print(f"\nfile names {len(FILENAMES) - len(name_bad)}/{len(FILENAMES)}; {len(ns) - len(failed)}/{len(ns)} ingest case(s) pass"
+          + (f'; FAILED: {failed}' if failed else '') + f"; {len(bad)} dashboard artefact difference(s)" + (f': {bad}' if bad else ''))
+    return 1 if failed or bad or name_bad else 0
 
 
 if __name__ == '__main__':

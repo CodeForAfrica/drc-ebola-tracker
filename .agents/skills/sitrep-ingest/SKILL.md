@@ -34,7 +34,7 @@ unattended run cannot rebuild them, and must not try.
 | `tools/sitrep_ingest.py` | Steps 3–10 for one PDF: identity, banner, Tableaux 1–3, narrative cross-checks, every hard gate, the single-cell rule, the ND share rule, both CSVs. Dry run by default; `--write` writes only when every gate passes. |
 | `tools/sitrep_build.py` | Dashboard data from the committed CSVs: `append N … --nd nd.json` (dry run prints the discrepancy list; `--write` adds the rows and mirrors), `check N …` (rebuilds a committed report's artefacts and diffs them). |
 | `tools/v1_zone.py` | Maps a newly reported zone from the INRB-UMIE archived v1 shapefile (polygon to 5 dp, v1 Population, DMS centroid), after checking that the file reproduces Wapinda exactly. |
-| `tools/test_sitrep_ingest.py` | Regression test: re-parses every committed report from N°126 (plus the held N°150) and checks the CSVs are byte-identical to `data/`, that each maintainer-decision report fails exactly the gates its decision names, and that `sitrep_build.py check` finds no difference from N°131. PDFs are fetched at test time; none is committed. |
+| `tools/test_sitrep_ingest.py` | Regression test: the file-name reader over every file-name form in step 3; then re-parses every committed report from N°126 (plus the not-ingested N°150 and N°169) and checks the CSVs are byte-identical to `data/`, that each maintainer-decision report fails exactly the gates its decision names, that nothing crashes or is written in a dry run, and that `sitrep_build.py check` finds no difference from N°131. PDFs are fetched at test time; none is committed. |
 
 ```bash
 UV_HTTP_TIMEOUT=180 uv run --with pdfplumber --python 3.12 python -I tools/sitrep_ingest.py <pdf> data --title-number <N from the post title>          # dry run
@@ -43,6 +43,19 @@ uv run --with pdfplumber --python 3.12 python -I tools/test_sitrep_ingest.py    
 ```
 
 Ingest reports in order (each one's known zones and the ND share rule read the earlier reports in `data/`).
+`--title-number` (the post title's number) is required: gate 6 compares it with the PDF header.
+
+**The parser never crashes on a PDF's content.** A value later gates depend on that cannot be read (a header,
+a date, a table anchor, the banner labels, a Total row, the earlier reports it needs) is a FAIL at a named gate,
+and the run stops there; any other parser error is reported as a FAIL naming its line, never as a traceback.
+Either way nothing is written and the exit status is 1. The 1 Nov 2026 run crashed on N°169's file name before
+this was added.
+
+**Not covered by the test, by maintainer decision (2 Nov 2026):** N°116–125 stay as written by the N°116–130
+backfill, not parser output (one-decimal CFRs where the PDF prints two, older layouts that stop the parser),
+and are not re-ingested. `sitrep_build.py check` compares `zones_timeseries_full.csv` rows and `zones_sitrepN.csv`
+mirrors only from N°146: rows written before the 8 Oct 2026 geometry update have no population or per-100k for
+the zones then unmapped, and stay as written.
 `--today` is only for re-parsing past reports (gate 5). `--accept-t3-row-anomaly` is a per-run maintainer
 decision (step 6) and is off by default; it never appears in a scripted, scheduled or looped run.
 
@@ -162,7 +175,7 @@ If neither matches, stop and report the post URL — do not guess a `wp-content/
 
 | Field | Source | Notes |
 |---|---|---|
-| `sitrep_number` | post **title** | `SitRep N°101/MVEBDB/23/08/2026` → `101`. Strip leading zeros (`N°0100` → `100`). Allow a space before the slash (`SitRep N°143 /MVE-BDBV/…`, in both the title and the PDF header). Cross-check against the PDF header line; if they disagree, trust the PDF and report the mismatch. |
+| `sitrep_number` | post **title** | `SitRep N°101/MVEBDB/23/08/2026` → `101`. Strip leading zeros (`N°0100` → `100`). Allow a space before the slash (`SitRep N°143 /MVE-BDBV/…`, in both the title and the PDF header). Cross-check against the PDF header line (gate 6); if they disagree, stop and report. **The filename is never the source of the number or the date**: read them from the filename only to flag a mismatch, and if it has none readable, flag that and carry on (`tools/sitrep_ingest.filename_info`). |
 | `report_date` | **PDF** page 1: `Date de rapportage : 23 août 2026` | Map French month names. The label changed in N°137: `Date de rapportage :` through N°136, `Date du rapport :` from N°137. Match either one: `Date (?:de rapportage\|du rapport)\s*:`. The first of the month is printed as an ordinal, `1er octobre 2026` (N°139): accept `\d+(?:er)?`. The header line's date (`SitRep N°141/MVE-BDBV/01/10/2026`) can disagree with this line (N°141 reports 2 Oct). Take `report_date` from `Date du rapport`, check it against the filename, and flag the mismatch. **Exception (N°150):** when `Date du rapport` disagrees with *both* the filename and the report's other printings (header line, table titles `au 11 octobre 2026`, narrative `En terme du 11 octobre`) *and* would collide with an adjacent sitrep's `report_date`, take the date the rest of the document supports and record the substitution in the run report and commit message. N°150 prints `Date du rapport : 12 octobre 2026` while its filename, header, both table titles and narrative say 11 Oct, and N°151 is 12 Oct: its `report_date` is 2026-10-11. In N°141 the filename backed `Date du rapport`, so the rule there stays as above. |
 | `publication_date` | **PDF** page 1: `Date de publication : 24 août 2026` | The day and month can run together (`Date de publication : 20octobre 2026`, N°158): insert a space after the day digits before reading the month, but never split an ordinal (`1er octobre` must stay whole; an over-eager first fix broke N°139). **Not the WordPress post date** — they routinely differ (N°101 was published 24 Aug per the PDF but posted 25 Aug). Use the WP `date` only if the PDF line is missing, and note the substitution. |
 | `status` | **PDF filename** | See below. |
@@ -202,6 +215,13 @@ Real filenames the rule must survive (all observed on insp.cd):
 | `SitRep_MVE_RDC_N_64_17-07-2026_OKK.pdf` | final | no draft marker |
 | `Final-SitRep_MVE_RDC_N°044_27_06_2026.pdf` | final | explicit |
 | `100.pdf`, `99.pdf`, `97-1.pdf`, `85.pdf` | **unknown** | INSP sometimes uploads a bare number — nothing to infer from |
+| `final_draft_SitRep_MVEBDB_168_29_10_2026.pdf` | provisional | `final_draft`: draft marker wins (as `Draft-Final-`) |
+| `final_draft_SitRep_MVE_RDC_N_169_30-10-2026.pdf` | provisional | as N°168; `N_169` and dashes in the date (N°170 too) |
+
+The filename's number and date (for the mismatch flag only) are read from a `<number>[_-]DD[_-]MM[_-]YYYY` run
+anywhere in the stem, whatever precedes the number (`_101_`, `N°055_`, `N18_`, `N_64_`, `N_169_`); a bare stem
+(`100`, `97-1`) gives a number and no date; `SitRep_MVE_RDC_20260701_OK` gives a date and no number. The test
+covers every name in this table plus N°063, N°080, N°081, N°144, N°159, N°162 and N°166's.
 
 Always keep the raw filename in `source_pdf` so status can be re-derived later.
 Never write `final` for a bare-number filename just because it looks like the others.
@@ -301,13 +321,15 @@ an optional `ont été`, then `validées comme`. **Do not require the word "aler
 **Total-row numbers above `Total Général` (N°159).** The nine Total numbers can be printed on their own
 line *before* the label, with no `Total` prefix (`3 648 147 3 856 517 146 2 918 1 656 293` then
 `Total Général`). Treat a numbers-only line directly followed by `Total Général` as the Total row.
-`tools/sitrep_ingest.py` handles this layout (N°159–167 all use it). **N°159's Total row has a typo the parser
-stops on:** it prints received total **3 856**, while its own received cells (3 648 + 147) and the province rows
-both give **3 795**; every other column, validated suspects included (517 + 146 = 663, = the narrative), equals
-the province sums. The committed N°159 (suspects 663) was accepted by hand in PR #59; the earlier note here that
-"every column equals the province sums" was wrong for that cell. `--accept-t3-row-anomaly` does not cover it
-(its Total-row check needs received alive + dead = total), so a re-parse stops, and the regression test expects
-that stop. See *Open items*.
+`tools/sitrep_ingest.py` handles this layout (N°159–167 all use it).
+
+**Known printing error, N°159's Tableau 3 Total row (maintainer decision, 2 Nov 2026).** It prints received total
+**3 856**; its own received cells (3 648 + 147) and the province rows both give **3 795**. Every other column
+equals the province sums, so suspects (517 + 146 = **663**) is unaffected, confirmed by the province rows and the
+narrative. Not every column matched, as this skill used to say: the received total did not. N°159's committed
+CSVs stay as they are (accepted by hand in PR #59). `--accept-t3-row-anomaly` is not widened to cover a typo in
+the received cells, so a re-parse of N°159 stops at the Tableau 3 gate, and the regression test expects that
+stop.
 
 **`NA` cells in a province row (N°159) are not ND.** Nord-Ubangi printed `227 0 227 17 0 NA NA 17 3`:
 received, validated, investigated and transferred are printed; only the two *invalidated* cells are
@@ -640,6 +662,5 @@ Re-check these on every run (see step 1):
 | N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19, 21, 26 and 30 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical through 26 Oct, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
 | Earlier reports, `nd.ct` (found 21 Oct 2026) | Under the named-list rule (step 6), earlier sitreps whose contact-tracing narrative names a complete list of transmitting provinces without Sud-Kivu (or another affected province) could carry `nd.ct` for the missing ones. Not backfilled in the N°156–158 PR. | A separate pass: re-read each committed report's contact-tracing paragraph, check the named list is complete (its per-province contacts sum to the totals), add `nd.ct` with `ctn`, and mirror it in `data/not_reported_provinces.csv`. |
 | N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
-| N°159 (20 Oct 2026) | Tableau 3 Total row prints received total 3 856 against 3 795 (its own 3 648 + 147, and the province rows); the CSV value (663) is confirmed by the province rows and the narrative. Found 30 Oct 2026 when the parser was committed; the parser stops on it and the regression test expects the stop. | Maintainer decision: record it as an accepted Total-row anomaly like N°147 (and decide whether the accept flag should cover a typo in the received cells), or leave the stop in the test. |
-| N°116–125 | Not reproduced by `tools/sitrep_ingest.py`: these came from the N°116–130 backfill, written to other conventions (CFR rounded to one decimal where the PDF prints two, e.g. Ganga `66.7` for `66,67%`, N°120–124), and older layouts stop the parser (N°116 no known-zones file; N°117–124 no contact-tracing narrative match; N°125 a one-cell `Sud Ubangi 0` Tableau 3 row and a `Total` / numbers / `Général` layout). Not in the regression test. | Maintainer decision whether to re-ingest them with the parser. |
+| N°169 (30 Oct 2026) | **Not ingested.** A source restatement: an Ituri data-harmonisation exercise (29 Oct) changes figures in 97% of Ituri's zones; Ituri deaths go from 3 436 to 3 750 (the 493 "A ventiler" deaths are now in named zones; the row is gone), so national deaths are 5 026 + 32 new + 314 = 5 372 and the CFR 51.6% (N°168: 48.6%). Two layout changes stop the parser: Tableau 1's Ituri row carries a footnote marker (`7380 3 769 * 51,1%`), and Tableau 3 has a tenth column ("Nombre de suspects non investigués"). The 1 Nov run crashed on its file name before failed matches became gates; it now stops at six named gates (pinned in the test). Per-zone figures before and after N°169 are not comparable (like N°069). N°170 (31 Oct, `final_draft_SitRep_MVE_RDC_N_170_31-10-2026.pdf`) is posted and not yet checked. | Attended session: maintainer decision on the restatement (break row in the per-zone series, Methods disclosure); then teach the parser the two layouts, add N°169 to the test as a passing case, and ingest N°169 onward. |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |

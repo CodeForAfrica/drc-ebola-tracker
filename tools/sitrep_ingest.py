@@ -8,25 +8,86 @@ reports; it never patches the parser or the figures.
 
 Options
   --write                       write the CSVs (default: dry run)
-  --title-number N              the post title's sitrep number, for gate 6 (default: compare with the filename)
+  --title-number N              the post title's sitrep number (required: gate 6 compares it with the PDF header;
+                                the filename's number is only read to flag a mismatch)
   --today YYYY-MM-DD            "today" for gate 5 (default: the real date; set it only to re-parse past reports)
   --pdf-cache DIR               where earlier reports' PDFs are kept for the ND share rule (default: <pdf dir>/prior)
   --accept-t3-row-anomaly       per-run maintainer decision for one approved report (skill, step 6). Off by default;
                                 never pass it in a scripted, scheduled or looped run.
 """
-import csv, datetime as dt, glob, io, itertools, os, re, sys
+import csv, datetime as dt, glob, io, itertools, os, re, sys, traceback
 import pdfplumber
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+class Stop(Exception):
+    """A gate that later gates depend on failed (its FAIL is already recorded): the run stops there."""
+
+
+def file_status(name):
+    """provisional / final / unknown from the PDF file name (skill, step 3). A draft marker wins."""
+    stem = os.path.splitext(os.path.basename(name))[0]
+    if re.search(r'(?<![a-z])d[ar]a?ft', stem, re.I): return 'provisional'
+    if re.search(r'(?<![a-z])(final|vf|fv|ok+)(?![a-z])', stem, re.I): return 'final'
+    if re.search(r'sitrep', stem, re.I): return 'final'
+    return 'unknown'
+
+
+def filename_info(name):
+    """{status, number, date} read from a PDF file name. number and date are None when the name has none; they are
+    only ever compared with the PDF to flag a mismatch, never used as the sitrep's identity. Forms seen on insp.cd:
+    SitRep_MVEBDB_101_23_08_2026, Draft_SitRep_MVE_RDC_N°055_08_07_2026, Daft-SitRep_MVE_RDC_N18_01_06_2026_JO_PA-Final-1,
+    SitRep_MVE_RDC_N_64_17-07-2026_OKK, final_draft_SitRep_MVE_RDC_N_169_30-10-2026, SitRep_MVE_RDC_20260701_OK (date
+    only), 100 / 97-1 (bare number), …_NA°046_…."""
+    stem = os.path.splitext(os.path.basename(name))[0]
+    number = date = None
+    m = re.search(r'(?<!\d)0*(\d{1,3})[_-](\d{1,2})[_-](\d{1,2})[_-](\d{4})(?!\d)', stem)
+    if m:
+        number = int(m.group(1))
+        try: date = dt.date(int(m.group(4)), int(m.group(3)), int(m.group(2)))
+        except ValueError: date = None
+    else:
+        m = re.fullmatch(r'0*(\d{1,3})(?:-\d+)?', stem)                       # '100', '97-1'
+        if m: number = int(m.group(1))
+        m = re.search(r'(?<!\d)(20\d\d)(\d\d)(\d\d)(?!\d)', stem)              # 'SitRep_MVE_RDC_20260701_OK'
+        if m:
+            try: date = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+            except ValueError: date = None
+    return dict(status=file_status(name), number=number, date=date)
+
+
 def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, accept_t3_row_anomaly=False, log=print):
-    """Parse one SitRep PDF. Returns {fails, outs (file name -> CSV text), written, sitrep, summary}."""
+    """Parse one SitRep PDF. Returns {fails, outs (file name -> CSV text), written, sitrep, summary}. Never raises on
+    the PDF's content: a value a later gate depends on that cannot be read is a FAIL at a named gate and stops the run
+    (outs empty); any other parser error is also returned as a FAIL, with its line, rather than a traceback."""
+    state = dict(fails=[], sitrep=None)
+    try:
+        return _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomaly, log, state)
+    except Stop:
+        pass
+    except Exception as e:                                   # never a traceback: a named FAIL, and the run stops
+        where = traceback.extract_tb(e.__traceback__)[-1]
+        msg = f'parser error (no gate covers it; fix the parser in an attended session): {type(e).__name__}: {e} at {os.path.basename(where.filename)}:{where.lineno}'
+        log('FAIL ' + msg); state['fails'].append(msg)
+    log(f"\n*** run stopped at a failed gate ({len(state['fails'])} failed) — nothing written")
+    return dict(fails=state['fails'], outs={}, written=[], sitrep=state['sitrep'], summary=None)
+
+
+def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomaly, log, state):
     TODAY = today or dt.date.today()
-    fails = []
+    fails = state['fails']
     def gate(ok, msg):
         log(('PASS ' if ok else 'FAIL ') + msg)
         if not ok: fails.append(msg)
+    def need(x, msg):
+        """A value later gates depend on: PASS, or FAIL and stop the run."""
+        ok = x is not None and x is not False
+        gate(ok, msg)
+        if not ok: raise Stop
+        return x
+    def find(pat, s, msg, flags=0): return need(re.search(pat, s, flags), msg)
+    def first(it, msg): return need(next(it, None), msg)
 
     text = '\n'.join(pg.extract_text() or '' for pg in pdfplumber.open(pdf).pages)
     text = text.replace('\xa0', ' ').replace('\u202f', ' ')   # no-break and narrow no-break spaces in figures
@@ -36,35 +97,40 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
                   septembre=9, octobre=10, novembre=11, décembre=12)
     def fdate(s):
         s = re.sub(r'^(\d+)(?=(?!er\s)[^\d\s])', r'\1 ', s)   # '20octobre 2026' (N°158); never splits '1er octobre'
-        d, m, y = s.split(); return dt.date(int(y), MONTHS[m.lower()], int(d.removesuffix('er')))   # '1er octobre' (N°139)
+        try:
+            d, m, y = s.split(); return dt.date(int(y), MONTHS[m.lower()], int(d.removesuffix('er')))   # '1er octobre' (N°139)
+        except (ValueError, KeyError):
+            return None
     def num(s): return int(s.replace(' ', ''))
     def pct(s): return float(s.replace('%', '').replace(',', '.').strip())
 
     # identity
     fname = os.path.basename(pdf)
-    stem = os.path.splitext(fname)[0]
-    if re.search(r'(?<![a-z])d[ar]a?ft', stem, re.I): status = 'provisional'
-    elif re.search(r'(?<![a-z])(final|vf|fv|ok+)(?![a-z])', stem, re.I): status = 'final'
-    elif re.search(r'sitrep', stem, re.I): status = 'final'
-    else: status = 'unknown'
-    hm = re.search(r'SitRep N°0*(\d+)\s*/\S*?/(\d\d)/(\d\d)/(\d{4})', text)   # 'N°143 /MVE' has a space
+    info = filename_info(fname)
+    status = info['status']
+    hm = find(r'SitRep N°0*(\d+)\s*/\S*?/(\d\d)/(\d\d)/(\d{4})', text,   # 'N°143 /MVE' has a space
+              'PDF header line "SitRep N°…/…/DD/MM/YYYY" found')
     hdr = hm.group(1)
-    fn_no = re.search(r'_(\d+)_\d\d_\d\d_\d{4}', fname).group(1)
-    sitrep = int(hdr)
-    if title_no is not None:   # gate 6 compares the post title with the PDF header (N°162's filename says 163)
-        gate(int(title_no) == sitrep, f'sitrep number header {hdr} == post title {title_no}')
-        if int(fn_no) != sitrep: log(f'FLAG filename carries N°{fn_no}, title and header say N°{sitrep}')
-    else:
-        gate(int(fn_no) == sitrep, f'sitrep number header {hdr} == filename {fn_no} (pass --title-number to compare with the post title)')
-    rd = fdate(re.search(r'Date (?:de rapportage|du rapport)\s*:\s*(\d+(?:er)? ?\S+ \d{4})', text).group(1))
-    pd = fdate(re.search(r'Date de publication\s*:\s*(\d+(?:er)? ?\S+ \d{4})', text).group(1))
-    hd = dt.date(int(hm.group(4)), int(hm.group(3)), int(hm.group(2)))
+    sitrep = int(hdr); state['sitrep'] = sitrep
+    # Gate 6: the post title against the PDF header. The filename is never the sitrep's identity (N°162's says 163).
+    need(title_no is not None or None, "post title's sitrep number given for gate 6 (--title-number)")
+    gate(int(title_no) == sitrep, f'sitrep number header {hdr} == post title {title_no}')
+    if info['number'] is None: log(f'FLAG filename has no readable sitrep number ({fname})')
+    elif info['number'] != sitrep: log(f"FLAG filename carries N°{info['number']}, title and header say N°{sitrep}")
+    m_rd = find(r'Date (?:de rapportage|du rapport)\s*:\s*(\d+(?:er)? ?\S+ \d{4})', text, 'report date line ("Date du rapport :") found')
+    m_pd = find(r'Date de publication\s*:\s*(\d+(?:er)? ?\S+ \d{4})', text, 'publication date line ("Date de publication :") found')
+    rd = need(fdate(m_rd.group(1)), f'report date {m_rd.group(1)!r} reads as a date')
+    pd = need(fdate(m_pd.group(1)), f'publication date {m_pd.group(1)!r} reads as a date')
+    try: hd = dt.date(int(hm.group(4)), int(hm.group(3)), int(hm.group(2)))
+    except ValueError: hd = None
     if hd != rd: log(f'FLAG header line date {hd} != Date du rapport {rd} (report_date taken from Date du rapport)')
+    if info['date'] is None: log(f'FLAG filename has no readable date ({fname})')
+    elif info['date'] not in (rd, hd): log(f"FLAG filename date {info['date']} != report date {rd}")
     gate(rd < pd and (TODAY - rd).days <= 14 and (TODAY - pd).days <= 14,
          f'report_date {rd} < publication_date {pd}, both within 14 days of {TODAY}')
 
-    provinces = int(re.search(r'^(\d+) Provinces touchées', text, re.M).group(1))
-    zones_p1 = int(re.search(r'^(\d+) Zones de santé', text, re.M).group(1))
+    provinces = int(find(r'^(\d+) Provinces touchées', text, 'page 1 "N Provinces touchées" found', re.M).group(1))
+    zones_p1 = int(find(r'^(\d+) Zones de santé', text, 'page 1 "N Zones de santé touchées" found', re.M).group(1))
 
     # banner: six KPI cells read from the large bold glyphs under the label line. Text extraction of the banner
     # interleaves glyphs, and in N°141 a callout box is overprinted on it, so read by font size and x position.
@@ -75,7 +141,9 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
         as a space, so a misplaced space shows ('9 36', N°166) instead of being glued into a number."""
         pg = pdfplumber.open(path).pages[0]
         ws = pg.extract_words()
-        top = min(w['top'] for w in ws if w['text'] == 'SUIVI')
+        tops = [w['top'] for w in ws if w['text'] == 'SUIVI']
+        if not tops: return None
+        top = min(tops)
         cs = sorted((c for c in pg.chars if top + 14 < c['top'] < top + 52 and c['size'] >= 12 and c['text'].strip()),
                     key=lambda c: c['x0'])
         cells, cur, last = [], [], None
@@ -103,7 +171,7 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
             if out[k] is not None: return [txt(c) for c in cells]
             out[k] = txt(cc)
         return out
-    bc = banner_cells(pdf)
+    bc = need(banner_cells(pdf), 'banner label line (SUIVI) found on page 1')
     INT = r'\d{1,3}(?: \d{3})*|\d+'          # '2 708' (thousands space) or '10141'; never '9 36'
     gate(len(bc) == 6, f'banner has six KPI cells {bc}')
     bc = (bc + [None] * 6)[:6]
@@ -120,9 +188,9 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
             'Sud-Kivu': 'Sud-Kivu', 'Bas Uélé': 'Bas-Uele', 'Bas-Uélé': 'Bas-Uele',
             'Sud Ubangi': 'Sud-Ubangi', 'Sud-Ubangi': 'Sud-Ubangi',
             'Nord Ubangi': 'Nord-Ubangi', 'Nord-Ubangi': 'Nord-Ubangi'}   # eighth province from N°155
-    t2 = next(i for i, l in enumerate(L) if l.startswith('Tableau 2'))
-    t3 = next(i for i, l in enumerate(L) if l.startswith('Tableau 3'))
-    start = next(i for i in range(t2, t3) if re.match(r'Ituri \d', L[i]))
+    t2 = first((i for i, l in enumerate(L) if l.startswith('Tableau 2')), 'Tableau 2 found')
+    t3 = first((i for i, l in enumerate(L) if l.startswith('Tableau 3')), 'Tableau 3 found')
+    start = first((i for i in range(t2, t3) if re.match(r'Ituri \d', L[i])), 'Tableau 2 first row ("Ituri <digit>") found')
     ROW = re.compile(r'^(.+?)\s+(\d+(?: \d{3})*|NA)\s+(\d+(?: \d{3})*)\s+(\d+,\d+ ?%|NA)?(?:\s+(.*))?$')
     # Known zones = the most recent EARLIER report's zone CSV (data/ or this run's output dir). Not the union of all
     # files: N°117-123 in data/ carry a mis-parsed "Boma" / "Mangbetu Gombari" and must not count as known names.
@@ -131,7 +199,7 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
             + glob.glob(f'{os.path.dirname(pdf)}/zones_sitrep*_????-??-??.csv'):
         k = int(re.search(r'zones_sitrep(\d+)_', kf).group(1))
         if k < sitrep: prior[k] = kf
-    KNOWN_FROM = prior[max(prior)]
+    KNOWN_FROM = prior[max(need(prior or None, f'an earlier report\'s zones CSV in data/ (known zone names for N°{sitrep})'))]
     KNOWN = {r['zone'] for r in csv.DictReader(open(KNOWN_FROM, encoding='utf8'))}
     log(f'known zone names from {os.path.basename(KNOWN_FROM)} ({len(KNOWN)})')
     ANNOUNCED = set(re.findall(r'[Nn]ouvelle zone de santé touchée\s*:\s*([A-ZÀ-Ý][\w\'-]+(?: [A-ZÀ-Ý][\w\'-]+)*)', re.sub(r'\s+', ' ', text)))
@@ -175,7 +243,7 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
                           cases=None if c == 'NA' else num(c), deaths=num(d),
                           cfr=None if cf in (None, 'NA') else pct(cf)))
     if pending: leftovers.append(pending)
-    gate(total is not None, 'Total row found in Tableau 2')
+    need(total, 'Total row found in Tableau 2')
     gate(not leftovers, f'no unmatched/leftover text in zone table {leftovers}')
     gate(all(not re.search(r'[\d%]', z['zone']) for z in zones), 'no zone name contains digit or %')
     unknown = sorted(z['zone'] for z in zones if z['zone'] not in KNOWN | ANNOUNCED | {'A ventiler'})
@@ -183,7 +251,7 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
     for z in sorted(ANNOUNCED): log(f'FLAG new affected zone announced: {z}' + ('' if z in KNOWN else ' (not in any earlier zone CSV)'))
 
     # Tableau 1 (province table)
-    t1 = next(i for i, l in enumerate(L) if l.startswith('Tableau 1'))
+    t1 = first((i for i, l in enumerate(L) if l.startswith('Tableau 1')), 'Tableau 1 found')
     t1rows = {}
     t1lines = L[t1:t2]
     for k in range(len(t1lines) - 1):      # from N°140 the Total numbers sit on the line above 'Total 63/167 (...)'
@@ -220,15 +288,16 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
     gate(sum(s['cases'] for s in subtot.values()) == tc and sum(s['deaths'] for s in subtot.values()) == td,
          f'provinces sum == Total row ({tc}/{td})')
     gate((b_cases, b_deaths) == (tc, td), f'banner cases/deaths {b_cases}/{b_deaths} == Total {tc}/{td}')
+    need(t1rows.get('Total'), 'Tableau 1 Total row found')
     gate(t1rows['Total']['digits'].endswith(f'{tc}{td}'), 'Tableau 1 Total == Tableau 2 Total')
     nz = len([z for z in zones if z['zone'] != 'A ventiler'])
     gate(nz == zones_p1 == sum(r['zt'] for k, r in t1rows.items() if k != 'Total') == t1rows['Total']['zt'],
          f'zone rows {nz} == page-1 zones {zones_p1} == Σ province zones touchées')
-    gate(abs(round(td / tc * 100, 1) - cfr_nat) <= 0.1, f'computed CFR {round(td/tc*100,1)} vs printed {cfr_nat}')
+    gate(cfr_nat is not None and tc > 0 and abs(round(td / tc * 100, 1) - cfr_nat) <= 0.1, f'computed CFR {round(td/tc*100,1) if tc else None} vs printed {cfr_nat}')
     gate(cfr_nat == tcf, f'banner CFR {cfr_nat} == Tableau 2 Total CFR {tcf}')
 
     # Tableau 3 suspects
-    t3end = next(i for i in range(t3, len(L)) if L[i].startswith('Figure 1'))
+    t3end = first((i for i in range(t3, len(L)) if L[i].startswith('Figure 1')), 'end of Tableau 3 ("Figure 1") found')
     prow, tot_tokens, in_total, nd_provs = [], [], False, []
     T3L = L[t3:t3end]
     for k in range(len(T3L) - 1):   # N°159+: the Total numbers sit on their own line directly above 'Total Général'
@@ -397,7 +466,7 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
             if not todo: break
             try:
                 if k not in cache: cache[k] = t3_validated(prior_pdf(earlier[k]))
-            except (ValueError, StopIteration) as e:
+            except (ValueError, StopIteration, OSError) as e:
                 gate(False, f'ND share rule: cannot read Tableau 3 of N°{k} ({e})'); todo = set(); break
             rows, nat = cache[k]
             for pv in sorted(todo):
@@ -425,7 +494,7 @@ def ingest(pdf, outdir, write=False, title_no=None, today=None, pdf_cache=None, 
     bad = [c for r in rows for c in r[6:] if c != '' and not re.fullmatch(r'-?\d+(\.\d+)?', str(c))]
     gate(not bad, f'all numeric cells parse cleanly {bad}')
 
-    summ = [sitrep, rd, pd, provinces, zones_p1, td, f'{cfr_nat:.1f}', '' if isolation is None else isolation, recovered, '' if suspects is None else suspects,
+    summ = [sitrep, rd, pd, provinces, zones_p1, td, '' if cfr_nat is None else f'{cfr_nat:.1f}', '' if isolation is None else isolation, recovered, '' if suspects is None else suspects,
             '' if contact is None else f'{contact:.1f}', fname]
     log('\nsummary:', summ)
     log(f'zone rows: {nz} + A ventiler = {len(rows)}; zones without population: {nopop}')
