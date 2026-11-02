@@ -75,7 +75,7 @@ def tableau1(pdfpath):
     out = {}
     blk = text[text.index('Tableau 1'):text.index('Tableau 2')]
     for l in blk.split('\n'):    # 'n/m' with or without a space before '(' ('1/11(9,1%)')
-        m = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi)\s+[\d ]+?\s+(\d+,\d+)%\s+(\d+)/(\d+)', l.strip())
+        m = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi)\s+[\d ]+?\s+(?:\*\s*)?(\d+,\d+)%\s+(\d+)/(\d+)', l.strip())   # '3 769 * 51,1%' (N°169)
         if m: out[T1NAME[m.group(1)]] = dict(cfr=float(m.group(2).replace(',', '.')), zt=int(m.group(3)), zn=int(m.group(4)))
     return out
 
