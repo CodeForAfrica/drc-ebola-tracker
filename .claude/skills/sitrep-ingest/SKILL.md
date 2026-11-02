@@ -343,6 +343,18 @@ the not-reported case. Split such a row on its printed cells only; never fill an
 `tools/sitrep_ingest.py` reads a nine-cell row with `NA` (and no `ND`) as printed, counting each `NA` as
 contributing nothing to the column sums, and flags it.
 
+**A tenth column from N°169: "Nombre de suspects non investigués".** Tableau 3's header gains a column between
+*investigués* and *transférés au CT/CTE*, so province and Total rows have ten cells
+(`Ituri 1 180 52 1 232 92 52 1 088 0 142 2 76`). Detect it from the header (`non investigu`), read rows and the
+Total as ten cells with the extra check *investigated + not investigated = validated (alive + dead)* (it holds on
+every row of N°169 and N°170, which keeps the split of thousands-spaced numbers unique), then drop the new cell so
+everything downstream reads the classic nine. An ND row then has ten `ND` cells. Validated suspects (cells 4 + 5)
+are unchanged in meaning.
+
+**The Total numbers above `Total` with `Général` on the next line (N°169, N°170).** The N°159 layout, but the
+label is split over two lines (`3 658 144 3 802 … 212` / `Total` / `Général`). Treat a numbers-only line followed
+by `Total Général`, or by `Total` and then `Général`, as the Total row.
+
 **A page number inside the Total block (N°157).** When a page break falls right after the Total row,
 the page number (`4`) sits on its own line before `Figure 1` and is read as a tenth Total-row token,
 so no split matches. Skip a lone 1–2-digit line inside the Total block.
@@ -555,6 +567,10 @@ Do not write any file until all of these pass:
    **Tableau 1 prints `n/m(p%)` with no space before the parenthesis** in some rows (`1/11(9,1%)` for
    Nord-Ubangi from N°161, `2/11(18,2%)` in N°167, `66/178(37,1%)` in N°166's Total): match `(\d+)/(\d+)`
    and never require a space before `(`, as for the N°153 suspects narrative (`612(15,3 %)`).
+   **A footnote marker can follow a province's deaths in Tableau 1 (N°169):** `Ituri 34 7380 3 769 * 51,1% 28/36
+   (77,8 %)`. Allow an optional `*` before the CFR, read the row as printed, and flag the marker; the footnote itself
+   is printed under Tableau 2 (`* Un exercice d'harmonisation des données non ventilées a été réalisé le 29 octobre
+   2026…`). N°170 still prints that footnote under Tableau 2 (as "non invantilées") with no marker in Tableau 1.
 2. All provinces summed equal the `Total` row, and that total equals the page-1 banner cumulative
    cases and deaths.
 3. Zone row count (excluding `A ventiler`) equals the "*N* Zones de santé touchées" figure on page 1
@@ -662,5 +678,5 @@ Re-check these on every run (see step 1):
 | N°150 (11 Oct 2026) | **Held, nothing written** (maintainer decision, 14 Oct 2026). Cases disagree: the page-1 banner (9 065) and Tableau 1's Haut-Uélé row (`4 382 162 42,6%`) are one below Tableau 2's Total (9 066), its Haut-Uélé subtotal (383), the zone rows and the narrative (`la RDC cumule 9066`). No single zone carries it: every Haut-Uélé zone's cumulative change equals its own new-case column (Pawa +2, Rungu +1, Wamba +1; 379 + 4 = 383). Tableau 1's row contradicts itself (379 + 4 new ≠ 382; its CFR 42,6% is 162/380). Deaths (4 381) agree everywhere. Checked 19, 21, 26 and 30 Oct 2026: post and media unmodified (14 Oct), PDF byte-identical through 26 Oct, no `-1.pdf` or `-2.pdf`. When ingested, `report_date` is 2026-10-11 (step 3 exception). The dashboard carries a break row for it. | Re-check for a corrected upload (`modified`, PDF bytes, `-1.pdf`); ingest only when the banner and Tableau 1 agree with Tableau 2, then replace the break row and remove this row. |
 | Earlier reports, `nd.ct` (found 21 Oct 2026) | Under the named-list rule (step 6), earlier sitreps whose contact-tracing narrative names a complete list of transmitting provinces without Sud-Kivu (or another affected province) could carry `nd.ct` for the missing ones. Not backfilled in the N°156–158 PR. | A separate pass: re-read each committed report's contact-tracing paragraph, check the named list is complete (its per-province contacts sum to the totals), add `nd.ct` with `ctn`, and mirror it in `data/not_reported_provinces.csv`. |
 | N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
-| N°169 (30 Oct 2026) | **Not ingested.** A source restatement: an Ituri data-harmonisation exercise (29 Oct) changes figures in 97% of Ituri's zones; Ituri deaths go from 3 436 to 3 750 (the 493 "A ventiler" deaths are now in named zones; the row is gone), so national deaths are 5 026 + 32 new + 314 = 5 372 and the CFR 51.6% (N°168: 48.6%). Two layout changes stop the parser: Tableau 1's Ituri row carries a footnote marker (`7380 3 769 * 51,1%`), and Tableau 3 has a tenth column ("Nombre de suspects non investigués"). The 1 Nov run crashed on its file name before failed matches became gates; it now stops at six named gates (pinned in the test). Per-zone figures before and after N°169 are not comparable (like N°069). N°170 (31 Oct, `final_draft_SitRep_MVE_RDC_N_170_31-10-2026.pdf`) is posted and not yet checked. | Attended session: maintainer decision on the restatement (break row in the per-zone series, Methods disclosure); then teach the parser the two layouts, add N°169 to the test as a passing case, and ingest N°169 onward. |
+| N°169 (30 Oct 2026) | **In `data/` as printed, left out of the dashboard series** (maintainer decision, 2 Nov 2026; option B, like N°150): no row in `D.nat2`, `D.national` or `data/national_timeseries.csv`, one break row in the per-zone series between N°168 and N°170, Methods `mm_cov_held169`; the regression test treats it as an expected dashboard exclusion. N°169 applied an Ituri data-harmonisation exercise (29 Oct; cases moved between zones, the 493 "A ventiler" deaths assigned to named zones): Ituri 3 769 deaths (= 3 436 at N°168 + 314 harmonised + 19 that day; the narrative's "passe de 3436 à 3750" is the harmonised total before that day's 19), national 5 372 / CFR 51.6%. N°170 returned to the earlier basis without explanation (A ventiler 493 again; Ituri 3 483 = 3 436 + 19 + 28; national 5 103 = 5 026 + 32 + 45; every Ituri zone = its N°168 figure plus the two days' increments) and still prints the harmonisation footnote. | Re-check every new report's basis (A ventiler row, Ituri deaths against the previous report plus the day's deaths). **If INSP re-applies the harmonisation**, the series needs a restatement break at that point (like N°069), and N°169's place in it is reconsidered: a maintainer decision, never applied by an unattended run. |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |

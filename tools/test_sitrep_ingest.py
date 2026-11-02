@@ -76,21 +76,16 @@ CASES = {
     167: dict(case="Yakoma unannounced (maintainer decision); 'Zone de / santé' header split; '2/11(18,2%)'",
               fails=["every zone name is already known or announced as new in this report (unknown: ['Yakoma']; announced: [])"]),
 }
-CASES[169] = dict(case="not ingested (pending): Ituri data harmonisation restates deaths 3436 -> 3750 and removes the "
-                      "A ventiler row; Tableau 1 Ituri '3 769 *' footnote marker; Tableau 3 gains a tenth column. The "
-                      "1 Nov run crashed on its file name ('N_169', dashes in the date); it must now stop at named gates",
-                 held=True,
-                 fails=['Tableau 1 and Tableau 2 list the same provinces (8: Ituri, Nord-Kivu, Haut-Uele, Tshopo, Sud-Kivu, Bas-Uele, Sud-Ubangi, Nord-Ubangi)',
-                        'Ituri: Tableau 1 (new,cases,deaths) == Tableau 2 subtotal',
-                        'Ituri: zone rows 28 == Tableau 1 zones touchées None',
-                        'zone rows 67 == page-1 zones 67 == Σ province zones touchées',
-                        "Tableau 3 Total None: unique 9-column split = Σ province rows (7 rows, 6 short/inconsistent: "
-                        "['93 3 96 15 3 78 0 15 3 6', '194 4 198 16 4 178 0 20 0 0', '1 180 52 1 232 92 52 1 088 0 142 2 76', "
-                        "'47 0 47 1 0 46 0 1 0 1', 'ND ND ND ND ND ND ND ND ND ND', '100 0 100 8 0 92 0 0 8 0'])",
-                        'suspects Tableau 3 None == narrative 465'])
+CASES[169] = dict(case="Tableau 1 Ituri '3 769 *' footnote marker; Tableau 3 tenth column (suspects non investigués); "
+                      "Tableau 3 Total above 'Total' / 'Général'; Ituri data harmonisation (restatement), no A ventiler row. "
+                      "The 1 Nov run crashed on its file name ('N_169', dashes in the date)")
+CASES[170] = dict(case="Tableau 3 tenth column; A ventiler row back (493): N°169's harmonisation is not carried forward")
 FIRST = 126
-HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf', 169: 'final_draft_SitRep_MVE_RDC_N_169_30-10-2026.pdf'}
-HELD_DATES = {150: '2026-10-14', 169: '2026-11-01'}
+# Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
+# national_timeseries.csv row, one break row in the per-zone series.
+DASHBOARD_EXCLUDED = {169: 'Ituri harmonisation not carried forward by N°170 (maintainer decision, 2 Nov 2026)'}
+HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf'}
+HELD_DATES = {150: '2026-10-14'}
 
 # File names: the skill's step-3 table, other forms seen on insp.cd, and N°168 / N°169 (status, number, date).
 D_ = lambda s: dt.date.fromisoformat(s)
@@ -115,6 +110,7 @@ FILENAMES = [
     ('SitRep_MVEBDB_166_27_10_2026_VF.pdf', 'final', 166, D_('2026-10-27')),
     ('final_draft_SitRep_MVEBDB_168_29_10_2026.pdf', 'provisional', 168, D_('2026-10-29')),
     ('final_draft_SitRep_MVE_RDC_N_169_30-10-2026.pdf', 'provisional', 169, D_('2026-10-30')),
+    ('final_draft_SitRep_MVE_RDC_N_170_31-10-2026.pdf', 'provisional', 170, D_('2026-10-31')),
 ]
 
 
@@ -188,10 +184,22 @@ def main(argv):
         print(f"{'PASS' if not problems else 'FAIL'}  N°{n:<4} {what}" + (f"  [{c['case']}]" if c.get('case') else ''))
         for p in problems: print('        ' + p)
         if problems: failed.append(n)
-    on_dashboard = {int(r['s']) for r in sb.load_config()[2]['nat2']}   # ingested reports not yet on the dashboard are skipped
+    _, _, D = sb.load_config()
+    on_dashboard = {int(r['s']) for r in D['nat2']}
+    live = int(D['nat2'][-1]['s'])
+    bad = []
+    print('\nDashboard exclusions:')
+    for n in sorted(reports):
+        if n < FIRST or n > live: continue          # backfill era; ingested but not yet on the dashboard
+        if n in DASHBOARD_EXCLUDED:
+            ok = n not in on_dashboard and n not in {int(r[0]) for r in D['national']}
+            print(f"{'PASS' if ok else 'FAIL'}  N°{n:<4} in data/ but left out of the dashboard series  [{DASHBOARD_EXCLUDED[n]}]")
+            if not ok: bad.append(f'N°{n} is on the dashboard but should be excluded')
+        elif n not in on_dashboard:
+            print(f'FAIL  N°{n:<4} in data/ but missing from the dashboard series'); bad.append(f'N°{n} missing from the dashboard')
     bns = [n for n in ns if n >= 131 and n in reports and n in on_dashboard]
     print(f'\nDashboard artefacts (sitrep_build.py check, {len(bns)} report(s)):')
-    bad = sb.check(bns, pdf_dir) if bns else []
+    bad += sb.check(bns, pdf_dir) if bns else []
     print(f"\nfile names {len(FILENAMES) - len(name_bad)}/{len(FILENAMES)}; {len(ns) - len(failed)}/{len(ns)} ingest case(s) pass"
           + (f'; FAILED: {failed}' if failed else '') + f"; {len(bad)} dashboard artefact difference(s)" + (f': {bad}' if bad else ''))
     return 1 if failed or bad or name_bad else 0

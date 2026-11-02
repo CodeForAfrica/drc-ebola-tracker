@@ -264,7 +264,9 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         if t1lines[k + 1] == 'Total' and re.fullmatch(r'[\d ]+ \d+,\d+% \d+/\d+.*', t1lines[k]):
             t1lines[k + 1] = 'Total ' + re.sub(r'(\d+)/(\d+) (\d+)(?=\s*\()', r'\1/\2\3', t1lines[k]); t1lines[k] = ''
     for l in t1lines:
-        mm = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi|Total)\s+([\d ]+?)\s+(\d+,\d+)%\s+(\d+)/(\d+)', l)
+        # a footnote marker can follow the deaths (N°169 'Ituri 34 7380 3 769 * 51,1% 28/36 (77,8 %)')
+        mm = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi|Total)\s+([\d ]+?)\s+(?:\*\s*)?(\d+,\d+)%\s+(\d+)/(\d+)', l)
+        if mm and re.search(r'\d\s*\*\s*\d+,\d+%', l): log(f'FLAG Tableau 1 {mm.group(1)} row carries a footnote marker: {l}')
         if mm:
             t1rows[PROV.get(mm.group(1), 'Total')] = dict(digits=mm.group(2).replace(' ', ''), cfr=pct(mm.group(3)),
                                                           zt=int(mm.group(4)), zof=int(mm.group(5)))
@@ -300,9 +302,21 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     t3end = first((i for i in range(t3, len(L)) if L[i].startswith('Figure 1')), 'end of Tableau 3 ("Figure 1") found')
     prow, tot_tokens, in_total, nd_provs = [], [], False, []
     T3L = L[t3:t3end]
-    for k in range(len(T3L) - 1):   # N°159+: the Total numbers sit on their own line directly above 'Total Général'
-        if re.fullmatch(r'[\d ]+', T3L[k]) and T3L[k + 1] == 'Total Général':
-            T3L[k], T3L[k + 1] = 'Total ' + T3L[k], ''
+    def t3_ncols(lines):
+        """9 cells, or 10 from N°169: a 'Nombre de suspects non investigués' column after 'investigués'."""
+        head = ' '.join(lines[:next((i for i, l in enumerate(lines) if re.match(r'^(Haut-Uélé|Ituri|Bas[ -]Uélé|Nord-Kivu)\s', l)), len(lines))])
+        return 10 if re.search(r'\bnon\s+investigu', head) else 9
+    NCOL = t3_ncols(T3L)
+    if NCOL == 10: log('FLAG Tableau 3 has ten columns ("Nombre de suspects non investigués", from N°169)')
+    def t3_total_above(lines):
+        """The Total numbers on their own line directly above 'Total Général' (N°159+), or above 'Total' with
+        'Général' on the next line (N°169+): rewrite them as one 'Total <numbers>' line."""
+        for k in range(len(lines) - 1):
+            if re.fullmatch(r'[\d ]+', lines[k]) and (lines[k + 1] == 'Total Général'
+                                                    or (lines[k + 1] == 'Total' and k + 2 < len(lines) and lines[k + 2] == 'Général')):
+                if lines[k + 1] == 'Total': lines[k + 2] = ''
+                lines[k], lines[k + 1] = 'Total ' + lines[k], ''
+    t3_total_above(T3L)
     for l in T3L:
         if re.match(r'^Total(\s+\d|$)', l): in_total = True
         if in_total and l.startswith('Figure'): break
@@ -311,9 +325,9 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             tot_tokens += re.findall(r'\d+', l); continue
         mm = re.match(r'^(Haut-Uélé|Bas-Uélé|Bas Uélé|Ituri|Nord-Kivu|Sud-Kivu|Sud Ubangi|Sud-Ubangi|Nord Ubangi|Nord-Ubangi|Tshopo)\s+(.*)$', l)
         tk = mm.group(2).split() if mm else []
-        if mm and len(tk) == 9 and tk.count('ND') >= 7 and set(tk) <= {'ND', 'NA', '0'}:   # province did not report
+        if mm and len(tk) == NCOL and tk.count('ND') >= NCOL - 2 and set(tk) <= {'ND', 'NA', '0'}:   # province did not report
             nd_provs.append(mm.group(1)); continue   # all ND (N°119-121, 147+), or ND with NA/0 in one cell (N°123, 128-130)
-        if mm and len(tk) == 9 and 'NA' in tk and 'ND' not in tk and all(re.fullmatch(r'\d+|NA', x) for x in tk):
+        if mm and len(tk) == NCOL and 'NA' in tk and 'ND' not in tk and all(re.fullmatch(r'\d+|NA', x) for x in tk):
             # N°159 Nord-Ubangi '227 0 227 17 0 NA NA 17 3': classification pending, not ND. The printed cells count;
             # an NA cell contributes nothing to the Total (maintainer decision, 22 Oct 2026). Never filled.
             log(f'FLAG Tableau 3 {mm.group(1)} prints NA cells (not ND): {mm.group(2)}'); prow.append(' '.join('0' if x == 'NA' else x for x in tk)); continue
@@ -327,13 +341,25 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             for rest in splits(toks[n:], k - 1): out.append([int(''.join(grp))] + rest)
         return out
     def okrow(s): return s[0] + s[1] == s[2] and s[7] <= s[3] + s[4] and s[3] + s[4] + s[5] + s[6] <= s[2]
+    def splitn(toks, ncol=None):
+        """Every reading of a row as its table's cells, returned as the nine classic cells. A ten-column row (N°169+)
+        must have investigated + not investigated = validated (alive + dead); the 'non investigués' cell is then
+        dropped, so everything downstream reads nine cells."""
+        ncol = ncol or NCOL
+        out = []
+        for c in splits(toks, ncol):
+            if ncol == 10:
+                if c[7] + c[8] != c[3] + c[4]: continue
+                c = c[:8] + c[9:]
+            out.append(c)
+        return out
     provcols, anomalies = [], []
     for r in prow:
-        c = [s for s in splits(r.split(), 9) if okrow(s)]
+        c = [s for s in splitn(r.split()) if okrow(s)]
         if not c:   # short or internally inconsistent row. Never fill or correct it.
             anomalies.append(r); continue
         provcols.append(c)
-    cands = [s for s in splits(tot_tokens, 9) if okrow(s)]
+    cands = [s for s in splitn(tot_tokens) if okrow(s)]
     flat = re.sub(r'\s+', ' ', text)
     mn = re.search(r'(\d{1,3}(?: \d{3})*)\s*(?:\([\d,]+ ?%\)\s+)?(?:\d{1,2}\s+(?=validées))?(?:alertes\s+)?(?:ont été\s+)?validées\s+comme', flat)   # N°150: page number between the figure and 'validées'
     narr = num(mn.group(1)) if mn else None
@@ -343,7 +369,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             cs = [sum(c[j] for c in combo) for j in range(9)]
             if cs in cands: matches.add(tuple(cs))
     colsum = list(list(matches)[0]) if len(matches) == 1 else None
-    gate(colsum is not None, f'Tableau 3 Total {colsum}: unique 9-column split = Σ province rows ({len(prow)} rows, {len(anomalies)} short/inconsistent: {anomalies})')
+    gate(colsum is not None, f'Tableau 3 Total {colsum}: unique {NCOL}-column split = Σ province rows ({len(prow)} rows, {len(anomalies)} short/inconsistent: {anomalies})')
     if anomalies and accept_t3_row_anomaly:
         # Per-run maintainer decision (never a default). Validated suspects must still be determined uniquely:
         # Total-row readings (investigated <= validated) whose validated columns equal the sums over the province
@@ -352,12 +378,12 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         pvs = {(sum(c[3] for c in combo), sum(c[4] for c in combo)) for combo in itertools.product(*provcols)}
         def anomaly_validated(r):
             t = [int(x) for x in r.split()]
-            if len(t) == 9: return [t[3:5]]                  # all cells printed, inconsistent elsewhere (N°140 Tshopo)
-            if len(t) == 8: return [t[2:4], t[3:5]]          # one blank: before col 4 -> cells 3-4, after col 5 -> cells 4-5
+            if len(t) == NCOL: return [t[3:5]]               # all cells printed, inconsistent elsewhere (N°140 Tshopo)
+            if len(t) == NCOL - 1: return [t[2:4], t[3:5]]   # one blank: before col 4 -> cells 3-4, after col 5 -> cells 4-5
             return []
         av = anomaly_validated(anomalies[0]) if len(anomalies) == 1 else []
         pv = sorted(pvs)
-        rel = [t for t in splits(tot_tokens, 9) if t[7] <= t[3] + t[4]
+        rel = [t for t in splitn(tot_tokens) if t[7] <= t[3] + t[4]
                and any([t[3] - a, t[4] - b] in av for a, b in pvs)]
         vals = sorted({t[3] + t[4] for t in rel})
         log(f'ANOMALY (accepted by --accept-t3-row-anomaly): rows {anomalies}; province validated sums {pv}; '
@@ -371,7 +397,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         # (a) every reading of the Total row, (b) the province rows' sum and (c) the narrative. Cells that feed no CSV
         # field may disagree; any disagreement on the validated cells still stops the run.
         pvs = {(sum(c[3] for c in combo), sum(c[4] for c in combo)) for combo in itertools.product(*provcols)}
-        trs = [t for t in splits(tot_tokens, 9) if t[0] + t[1] == t[2] and t[7] <= t[3] + t[4]]
+        trs = [t for t in splitn(tot_tokens) if t[0] + t[1] == t[2] and t[7] <= t[3] + t[4]]
         tvs = {(t[3], t[4]) for t in trs}
         log(f'ANOMALY (Total row; --accept-t3-row-anomaly): province validated {sorted(pvs)}; Total-row validated {sorted(tvs)}; narrative {narr}')
         ok = len(pvs) == 1 and tvs == pvs and narr == sum(next(iter(pvs)))
@@ -386,7 +412,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     elif anomalies and accept_t3_row_anomaly and colsum is not None:
         gate(narr == colsum[3] + colsum[4], f'accepted row anomaly: validated suspects {colsum[3] + colsum[4]} == narrative {narr}')
     suspects = colsum[3] + colsum[4] if colsum else None
-    if nd_provs: log(f'FLAG Tableau 3 provinces not reporting (all nine cells ND, excluded from the Total): {nd_provs}')
+    if nd_provs: log(f'FLAG Tableau 3 provinces not reporting (all cells ND, excluded from the Total): {nd_provs}')
     # Single-cell rule (maintainer decision, N°138): a table-vs-narrative disagreement on a field that feeds
     # exactly one CSV cell (suspects_today, contact_tracing_pct) blanks that cell instead of holding the report,
     # provided both sides were parsed and it is the only such disagreement. All other gates stay hard.
@@ -424,8 +450,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         a = next(i for i, l in enumerate(LL) if l.startswith('Tableau 3'))
         b = next(i for i in range(a, len(LL)) if LL[i].startswith('Figure 1'))
         TL = LL[a:b]
-        for k in range(len(TL) - 1):
-            if re.fullmatch(r'[\d ]+', TL[k]) and TL[k + 1] == 'Total Général': TL[k], TL[k + 1] = 'Total ' + TL[k], ''
+        nc = t3_ncols(TL)
+        t3_total_above(TL)
         out, tot = {}, []
         for k, l in enumerate(TL):
             if re.match(r'^Total(\s+\d|$)', l):
@@ -433,14 +459,14 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             mm = re.match(rf'^({T3NAMES})\s+(.*)$', l)
             if not mm: continue
             pv, tk = PROV[mm.group(1)], mm.group(2).split()
-            if len(tk) == 9 and tk.count('ND') >= 7 and set(tk) <= {'ND', 'NA', '0'}: out[pv] = None; continue
-            if len(tk) == 9 and all(re.fullmatch(r'\d+|NA', x) for x in tk):          # nine cells (N°159 Nord-Ubangi has NA)
+            if len(tk) == nc and tk.count('ND') >= nc - 2 and set(tk) <= {'ND', 'NA', '0'}: out[pv] = None; continue
+            if len(tk) == nc and all(re.fullmatch(r'\d+|NA', x) for x in tk):          # every cell printed (N°159 Nord-Ubangi has NA)
                 out[pv] = int(tk[3]) + int(tk[4]); continue
-            vals = {c[3] + c[4] for c in splits(tk, 9) if okrow(c)} if all(x.isdigit() for x in tk) else set()
+            vals = {c[3] + c[4] for c in splitn(tk, nc) if okrow(c)} if all(x.isdigit() for x in tk) else set()
             if len(vals) != 1: raise ValueError(f'{os.path.basename(path)}: Tableau 3 row {pv} {tk} not readable')
             out[pv] = vals.pop()
         nat = sum(v for v in out.values() if v is not None)
-        if not any(t[3] + t[4] == nat for t in splits(tot, 9) if t[7] <= t[3] + t[4]):
+        if not any(t[3] + t[4] == nat for t in splitn(tot, nc) if t[7] <= t[3] + t[4]):
             raise ValueError(f'{os.path.basename(path)}: Tableau 3 province rows ({nat}) do not match the Total row')
         return out, nat
     def prior_pdf(name):
@@ -449,7 +475,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         for q in (os.path.join(os.path.dirname(os.path.abspath(pdf)), name), os.path.join(d, name)):
             if os.path.exists(q): return q
         import json as _j, urllib.request as _u
-        get = lambda u, t: _u.urlopen(_u.Request(u, headers={'User-Agent': 'curl/8.5.0'}), timeout=t).read()   # 403 to urllib's default agent
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from sitrep_build import http_get as get   # User-Agent (403 to urllib's default agent) and retries
         hits = _j.loads(get('https://insp.cd/wp-json/wp/v2/media?per_page=20&_fields=source_url&search=' + os.path.splitext(name)[0], 60))
         url = next(h['source_url'] for h in hits if os.path.basename(h['source_url']) == name)
         body = get(url, 120); assert body[:4] == b'%PDF', url

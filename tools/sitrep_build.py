@@ -1,7 +1,7 @@
 """Dashboard data artefacts for INSP SitReps, built from the sitrep-ingest CSVs in data/ (+ the PDF's Tableau 1).
 
     uv run --with pdfplumber --python 3.12 python -I tools/sitrep_build.py check N [N ...]
-    uv run --with pdfplumber --python 3.12 python -I tools/sitrep_build.py append N [N ...] --nd nd.json [--write]
+    uv run --with pdfplumber --python 3.12 python -I tools/sitrep_build.py append N [N ...] --nd nd.json [--break-before N] [--write]
 
 check   rebuilds each report's artefacts and compares them with what is committed: its D.nat2 / D.national rows,
         its D.trends readings, its national_timeseries.csv row, its provinces_sitrepN.csv where it exists and, from
@@ -12,6 +12,8 @@ append  adds reports after the live one as consecutive daily rows (no break row)
         mirrors (zones/provinces CSV and GeoJSON of the last report, time series, trend JSON,
         not_reported_provinces.csv). Without --write it prints the discrepancy list (dashboard vs the new report's
         banner and Tableau 1) and changes nothing. A new zone must be mapped first (tools/v1_zone.py).
+        --break-before N (repeatable) puts one break row in the per-zone series before N°N, for a report held out
+        of the series between the two (as N°150 and N°169).
         It does not touch prose: release labels in index.html, the T strings (stamps, meta_updated, mm_sources,
         mm_cov2, mm_cov_nd, ...) and the ?v= cache bust are edited by hand; the command lists them.
 
@@ -56,12 +58,26 @@ def read_ingest(n):
     return rows, summ
 
 
+def http_get(url, timeout, tries=4):
+    """GET with a User-Agent (insp.cd answers 403 to urllib's default) and retries with backoff on transient errors
+    (HTTP 5xx such as 520, a connection cut mid-transfer): 2 s, 4 s, 8 s."""
+    import http.client, time, urllib.error
+    for k in range(tries):
+        try:
+            return urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'curl/8.5.0'}), timeout=timeout).read()
+        except (urllib.error.HTTPError) as e:
+            if e.code < 500 or k == tries - 1: raise
+        except (urllib.error.URLError, http.client.IncompleteRead, ConnectionError, TimeoutError):
+            if k == tries - 1: raise
+        time.sleep(2 ** (k + 1))
+
+
 def fetch_pdf(name, pdf_dir):
     """The PDF by its exact name: from pdf_dir, else from the insp.cd media library (search by file name)."""
     os.makedirs(pdf_dir, exist_ok=True)
     p = os.path.join(pdf_dir, name)
     if os.path.exists(p): return p
-    get = lambda u, t: urllib.request.urlopen(urllib.request.Request(u, headers={'User-Agent': 'curl/8.5.0'}), timeout=t).read()
+    get = lambda u, t: http_get(u, t)
     hits = json.loads(get('https://insp.cd/wp-json/wp/v2/media?per_page=20&_fields=source_url&search='
                           + urllib.request.quote(os.path.splitext(name)[0]), 60))
     url = next(h['source_url'] for h in hits if os.path.basename(h['source_url']) == name)
@@ -75,7 +91,7 @@ def tableau1(pdfpath):
     out = {}
     blk = text[text.index('Tableau 1'):text.index('Tableau 2')]
     for l in blk.split('\n'):    # 'n/m' with or without a space before '(' ('1/11(9,1%)')
-        m = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi)\s+[\d ]+?\s+(\d+,\d+)%\s+(\d+)/(\d+)', l.strip())
+        m = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi)\s+[\d ]+?\s+(?:\*\s*)?(\d+,\d+)%\s+(\d+)/(\d+)', l.strip())   # '3 769 * 51,1%' (N°169)
         if m: out[T1NAME[m.group(1)]] = dict(cfr=float(m.group(2).replace(',', '.')), zt=int(m.group(3)), zn=int(m.group(4)))
     return out
 
@@ -236,8 +252,10 @@ def check(ns, pdf_dir):
     return bad
 
 
-def append(ns, nd, pdf_dir, write=False):
-    """Add N°ns (consecutive daily rows) and make the last one live. Prints the discrepancy list first."""
+def append(ns, nd, pdf_dir, write=False, break_before=()):
+    """Add N°ns (consecutive daily rows) and make the last one live. Prints the discrepancy list first.
+    break_before: reports preceded by one break row in the per-zone series (D.trends and zone_trends_sitrep.json),
+    for a report left out of the series between them (N°142 unpublished, N°150 and N°169 held)."""
     _, lines, D = load_config()
     live = D['nat2'][-1]
     assert int(ns[0]) > int(live['s']), f"N°{ns[0]} is not after the live N°{live['s']}"
@@ -259,6 +277,7 @@ def append(ns, nd, pdf_dir, write=False):
         print(f"  PROV {q['p']:12} {op.get(q['p'], '(new)')}  ->  {nw}" + ('' if op.get(q['p']) == nw else '   -> update'))
     print(f"  zones: {st['zones_reported']} reported, {len(mapped)} mapped, unmapped {st['unm']}; A ventiler {st['avent']}")
     for n in ns:
+        if n in break_before: print(f'  break row in the per-zone series before N°{n}')
         r = outs[n]['nat2']; print(f"  row N°{n}: c {r['c']} dd {r['dd']} cfr {r['cfr']} iso {r['iso']} rec {r['rec']} sus {r['sus']} ct {r['ct']} nd {nd.get(str(n))}")
     if not write:
         print('\nDry run: nothing changed. Re-run with --write to apply.'); return
@@ -266,7 +285,9 @@ def append(ns, nd, pdf_dir, write=False):
         row = outs[n]['nat2']
         if nd.get(str(n)): row['nd'] = nd[str(n)]
         D['nat2'].append(row); D['national'].append(outs[n]['national'])
-        for k, (md, c, d) in outs[n]['reading'].items(): D['trends'][k].append([md, None, None, c, d])
+        for k, (md, c, d) in outs[n]['reading'].items():
+            if n in break_before: D['trends'][k].append(['', None, None, None, None])
+            D['trends'][k].append([md, None, None, c, d])
     D['zones'] = a['zones']
     lines[17] = 'const D=' + json.dumps(D, separators=(',', ':'), ensure_ascii=False) + ';'
     cfg = '\n'.join(lines)
@@ -279,7 +300,9 @@ def append(ns, nd, pdf_dir, write=False):
     dd = f'{REPO}/data'
     tj = json.load(open(f'{dd}/zone_trends_sitrep.json', encoding='utf8'))
     for n in ns:
-        for k, v in outs[n]['reading'].items(): tj[k].append(list(v))
+        for k, v in outs[n]['reading'].items():
+            if n in break_before: tj[k].append(['', None, None])
+            tj[k].append(list(v))
     open(f'{dd}/zone_trends_sitrep.json', 'w', encoding='utf8', newline='').write(json.dumps(tj, separators=(',', ':')))
     with open(f'{dd}/national_timeseries.csv', 'a', encoding='utf8', newline='') as f:
         for n in ns: f.write(outs[n]['nts'])
@@ -306,8 +329,11 @@ def main(argv):
         return 1 if bad else 0
     if len(argv) >= 2 and argv[0] == 'append' and '--nd' in argv:
         i = argv.index('--nd'); nd = json.load(open(argv[i + 1], encoding='utf8')); rest = argv[1:i] + argv[i + 2:]
+        brk = []
+        while '--break-before' in rest:
+            j = rest.index('--break-before'); brk.append(int(rest[j + 1])); del rest[j:j + 2]
         write = '--write' in rest
-        append([int(x) for x in rest if x != '--write'], nd, pdf_dir, write=write)
+        append([int(x) for x in rest if x != '--write'], nd, pdf_dir, write=write, break_before=tuple(brk))
         return 0
     sys.exit(__doc__)
 
