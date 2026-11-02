@@ -81,6 +81,9 @@ CASES[169] = dict(case="Tableau 1 Ituri '3 769 *' footnote marker; Tableau 3 ten
                       "The 1 Nov run crashed on its file name ('N_169', dashes in the date)")
 CASES[170] = dict(case="Tableau 3 tenth column; A ventiler row back (493): N°169's harmonisation is not carried forward")
 FIRST = 126
+# Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
+# national_timeseries.csv row, one break row in the per-zone series.
+DASHBOARD_EXCLUDED = {169: 'Ituri harmonisation not carried forward by N°170 (maintainer decision, 2 Nov 2026)'}
 HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf'}
 HELD_DATES = {150: '2026-10-14'}
 
@@ -181,10 +184,22 @@ def main(argv):
         print(f"{'PASS' if not problems else 'FAIL'}  N°{n:<4} {what}" + (f"  [{c['case']}]" if c.get('case') else ''))
         for p in problems: print('        ' + p)
         if problems: failed.append(n)
-    on_dashboard = {int(r['s']) for r in sb.load_config()[2]['nat2']}   # ingested reports not yet on the dashboard are skipped
+    _, _, D = sb.load_config()
+    on_dashboard = {int(r['s']) for r in D['nat2']}
+    live = int(D['nat2'][-1]['s'])
+    bad = []
+    print('\nDashboard exclusions:')
+    for n in sorted(reports):
+        if n < FIRST or n > live: continue          # backfill era; ingested but not yet on the dashboard
+        if n in DASHBOARD_EXCLUDED:
+            ok = n not in on_dashboard and n not in {int(r[0]) for r in D['national']}
+            print(f"{'PASS' if ok else 'FAIL'}  N°{n:<4} in data/ but left out of the dashboard series  [{DASHBOARD_EXCLUDED[n]}]")
+            if not ok: bad.append(f'N°{n} is on the dashboard but should be excluded')
+        elif n not in on_dashboard:
+            print(f'FAIL  N°{n:<4} in data/ but missing from the dashboard series'); bad.append(f'N°{n} missing from the dashboard')
     bns = [n for n in ns if n >= 131 and n in reports and n in on_dashboard]
     print(f'\nDashboard artefacts (sitrep_build.py check, {len(bns)} report(s)):')
-    bad = sb.check(bns, pdf_dir) if bns else []
+    bad += sb.check(bns, pdf_dir) if bns else []
     print(f"\nfile names {len(FILENAMES) - len(name_bad)}/{len(FILENAMES)}; {len(ns) - len(failed)}/{len(ns)} ingest case(s) pass"
           + (f'; FAILED: {failed}' if failed else '') + f"; {len(bad)} dashboard artefact difference(s)" + (f': {bad}' if bad else ''))
     return 1 if failed or bad or name_bad else 0

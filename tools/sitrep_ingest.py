@@ -475,7 +475,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         for q in (os.path.join(os.path.dirname(os.path.abspath(pdf)), name), os.path.join(d, name)):
             if os.path.exists(q): return q
         import json as _j, urllib.request as _u
-        get = lambda u, t: _u.urlopen(_u.Request(u, headers={'User-Agent': 'curl/8.5.0'}), timeout=t).read()   # 403 to urllib's default agent
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from sitrep_build import http_get as get   # User-Agent (403 to urllib's default agent) and retries
         hits = _j.loads(get('https://insp.cd/wp-json/wp/v2/media?per_page=20&_fields=source_url&search=' + os.path.splitext(name)[0], 60))
         url = next(h['source_url'] for h in hits if os.path.basename(h['source_url']) == name)
         body = get(url, 120); assert body[:4] == b'%PDF', url
