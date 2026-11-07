@@ -49,3 +49,5 @@ sitrep,report_date,figure,provinces_not_reported
 171,2026-11-01,contact_tracing_pct,Sud-Kivu;Nord-Ubangi
 173,2026-11-03,suspects_today,Sud-Ubangi;Nord-Ubangi
 173,2026-11-03,contact_tracing_pct,Sud-Kivu;Bas-Uele;Nord-Ubangi
+174,2026-11-04,suspects_today,Sud-Ubangi;Nord-Ubangi
+174,2026-11-04,contact_tracing_pct,Sud-Kivu;Bas-Uele;Nord-Ubangi
