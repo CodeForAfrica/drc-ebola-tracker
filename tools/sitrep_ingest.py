@@ -301,8 +301,9 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     need(t1rows.get('Total'), 'Tableau 1 Total row found')
     gate(t1rows['Total']['digits'].endswith(f'{tc}{td}'), 'Tableau 1 Total == Tableau 2 Total')
     news = [s['new'] for s in subtot.values()]
-    if None not in news:
-        gate(t1rows['Total']['digits'] in (f'{sum(news)}{tc}{td}', f'{tc}{td}'),
+    tdig = t1rows['Total']['digits']
+    if None not in news and tdig.endswith(f'{tc}{td}'):   # a cases/deaths mismatch is already the gate above
+        gate(tdig[:len(tdig) - len(f'{tc}{td}')] in ('', str(sum(news))),
              f'Tableau 1 Total new cases (if printed) == Σ provinces\' new cases {sum(news)}')
     nz = len([z for z in zones if z['zone'] != 'A ventiler'])
     gate(nz == zones_p1 == sum(r['zt'] for k, r in t1rows.items() if k != 'Total') == t1rows['Total']['zt'],
