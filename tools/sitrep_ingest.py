@@ -263,6 +263,14 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         # ('71 9 765 4 727 48,4% 63/167 (37,7 %)' then 'Total'); N°163 also splits the denominator ('66/17 8(37,1%)')
         if t1lines[k + 1] == 'Total' and re.fullmatch(r'[\d ]+ \d+,\d+% \d+/\d+.*', t1lines[k]):
             t1lines[k + 1] = 'Total ' + re.sub(r'(\d+)/(\d+) (\d+)(?=\s*\()', r'\1/\2\3', t1lines[k]); t1lines[k] = ''
+        # N°176-177: the zone cell alone on the line above 'Total <numbers> <cfr>%' ('67/178 (37,6%)' then
+        # 'Total 41 10 920 5 323 48,7%'); N°176 also drops the new-cases figure to a bare line below ('Total 10879 5302 48,7%'
+        # then '76'). Checked below: a printed new-cases figure must equal the provinces' Tableau 2 new cases.
+        mz = re.fullmatch(r'Total ([\d ]+ \d+,\d+ ?%)', t1lines[k + 1])
+        if mz and re.fullmatch(r'\d+/\d+ ?\(\d+,\d+ ?%\)', t1lines[k]):
+            below = t1lines[k + 2] if k + 2 < len(t1lines) and re.fullmatch(r'\d+', t1lines[k + 2]) else None
+            t1lines[k + 1] = 'Total ' + (below + ' ' if below else '') + mz.group(1) + ' ' + t1lines[k]; t1lines[k] = ''
+            if below: t1lines[k + 2] = ''
     for l in t1lines:
         # a footnote marker can follow the deaths (N°169 'Ituri 34 7380 3 769 * 51,1% 28/36 (77,8 %)')
         mm = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi|Total)\s+([\d ]+?)\s+(?:\*\s*)?(\d+,\d+)%\s+(\d+)/(\d+)', l)
@@ -292,6 +300,10 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     gate((b_cases, b_deaths) == (tc, td), f'banner cases/deaths {b_cases}/{b_deaths} == Total {tc}/{td}')
     need(t1rows.get('Total'), 'Tableau 1 Total row found')
     gate(t1rows['Total']['digits'].endswith(f'{tc}{td}'), 'Tableau 1 Total == Tableau 2 Total')
+    news = [s['new'] for s in subtot.values()]
+    if None not in news:
+        gate(t1rows['Total']['digits'] in (f'{sum(news)}{tc}{td}', f'{tc}{td}'),
+             f'Tableau 1 Total new cases (if printed) == Σ provinces\' new cases {sum(news)}')
     nz = len([z for z in zones if z['zone'] != 'A ventiler'])
     gate(nz == zones_p1 == sum(r['zt'] for k, r in t1rows.items() if k != 'Total') == t1rows['Total']['zt'],
          f'zone rows {nz} == page-1 zones {zones_p1} == Σ province zones touchées')
