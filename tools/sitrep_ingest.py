@@ -432,7 +432,9 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             if inv_rule_accept:
                 gate(narr == colsum[3] + colsum[4], f'accepted row anomaly: validated suspects {colsum[3] + colsum[4]} == narrative {narr}')
         elif inv_rule_accept:
-            gate(False, f'accepted row anomaly: validated suspects unique {sorted(vpairs)}')
+            # not resolved this way (N°140 Tshopo): hand back to the earlier accept branches unchanged
+            log(f'  (investigated-columns reading with the accepted rows gives validated {sorted(vpairs)}; using the row-anomaly checks below)')
+            inv_rule_accept = False
     if not inv_used:
         gate(colsum is not None, f'Tableau 3 Total {colsum}: unique {NCOL}-column split = Σ province rows ({len(prow)} rows, {len(anomalies)} short/inconsistent: {anomalies})')
     if anomalies and accept_t3_row_anomaly and not inv_rule_accept:
