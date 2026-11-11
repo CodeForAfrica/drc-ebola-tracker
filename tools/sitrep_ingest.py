@@ -263,6 +263,14 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         # ('71 9 765 4 727 48,4% 63/167 (37,7 %)' then 'Total'); N°163 also splits the denominator ('66/17 8(37,1%)')
         if t1lines[k + 1] == 'Total' and re.fullmatch(r'[\d ]+ \d+,\d+% \d+/\d+.*', t1lines[k]):
             t1lines[k + 1] = 'Total ' + re.sub(r'(\d+)/(\d+) (\d+)(?=\s*\()', r'\1/\2\3', t1lines[k]); t1lines[k] = ''
+        # N°176-177: the zone cell alone on the line above 'Total <numbers> <cfr>%' ('67/178 (37,6%)' then
+        # 'Total 41 10 920 5 323 48,7%'); N°176 also drops the new-cases figure to a bare line below ('Total 10879 5302 48,7%'
+        # then '76'). Checked below: a printed new-cases figure must equal the provinces' Tableau 2 new cases.
+        mz = re.fullmatch(r'Total ([\d ]+ \d+,\d+ ?%)', t1lines[k + 1])
+        if mz and re.fullmatch(r'\d+/\d+ ?\(\d+,\d+ ?%\)', t1lines[k]):
+            below = t1lines[k + 2] if k + 2 < len(t1lines) and re.fullmatch(r'\d+', t1lines[k + 2]) else None
+            t1lines[k + 1] = 'Total ' + (below + ' ' if below else '') + mz.group(1) + ' ' + t1lines[k]; t1lines[k] = ''
+            if below: t1lines[k + 2] = ''
     for l in t1lines:
         # a footnote marker can follow the deaths (N°169 'Ituri 34 7380 3 769 * 51,1% 28/36 (77,8 %)')
         mm = re.match(r'^(Ituri|Nord-Kivu|Haut-Uélé|Tshopo|Sud-Kivu|Bas[ -]Uélé|Sud[ -]Ubangi|Nord[ -]Ubangi|Total)\s+([\d ]+?)\s+(?:\*\s*)?(\d+,\d+)%\s+(\d+)/(\d+)', l)
@@ -292,6 +300,11 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     gate((b_cases, b_deaths) == (tc, td), f'banner cases/deaths {b_cases}/{b_deaths} == Total {tc}/{td}')
     need(t1rows.get('Total'), 'Tableau 1 Total row found')
     gate(t1rows['Total']['digits'].endswith(f'{tc}{td}'), 'Tableau 1 Total == Tableau 2 Total')
+    news = [s['new'] for s in subtot.values()]
+    tdig = t1rows['Total']['digits']
+    if None not in news and tdig.endswith(f'{tc}{td}'):   # a cases/deaths mismatch is already the gate above
+        gate(tdig[:len(tdig) - len(f'{tc}{td}')] in ('', str(sum(news))),
+             f'Tableau 1 Total new cases (if printed) == Σ provinces\' new cases {sum(news)}')
     nz = len([z for z in zones if z['zone'] != 'A ventiler'])
     gate(nz == zones_p1 == sum(r['zt'] for k, r in t1rows.items() if k != 'Total') == t1rows['Total']['zt'],
          f'zone rows {nz} == page-1 zones {zones_p1} == Σ province zones touchées')
@@ -306,6 +319,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         """9 cells, or 10 from N°169: a 'Nombre de suspects non investigués' column after 'investigués'."""
         head = ' '.join(lines[:next((i for i, l in enumerate(lines) if re.match(r'^(Haut-Uélé|Ituri|Bas[ -]Uélé|Nord-Kivu)\s', l)), len(lines))])
         return 10 if re.search(r'\bnon\s+investigu', head) else 9
+    def t3_first_row(lines):
+        return next((i for i, l in enumerate(lines) if re.match(r'^(Haut-Uélé|Ituri|Bas[ -]Uélé|Nord-Kivu|Sud[ -]Kivu|Sud[ -]Ubangi|Nord[ -]Ubangi|Tshopo)\s', l)), 0)
     NCOL = t3_ncols(T3L)
     if NCOL == 10: log('FLAG Tableau 3 has ten columns ("Nombre de suspects non investigués", from N°169)')
     def t3_total_above(lines):
@@ -317,6 +332,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
                 if lines[k + 1] == 'Total': lines[k + 2] = ''
                 lines[k], lines[k + 1] = 'Total ' + lines[k], ''
     t3_total_above(T3L)
+    T3L = T3L[t3_first_row(T3L):]   # N°177: a bare 'Total' header line ('Total alertes') sits above the first province row
     for l in T3L:
         if re.match(r'^Total(\s+\d|$)', l): in_total = True
         if in_total and l.startswith('Figure'): break
@@ -340,16 +356,18 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             if n > 1 and (len(grp[0]) > 3 or any(len(g) != 3 for g in grp[1:])): break
             for rest in splits(toks[n:], k - 1): out.append([int(''.join(grp))] + rest)
         return out
-    def okrow(s): return s[0] + s[1] == s[2] and s[7] <= s[3] + s[4] and s[3] + s[4] + s[5] + s[6] <= s[2]
-    def splitn(toks, ncol=None):
+    def okcore(s): return s[0] + s[1] == s[2] and s[3] + s[4] + s[5] + s[6] <= s[2]
+    def okrow(s): return okcore(s) and s[7] <= s[3] + s[4]
+    def splitn(toks, ncol=None, inv=True):
         """Every reading of a row as its table's cells, returned as the nine classic cells. A ten-column row (N°169+)
         must have investigated + not investigated = validated (alive + dead); the 'non investigués' cell is then
-        dropped, so everything downstream reads nine cells."""
+        dropped, so everything downstream reads nine cells. inv=False skips that investigated-columns check (the
+        investigated-columns rule below); the cell is still dropped."""
         ncol = ncol or NCOL
         out = []
         for c in splits(toks, ncol):
             if ncol == 10:
-                if c[7] + c[8] != c[3] + c[4]: continue
+                if inv and c[7] + c[8] != c[3] + c[4]: continue
                 c = c[:8] + c[9:]
             out.append(c)
         return out
@@ -369,8 +387,57 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             cs = [sum(c[j] for c in combo) for j in range(9)]
             if cs in cands: matches.add(tuple(cs))
     colsum = list(list(matches)[0]) if len(matches) == 1 else None
-    gate(colsum is not None, f'Tableau 3 Total {colsum}: unique {NCOL}-column split = Σ province rows ({len(prow)} rows, {len(anomalies)} short/inconsistent: {anomalies})')
-    if anomalies and accept_t3_row_anomaly:
+    inv_rule_accept = inv_used = False
+    if colsum is None and prow:
+        # Investigated-columns rule (standing rule from N°176, maintainer decision 11 Nov 2026). suspects_today is the
+        # validated count (validated alive + validated deceased in the Total row), used when it equals the narrative's
+        # validated figure. Columns counting investigated or uninvestigated suspects feed no CSV field: when the strict
+        # reading fails, re-read the rows without the two checks on those columns (investigated <= validated; ten
+        # columns: investigated + not investigated = validated). Every other row check and the match against the Total
+        # row stay; the province rows must then give exactly one validated (alive, dead) pair. Mismatches are recorded,
+        # never a stop. Not a general accept flag: nothing else is relaxed.
+        rcols, ranom = [], []
+        for r in prow:
+            c = [s for s in splitn(r.split(), inv=False) if okcore(s)]
+            (rcols.append(c) if c else ranom.append(r))
+        rcands = [s for s in splitn(tot_tokens, inv=False) if okcore(s)]
+        rmatch = set()
+        if ranom and accept_t3_row_anomaly:
+            # Per-run maintainer decision (never a default; N°176, 11 Nov 2026): a row that is also inconsistent outside
+            # the investigated columns (N°176 Bas-Uélé: validated + invalidated 119 > received 114). Each such row must
+            # read exactly one way; with it, the column sums must equal a reading of the Total row, give exactly one
+            # validated pair, and that pair must equal the narrative (checked below).
+            fixed = [splitn(r.split(), inv=False) for r in ranom]
+            if all(len(x) == 1 for x in fixed):
+                rcols = rcols + fixed; ranom_acc, ranom = ranom, []
+                log(f'ANOMALY (accepted by --accept-t3-row-anomaly): rows {ranom_acc} read one way each and are kept as printed')
+                inv_rule_accept = True
+        if not ranom:
+            for combo in itertools.product(*rcols):
+                cs = [sum(c[j] for c in combo) for j in range(9)]
+                if cs in rcands: rmatch.add(tuple(cs))
+        vpairs = {(m[3], m[4]) for m in rmatch}
+        if len(vpairs) == 1:
+            inv_used = True
+            colsum = list(next(iter(rmatch))) if len(rmatch) == 1 else [None, None, None, *next(iter(vpairs)), None, None, None, None]
+            bad = [r for r in prow if not [s for s in splitn(r.split()) if okrow(s)]]
+            log(f'FLAG Tableau 3 investigated columns do not reconcile (investigated-columns rule, no CSV field): rows {bad}; '
+                f'Total row {" ".join(tot_tokens)}; validated suspects {colsum[3]} + {colsum[4]} = {colsum[3] + colsum[4]} '
+                f'({len(rmatch)} Total-row reading(s) agree)')
+            if colsum[0] is not None and colsum[3] + colsum[4] + colsum[5] + colsum[6] < colsum[2]:
+                log(f'FLAG Tableau 3: {colsum[2] - (colsum[3] + colsum[4] + colsum[5] + colsum[6])} of {colsum[2]} alerts are '
+                    'neither validated nor invalidated (not yet verified)')
+            gate(True, f'Tableau 3 validated suspects {colsum[3]}/{colsum[4]} unique under the investigated-columns rule '
+                       f'({len(prow)} rows; investigated / not-investigated cells not reconciled)')
+            if inv_rule_accept:
+                gate(narr == colsum[3] + colsum[4], f'accepted row anomaly: validated suspects {colsum[3] + colsum[4]} == narrative {narr}')
+        elif inv_rule_accept:
+            # not resolved this way (N°140 Tshopo): hand back to the earlier accept branches unchanged
+            log(f'  (investigated-columns reading with the accepted rows gives validated {sorted(vpairs)}; using the row-anomaly checks below)')
+            inv_rule_accept = False
+    if not inv_used:
+        gate(colsum is not None, f'Tableau 3 Total {colsum}: unique {NCOL}-column split = Σ province rows ({len(prow)} rows, {len(anomalies)} short/inconsistent: {anomalies})')
+    if anomalies and accept_t3_row_anomaly and not inv_rule_accept:
         # Per-run maintainer decision (never a default). Validated suspects must still be determined uniquely:
         # Total-row readings (investigated <= validated) whose validated columns equal the sums over the province
         # rows that read as nine cells; exactly one resulting value, which must then also equal the narrative.
@@ -391,7 +458,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         fails.remove(next(f for f in fails if f.startswith('Tableau 3 Total')))
         gate(len(vals) == 1, f'accepted anomaly: validated suspects unique {vals}')
         colsum = rel[0] if len(vals) == 1 else None
-    if colsum is None and not anomalies and accept_t3_row_anomaly:
+    if colsum is None and not anomalies and accept_t3_row_anomaly and not inv_rule_accept:
         # Total-row anomaly (N°147: invalidated-alive 1452 vs Σ province rows 1450). Per-run maintainer decision.
         # Passes ONLY if the CSV-feeding value (validated suspects = vivants + décédés) is confirmed independently by
         # (a) every reading of the Total row, (b) the province rows' sum and (c) the narrative. Cells that feed no CSV
@@ -409,7 +476,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             diff = [j + 1 for j in range(9) if best[j] != psum[j]]
             log(f'  closest Total-row reading {best} vs Σ province rows {psum}: differs in column(s) {diff} (no CSV field)')
             a, b = next(iter(pvs)); colsum = [None, None, None, a, b, None, None, None, None]
-    elif anomalies and accept_t3_row_anomaly and colsum is not None:
+    elif anomalies and accept_t3_row_anomaly and colsum is not None and not inv_rule_accept:
         gate(narr == colsum[3] + colsum[4], f'accepted row anomaly: validated suspects {colsum[3] + colsum[4]} == narrative {narr}')
     suspects = colsum[3] + colsum[4] if colsum else None
     if nd_provs: log(f'FLAG Tableau 3 provinces not reporting (all cells ND, excluded from the Total): {nd_provs}')
@@ -452,6 +519,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         TL = LL[a:b]
         nc = t3_ncols(TL)
         t3_total_above(TL)
+        TL = TL[t3_first_row(TL):]
         out, tot = {}, []
         for k, l in enumerate(TL):
             if re.match(r'^Total(\s+\d|$)', l):
@@ -463,10 +531,13 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
             if len(tk) == nc and all(re.fullmatch(r'\d+|NA', x) for x in tk):          # every cell printed (N°159 Nord-Ubangi has NA)
                 out[pv] = int(tk[3]) + int(tk[4]); continue
             vals = {c[3] + c[4] for c in splitn(tk, nc) if okrow(c)} if all(x.isdigit() for x in tk) else set()
+            if not vals and all(x.isdigit() for x in tk):   # investigated-columns rule
+                vals = {c[3] + c[4] for c in splitn(tk, nc, inv=False) if okcore(c)}
             if len(vals) != 1: raise ValueError(f'{os.path.basename(path)}: Tableau 3 row {pv} {tk} not readable')
             out[pv] = vals.pop()
         nat = sum(v for v in out.values() if v is not None)
-        if not any(t[3] + t[4] == nat for t in splitn(tot, nc) if t[7] <= t[3] + t[4]):
+        if not any(t[3] + t[4] == nat for t in splitn(tot, nc) if t[7] <= t[3] + t[4]) and \
+                not any(t[3] + t[4] == nat for t in splitn(tot, nc, inv=False) if okcore(t)):   # investigated-columns rule
             raise ValueError(f'{os.path.basename(path)}: Tableau 3 province rows ({nat}) do not match the Total row')
         return out, nat
     def prior_pdf(name):

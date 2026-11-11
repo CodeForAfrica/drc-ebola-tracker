@@ -80,6 +80,15 @@ CASES[169] = dict(case="Tableau 1 Ituri '3 769 *' footnote marker; Tableau 3 ten
                       "Tableau 3 Total above 'Total' / 'Général'; Ituri data harmonisation (restatement), no A ventiler row. "
                       "The 1 Nov run crashed on its file name ('N_169', dashes in the date)")
 CASES[170] = dict(case="Tableau 3 tenth column; A ventiler row back (493): N°169's harmonisation is not carried forward")
+# N°176 / N°177: Tableau 1 Total with the zone cell alone above 'Total <numbers>' (N°176 also puts the new-cases figure
+# on a bare line below). Tableau 3 under the investigated-columns rule (standing rule from N°176, maintainer decision
+# 11 Nov 2026): suspects_today is the validated count; investigated / not-investigated cells feed no CSV field.
+CASES[176] = dict(case="Tableau 1 zone cell above 'Total 10879 5302 48,7%', new cases '76' below; investigated-columns "
+                       "rule (321 of 4 176 alerts not yet verified, 'non investigués' 262 vs narrative 100 %); Bas-Uélé "
+                       "row validated + invalidated 119 > received 114 (accepted, maintainer decision 11 Nov 2026)",
+                  flags=[ACCEPT_T3])
+CASES[177] = dict(case="Tableau 1 zone cell above 'Total 41 10 920 5 323 48,7%'; nine-column Tableau 3 under a bare "
+                       "'Total' header line; investigated-columns rule (investigated 461 vs validated 457)")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
@@ -111,6 +120,10 @@ FILENAMES = [
     ('final_draft_SitRep_MVEBDB_168_29_10_2026.pdf', 'provisional', 168, D_('2026-10-29')),
     ('final_draft_SitRep_MVE_RDC_N_169_30-10-2026.pdf', 'provisional', 169, D_('2026-10-30')),
     ('final_draft_SitRep_MVE_RDC_N_170_31-10-2026.pdf', 'provisional', 170, D_('2026-10-31')),
+    ('SitRep_MVE_RDC_N176_06-11-2026_vf.pdf', 'final', 176, D_('2026-11-06')),
+    ('SitRep_MVE_RDC_N177_07-11-2026_final_corrige.pdf', 'final', 177, D_('2026-11-07')),
+    ('SitRep_MVE_RDC_N178_08-11-2026_corrige.pdf', 'final', 178, D_('2026-11-08')),
+    ('SitRep_N179_09-11-2026_corrige.pdf', 'final', 179, D_('2026-11-09')),
 ]
 
 
