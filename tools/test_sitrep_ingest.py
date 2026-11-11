@@ -81,26 +81,20 @@ CASES[169] = dict(case="Tableau 1 Ituri '3 769 *' footnote marker; Tableau 3 ten
                       "The 1 Nov run crashed on its file name ('N_169', dashes in the date)")
 CASES[170] = dict(case="Tableau 3 tenth column; A ventiler row back (493): N°169's harmonisation is not carried forward")
 # N°176 / N°177: Tableau 1 Total with the zone cell alone above 'Total <numbers>' (N°176 also puts the new-cases figure
-# on a bare line below). Tableau 1 now passes; both stop at Tableau 3, pending a maintainer decision (9 Nov 2026):
-# N°176 verifies 3 855 of 4 176 alerts, so the rows no longer split uniquely; N°177 drops to nine columns and its
-# suspects column (461) differs from the validated suspects (457). Not ingested.
-CASES[176] = dict(case="Tableau 1 zone cell above 'Total 10879 5302 48,7%', new cases '76' below; Tableau 3 rows with "
-                       "unverified alerts (pending decision)", held=True,
-                  fails=['Tableau 3 Total None: unique 10-column split = Σ province rows (6 rows, 5 short/inconsistent: '
-                         "['119 5 124 18 5 101 0 23 13 10', '111 3 114 8 3 108 0 11 0 11', '1 466 72 1538 111 68 1345 4 179 99 179', "
-                         "'2 174 84 2258 197 83 1667 0 280 149 280', '18 0 18 8 0 5 0 8 1 8'])",
-                         'suspects Tableau 3 None == narrative 506'])
-CASES[177] = dict(case="Tableau 1 zone cell above 'Total 41 10 920 5 323 48,7%'; Tableau 3 back to nine columns, "
-                       "suspects column 461 vs validated 457 (pending decision)", held=True,
-                  fails=['Tableau 3 Total None: unique 9-column split = Σ province rows (0 rows, 0 short/inconsistent: [])',
-                         'suspects Tableau 3 None == narrative 457'])
+# on a bare line below). Tableau 3 under the investigated-columns rule (standing rule from N°176, maintainer decision
+# 11 Nov 2026): suspects_today is the validated count; investigated / not-investigated cells feed no CSV field.
+CASES[176] = dict(case="Tableau 1 zone cell above 'Total 10879 5302 48,7%', new cases '76' below; investigated-columns "
+                       "rule (321 of 4 176 alerts not yet verified, 'non investigués' 262 vs narrative 100 %); Bas-Uélé "
+                       "row validated + invalidated 119 > received 114 (accepted, maintainer decision 11 Nov 2026)",
+                  flags=[ACCEPT_T3])
+CASES[177] = dict(case="Tableau 1 zone cell above 'Total 41 10 920 5 323 48,7%'; nine-column Tableau 3 under a bare "
+                       "'Total' header line; investigated-columns rule (investigated 461 vs validated 457)")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
 DASHBOARD_EXCLUDED = {169: 'Ituri harmonisation not carried forward by N°170 (maintainer decision, 2 Nov 2026)'}
-HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf', 176: 'SitRep_MVE_RDC_N176_06-11-2026_vf.pdf',
-            177: 'SitRep_MVE_RDC_N177_07-11-2026_final_corrige.pdf'}
-HELD_DATES = {150: '2026-10-14', 176: '2026-11-07', 177: '2026-11-08'}
+HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf'}
+HELD_DATES = {150: '2026-10-14'}
 
 # File names: the skill's step-3 table, other forms seen on insp.cd, and N°168 / N°169 (status, number, date).
 D_ = lambda s: dt.date.fromisoformat(s)
@@ -128,6 +122,8 @@ FILENAMES = [
     ('final_draft_SitRep_MVE_RDC_N_170_31-10-2026.pdf', 'provisional', 170, D_('2026-10-31')),
     ('SitRep_MVE_RDC_N176_06-11-2026_vf.pdf', 'final', 176, D_('2026-11-06')),
     ('SitRep_MVE_RDC_N177_07-11-2026_final_corrige.pdf', 'final', 177, D_('2026-11-07')),
+    ('SitRep_MVE_RDC_N178_08-11-2026_corrige.pdf', 'final', 178, D_('2026-11-08')),
+    ('SitRep_N179_09-11-2026_corrige.pdf', 'final', 179, D_('2026-11-09')),
 ]
 
 
