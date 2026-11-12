@@ -319,6 +319,17 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         """9 cells, or 10 from N°169: a 'Nombre de suspects non investigués' column after 'investigués'."""
         head = ' '.join(lines[:next((i for i, l in enumerate(lines) if re.match(r'^(Haut-Uélé|Ituri|Bas[ -]Uélé|Nord-Kivu)\s', l)), len(lines))])
         return 10 if re.search(r'\bnon\s+investigu', head) else 9
+    T3_PROVS = ('Haut-Uélé', 'Bas-Uélé', 'Bas Uélé', 'Ituri', 'Nord-Kivu', 'Sud-Kivu', 'Sud Ubangi', 'Sud-Ubangi',
+                'Nord Ubangi', 'Nord-Ubangi', 'Tshopo')
+    def t3_join_wrapped(lines):
+        """N°180: a province name wraps around its number line ('Haut-' / '81 4 85 …' / 'Uélé', 'Nord' / '36 0 …' /
+        'Ubangi'). Join the three lines into one row, only when the two halves form a Tableau 3 province name."""
+        for k in range(len(lines) - 2):
+            a, nums, b = lines[k], lines[k + 1], lines[k + 2]
+            if not re.fullmatch(r'[\d ]+', nums) or re.search(r'\d', a + b): continue
+            name = a + b if a.endswith('-') else f'{a} {b}'
+            if name in T3_PROVS:
+                lines[k], lines[k + 1], lines[k + 2] = f'{name} {nums}', '', ''
     def t3_first_row(lines):
         return next((i for i, l in enumerate(lines) if re.match(r'^(Haut-Uélé|Ituri|Bas[ -]Uélé|Nord-Kivu|Sud[ -]Kivu|Sud[ -]Ubangi|Nord[ -]Ubangi|Tshopo)\s', l)), 0)
     NCOL = t3_ncols(T3L)
@@ -332,6 +343,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
                 if lines[k + 1] == 'Total': lines[k + 2] = ''
                 lines[k], lines[k + 1] = 'Total ' + lines[k], ''
     t3_total_above(T3L)
+    t3_join_wrapped(T3L)
     T3L = T3L[t3_first_row(T3L):]   # N°177: a bare 'Total' header line ('Total alertes') sits above the first province row
     for l in T3L:
         if re.match(r'^Total(\s+\d|$)', l): in_total = True
@@ -519,6 +531,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         TL = LL[a:b]
         nc = t3_ncols(TL)
         t3_total_above(TL)
+        t3_join_wrapped(TL)
         TL = TL[t3_first_row(TL):]
         out, tot = {}, []
         for k, l in enumerate(TL):
