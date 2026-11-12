@@ -89,6 +89,7 @@ CASES[176] = dict(case="Tableau 1 zone cell above 'Total 10879 5302 48,7%', new 
                   flags=[ACCEPT_T3])
 CASES[177] = dict(case="Tableau 1 zone cell above 'Total 41 10 920 5 323 48,7%'; nine-column Tableau 3 under a bare "
                        "'Total' header line; investigated-columns rule (investigated 461 vs validated 457)")
+CASES[180] = dict(case="Tableau 3 province names wrap around their number lines ('Haut-' / numbers / 'Uélé', 'Nord' / numbers / 'Ubangi')")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
@@ -124,6 +125,7 @@ FILENAMES = [
     ('SitRep_MVE_RDC_N177_07-11-2026_final_corrige.pdf', 'final', 177, D_('2026-11-07')),
     ('SitRep_MVE_RDC_N178_08-11-2026_corrige.pdf', 'final', 178, D_('2026-11-08')),
     ('SitRep_N179_09-11-2026_corrige.pdf', 'final', 179, D_('2026-11-09')),
+    ('SitRep_N180_10-11-2026_corrige-1.pdf', 'final', 180, D_('2026-11-10')),
 ]
 
 
