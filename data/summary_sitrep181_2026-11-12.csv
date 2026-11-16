@@ -1,0 +1,2 @@
+sitrep_number,report_date,publication_date,provinces,zones,confirmed_deaths,fatality_rate_pct,patients_in_isolation,recovered_patients,suspects_today,contact_tracing_pct,source_pdf
+181,2026-11-11,2026-11-12,8,68,5471,48.9,1676,3045,,80.9,SitRep_N181_11-11-2026_corrige_2.pdf

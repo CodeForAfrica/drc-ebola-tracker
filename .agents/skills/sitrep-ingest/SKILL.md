@@ -395,6 +395,8 @@ inconsistent elsewhere: invalidated-alive was 630 against the 634 the Total row 
   hand for the one report a maintainer approved, and must **never** appear in a scripted,
   scheduled or looped invocation. Record the row and the reasoning in the commit message, as was
   done for N°136.
+- A short row of zeros for a province the narrative leaves out reads as 0 when the Total row proves it
+  (standing rule from N°182, below).
 - Any other short-row case is a stop.
 
 **A province that did not report (ND).** Tableau 3 prints `ND` in the cells of a province that
@@ -472,6 +474,20 @@ Two more forms of the wrap: **N°181** wraps a province's `ND` line (`Haut-` / `
 `Uélé`), so the middle line may also be all `ND`/`NA` cells (without this the province was skipped instead of recorded
 as ND); **N°183** puts the first half on the number line and the second half alone below (`Haut- 82 1 83 13 1 69 0
 14 6` / `Uélé`). Both are joined under the same condition (the halves must form a Tableau 3 province name).
+
+**Short all-zero row for a province the narrative leaves out (standing rule, maintainer decision 16 Nov 2026).**
+N°182 prints `Haut-Uélé 0 0 0` and N°184 `Nord Ubangi 0 0 0 0` in Tableau 3: fewer cells than the table, all zero,
+for a province the narrative's list of provinces "ayant transmis leurs données" leaves out. Such a row reads as **0,
+not ND**, and gets no `†` marker: ND is only ever what INSP prints as `ND`. It is accepted only when the Total row
+equals the sum of the other provinces' rows in **every** column (which proves the missing cells are 0); otherwise the
+run stops. `tools/sitrep_ingest.py` applies this without a flag and logs `FLAG Tableau 3 short all-zero row(s) read as 0`.
+
+**Single-cell rule on Tableau 3's validated cells (maintainer decision, N°181, 16 Nov 2026).** When the province rows
+(read under the investigated-columns rule) equal the Total row in every column except validated alive / deceased, the
+rows and the Total disagree on the one CSV cell those columns feed: `suspects_today` is left empty, as for a
+table-vs-narrative disagreement (N°138, N°162), and the disagreement counts toward the "at most one single-cell
+disagreement" gate. Both readings must be unique and every other column must match; anything else is a stop. N°181: rows
+365 + 159 = 524, Total row 365 + 160 = 525, narrative 525 (4 413 verified = 525 + 3 888).
 
 **An inconsistent Total row (first seen in N°147).** The province rows were consistent, but the
 Total row printed invalidated-alive as 1 452 against a province sum of 1 450 (its own cells add up
@@ -656,6 +672,13 @@ Do not write any file until all of these pass:
    Nord-Ubangi 2/11 and Total 67/178, Nord-Ubangi subtotal 6 / 1. Its 3 cases are not in any day's new
    cases: N°167's cumulative rises by 81 (10 193 → 10 274) while it reports 78 new (Nord-Ubangi 0). The
    next unannounced zone is again a stop for a person.
+   **Watsa, N°181 (maintainer decision, 16 Nov 2026; not a default):** Haut-Uélé, `Watsa 2 2 100,0% 2 2 0 2`. N°181
+   says only "Une nouvelle zone de santé a été touchée au cours des dernières 24 heures" without naming it. It is in no
+   earlier Tableau 2 (N°150's held PDF included), and gates 1–4 pass on 68 zones: page 1 "68 zones de santé sur 178",
+   68 Tableau 2 rows, Tableau 1 Haut-Uélé 8/13 and Total 68/178, Haut-Uélé subtotal 504 / 218; its 2 cases are in the
+   day's new cases (+83 = 83). N°181's CSVs were written from the parser's output with only this gate failing (as
+   N°167). Mapped with `tools/v1_zone.py CD5309ZS02 --write` (v1 population 168 381, centroid 2.72203, 29.72089 inside
+   the polygon, no overlap; borders Damas, Dungu, Gombari); no `D.trends` series, no Flowminder rows.
 
 Report the reconciliation table (computed vs printed, per province) in the run summary even when
 everything passes — it is the evidence that the extraction is correct.
@@ -735,8 +758,8 @@ Re-check these on every run (see step 1):
 | N°176 (6 Nov 2026) | **Ingested with `--accept-t3-row-anomaly`** (maintainer decision, 11 Nov 2026): Bas-Uélé's Tableau 3 row classifies 119 alerts against 114 received; `suspects_today` 506 (347 + 159 = narrative). 321 of 4 176 alerts not yet verified; the "suspects non investigués" column (262) contradicts the narrative's 100 % investigated (investigated-columns rule). | If a corrected upload appears, re-ingest it without the flag and compare. |
 | N°177 (7 Nov 2026) | Ingested under the investigated-columns rule: suspects column 461 (the narrative's "461 cas suspects investigués") against 457 validated; `suspects_today` 457. The highlights keep an editor's note ("423 (À l'équipe : Q2) nouveaux échantillons") in a file named `…_final_corrige.pdf`; no stored field. | If a corrected upload appears, re-ingest and compare. |
 | N°179 (9 Nov 2026) | `patients_in_isolation` is 651 as printed on the banner, down from 966 in N°178 (−315 in a day); no narrative total to cross-check. Stored as printed. N°180 prints 981 again. | If a corrected upload appears, re-ingest and compare. |
-| N°181 (11 Nov 2026) | **Not ingested; stopped for a maintainer decision (16 Nov 2026).** (1) **Watsa** (Haut-Uélé, `Watsa 2 2 100,0% 2 2 0 2`) is new and not named as new ("Une nouvelle zone de santé a été touchée au cours des dernières 24 heures"); it is in no earlier report (N°150's PDF included), and page 1 (68 sur 178), the 68 Tableau 2 rows, Tableau 1 (Haut-Uélé 8/13, Total 68/178) and the Haut-Uélé subtotal (504 / 218) agree; `tools/v1_zone.py CD5309ZS02` (dry run): population 168 381, centroid 2.72203, 29.72089 inside the polygon (1 m from its centroid), no overlap (borders Damas, Dungu, Gombari). (2) **Tableau 3:** the province rows sum to every Total cell except validated deceased (Σ 159 vs Total 160); the Total and the narrative give 525 (365 + 160; 4 413 verified = 525 + 3 888), the rows 524, so `suspects_today` is not confirmed by the rows and `--accept-t3-row-anomaly` refuses it (0 Total-row readings agree). Sud-Ubangi `12 0 12 0 0 11 0 1 0` (0 validated, 1 investigated) is an investigated-column mismatch only. Haut-Uélé is ND (ND share 23 of N°180's 563 = 4.09 %, kept). Banner isolation 1 676 (981 in N°180). | Maintainer decides N°181's suspects (e.g. empty, or 525 from Total and narrative); then ingest 181 with Watsa and map it. |
-| N°182 (12 Nov 2026) | Waits behind N°181. Haut-Uélé prints a short `0 0 0` Tableau 3 row (not `ND`), and the narrative's six transmitting provinces leave it out; the other rows reconcile (validated 274 + 75 = 349 = narrative). | Maintainer decides whether a short all-zero row is ND. |
-| N°183 (13 Nov 2026) | Waits behind N°181. Tableau 3 reads cleanly with the N°183 wrap layout (612 = 448 + 164 = narrative). | Ingest after N°181. |
-| N°184 (14 Nov 2026) | Waits behind N°181. Nord-Ubangi prints a short `0 0 0 0` Tableau 3 row (not `ND`), and the narrative's six provinces leave it out; the other rows reconcile (269 + 125 = 394 = narrative). | As N°182. |
+| N°181 (11 Nov 2026) | **Ingested** (maintainer decisions, 16 Nov 2026): Watsa accepted and mapped (new-zone note above). `suspects_today` **empty** under the single-cell rule: Tableau 3's province rows give validated 365 + 159 = **524**, its Total row 365 + 160 = **525** and the narrative 525; every other column agrees. Sud-Ubangi `12 0 12 0 0 11 0 1 0` (0 validated, 1 investigated) is an investigated-column mismatch only. Haut-Uélé ND (wrapped `ND` line; ND share 4.09 %). Banner isolation 1 676 (981 in N°180). | If a corrected upload appears, re-ingest and compare; fill `suspects_today` only if rows and Total agree. |
+| N°182 (12 Nov 2026) | Ingested. Haut-Uélé's short `0 0 0` Tableau 3 row read as 0 (standing rule above; Total = Σ other rows in every column); suspects 349. | — |
+| N°183 (13 Nov 2026) | Ingested (N°183 wrap layout); suspects 612. | — |
+| N°184 (14 Nov 2026) | Ingested. Nord-Ubangi's short `0 0 0 0` Tableau 3 row read as 0 (standing rule); suspects 394. | — |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |
