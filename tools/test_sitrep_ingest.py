@@ -90,12 +90,21 @@ CASES[176] = dict(case="Tableau 1 zone cell above 'Total 10879 5302 48,7%', new 
 CASES[177] = dict(case="Tableau 1 zone cell above 'Total 41 10 920 5 323 48,7%'; nine-column Tableau 3 under a bare "
                        "'Total' header line; investigated-columns rule (investigated 461 vs validated 457)")
 CASES[180] = dict(case="Tableau 3 province names wrap around their number lines ('Haut-' / numbers / 'Uélé', 'Nord' / numbers / 'Ubangi')")
+# N°181-184: not ingested yet; pinned at their current stops (see the sitrep-ingest skill's Open items).
+CASES[181] = dict(case="held (maintainer decision pending, 16 Nov 2026): Watsa unannounced by name; Tableau 3 validated deceased Σ rows 159 vs Total 160 (narrative 525); Sud-Ubangi row '12 0 12 0 0 11 0 1 0'; Haut-Uélé ND row wrapped around its name", held=True,
+               fails=["every zone name is already known or announced as new in this report (unknown: ['Watsa']; announced: [])", "Tableau 3 Total None: unique 9-column split = Σ province rows (6 rows, 1 short/inconsistent: ['12 0 12 0 0 11 0 1 0'])", 'suspects Tableau 3 None == narrative 525'])
+CASES[182] = dict(case="held behind N°181: Haut-Uélé prints a short '0 0 0' Tableau 3 row (not ND; decision pending)", held=True,
+               fails=["every zone name is already known or announced as new in this report (unknown: ['Watsa']; announced: [])", "Tableau 3 Total None: unique 9-column split = Σ province rows (7 rows, 1 short/inconsistent: ['0 0 0'])", 'suspects Tableau 3 None == narrative 349'])
+CASES[183] = dict(case="held behind N°181: Tableau 3 name halves with the first half on the number line ('Haut- 82 1 83 …' / 'Uélé'); Tableau 3 passes", held=True,
+               fails=["every zone name is already known or announced as new in this report (unknown: ['Watsa']; announced: [])"])
+CASES[184] = dict(case="held behind N°181: Nord-Ubangi prints a short '0 0 0 0' Tableau 3 row (not ND; decision pending)", held=True,
+               fails=["every zone name is already known or announced as new in this report (unknown: ['Watsa']; announced: [])", "Tableau 3 Total None: unique 9-column split = Σ province rows (7 rows, 1 short/inconsistent: ['0 0 0 0'])", 'suspects Tableau 3 None == narrative 394'])
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
 DASHBOARD_EXCLUDED = {169: 'Ituri harmonisation not carried forward by N°170 (maintainer decision, 2 Nov 2026)'}
-HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf'}
-HELD_DATES = {150: '2026-10-14'}
+HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf', 181: 'SitRep_N181_11-11-2026_corrige_2.pdf', 182: 'SitRep_N182_12-11-2026_corrige.pdf', 183: 'SitRep_N183_13-11-2026_corrige-VF.pdf', 184: 'SitRep_N184_14-11-2026_VF.pdf'}
+HELD_DATES = {150: '2026-10-14', 181: '2026-11-12', 182: '2026-11-13', 183: '2026-11-14', 184: '2026-11-15'}
 
 # File names: the skill's step-3 table, other forms seen on insp.cd, and N°168 / N°169 (status, number, date).
 D_ = lambda s: dt.date.fromisoformat(s)
@@ -126,6 +135,10 @@ FILENAMES = [
     ('SitRep_MVE_RDC_N178_08-11-2026_corrige.pdf', 'final', 178, D_('2026-11-08')),
     ('SitRep_N179_09-11-2026_corrige.pdf', 'final', 179, D_('2026-11-09')),
     ('SitRep_N180_10-11-2026_corrige-1.pdf', 'final', 180, D_('2026-11-10')),
+    ('SitRep_N181_11-11-2026_corrige_2.pdf', 'final', 181, D_('2026-11-11')),
+    ('SitRep_N182_12-11-2026_corrige.pdf', 'final', 182, D_('2026-11-12')),
+    ('SitRep_N183_13-11-2026_corrige-VF.pdf', 'final', 183, D_('2026-11-13')),
+    ('SitRep_N184_14-11-2026_VF.pdf', 'final', 184, D_('2026-11-14')),
 ]
 
 

@@ -323,13 +323,23 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
                 'Nord Ubangi', 'Nord-Ubangi', 'Tshopo')
     def t3_join_wrapped(lines):
         """N°180: a province name wraps around its number line ('Haut-' / '81 4 85 …' / 'Uélé', 'Nord' / '36 0 …' /
-        'Ubangi'). Join the three lines into one row, only when the two halves form a Tableau 3 province name."""
+        'Ubangi'; N°181 also 'Haut-' / 'ND ND …' / 'Uélé' for a province that did not report). Join the three lines into
+        one row, only when the two halves form a Tableau 3 province name."""
         for k in range(len(lines) - 2):
             a, nums, b = lines[k], lines[k + 1], lines[k + 2]
-            if not re.fullmatch(r'[\d ]+', nums) or re.search(r'\d', a + b): continue
+            if not re.fullmatch(r'(?:\d+|ND|NA)(?: (?:\d+|ND|NA))*', nums) or re.search(r'\d|\bND\b|\bNA\b', a + b): continue
             name = a + b if a.endswith('-') else f'{a} {b}'
             if name in T3_PROVS:
                 lines[k], lines[k + 1], lines[k + 2] = f'{name} {nums}', '', ''
+        # N°183: the first half shares the number line, the second half is alone below ('Haut- 82 1 83 …' / 'Uélé')
+        for k in range(len(lines) - 1):
+            m = re.fullmatch(r'(\S+)\s+((?:\d+|ND|NA)(?: (?:\d+|ND|NA))*)', lines[k])
+            b = lines[k + 1]
+            if not m or not b or re.search(r'\d|\bND\b|\bNA\b|\s', b): continue
+            a = m.group(1)
+            name = a + b if a.endswith('-') else f'{a} {b}'
+            if name in T3_PROVS:
+                lines[k], lines[k + 1] = f'{name} {m.group(2)}', ''
     def t3_first_row(lines):
         return next((i for i, l in enumerate(lines) if re.match(r'^(Haut-Uélé|Ituri|Bas[ -]Uélé|Nord-Kivu|Sud[ -]Kivu|Sud[ -]Ubangi|Nord[ -]Ubangi|Tshopo)\s', l)), 0)
     NCOL = t3_ncols(T3L)
