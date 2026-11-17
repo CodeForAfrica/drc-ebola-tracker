@@ -9,6 +9,29 @@ A single-page, map-based dashboard of the 2026 Bundibugyo ebolavirus (BVD) outbr
 - There is **NO framework** and **NO build step**. The site runs by opening `index.html` directly in a browser.
 - **Do NOT** convert it to React (or any framework), and **do NOT** add a bundler, package manager, or build tooling. Keep it as vanilla HTML/CSS/JS loaded with plain `<script src>` tags (no `fetch()` of local files, so `file://` keeps working).
 
+> **The two rules above govern the vanilla tracker (`index.html`/`styles.css`/`app.js`/`config.drc-bvd-2026.js`), which stays no-build and `file://`-openable. They are NOT relaxed.** A separate React front end lives under `site/` — see the next section.
+
+## Site (React) — `site/` (Option B; added by PR, pending maintainer sign-off)
+
+A second, richer front end built with **React + TypeScript + Vite + Tailwind + Leaflet + Recharts** in Code for Africa's visual identity. It is deployed by `.github/workflows/pages.yml`, which also copies the **unchanged** vanilla tracker to **`/explore/`** in the published output. The vanilla tracker and its files are not modified.
+
+**`site/` holds NO figures — it is a read-only view of this repo's data.** Every value comes from `site/src/data/*.json`, produced by `npm run data` (in `site/`), which runs:
+- `scripts/extract.cjs` → copies `D.nat2`, `PROV`, `CTRY`, `D.zones/geo/trends/mob`, `BASE` geometry (precision-reduced only) and selected `T.en` strings from `../config.drc-bvd-2026.js` into `src/data/tracker.json` — **one for one, no value edited**;
+- `scripts/first_listed.cjs` → derives each zone's first-listed date from `../data/zones_timeseries_full.csv` + the zone series into `src/data/firstListed.json`.
+
+`src/data/admin1.json` is **geoBoundaries gbOpen ADM1 geometry only** (Kenya counties, Nigeria states; CC BY 4.0) — not derived from the config. The CI workflow runs `npm run data` on every build, so a SitRep update to the config reaches the site with no extra edit.
+
+**Standing rules for `site/`** (keep in sync with the live tracker's ethos):
+- If a figure needs typing into `site/src`, it is in the wrong place — it belongs in the config/`data/` and the scripts.
+- Derived values (daily change, shares, rankings, first-listed dates) live in `src/lib/data.ts` / `src/lib/briefing.ts`, each with a comment on how it is derived.
+- A **daily change** is shown only between **consecutive daily reports**; missing reports are drawn **dashed** and labelled; **nothing is interpolated**.
+- **"No data" is never drawn as zero.** Kenya / Nigeria subdivisions are **never coloured** by a value (national figures only).
+- Mobility is always labelled **Flowminder / Vodacom April 2026 estimates** — importation risk, not transmission; suppressed flows are never counted as zero.
+- **Early-warning** levels stay **empty** until the epidemiology team supplies indicators/thresholds/values — no demo values on the public site.
+- The **"Verify against WHO before publishing"** note stays visible on every page.
+
+**Amends standing rules — requires maintainer (Eric) approval before merge** (HANDOFF §3): (1) `site/` uses a framework + CI build step (the vanilla tracker under `/explore/` stays no-build and `file://`-openable); (2) `site/` uses the Code for Africa identity instead of the dark situation-room theme; (3) `site/` uses CARTO basemap tiles (OpenStreetMap data) — confirm CARTO's usage terms; (4) new data source **geoBoundaries gbOpen ADM1** (CC BY 4.0, geometry only) for Kenya/Nigeria outlines, credited on the map and in Data & methods. Until the new site reaches feature parity, the vanilla tracker is kept under `/explore/` (parity gaps: EN/FR, time filter, CFR & Risk-level indicators, ND contact-tracing/suspect markers, full Methods text, zone search by province).
+
 ## Current design — "Epidemic Intelligence" (redesigned)
 
 The dashboard was rebuilt to a new layout ("Epidemic Intelligence · Bundibugyo 2026"): a full-bleed map with a floating map-indicator selector, search box, log-scaled legend and a Latest-only time bar, plus a right sidebar with a national + provincial overview and a per-zone view (snapshot, trends chart, mobility panel). Leaflet is vendored (`vendor/leaflet/`); charts are hand-drawn SVG (no Chart.js). Key points for future edits:

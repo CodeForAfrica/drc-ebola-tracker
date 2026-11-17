@@ -1,2 +1,12 @@
 .DS_Store
 __pycache__/
+
+# React site (site/) — build output and deps are rebuilt by CI (npm run data && build)
+site/node_modules/
+site/dist/
+site/.vite/
+# Generated data JSON (rebuilt from ../config + ../data by `npm run data`).
+# Committed as a reviewable copy so the PR builds without a data step; CI regenerates on every build.
+# To stop tracking them instead, uncomment:
+# site/src/data/tracker.json
+# site/src/data/firstListed.json

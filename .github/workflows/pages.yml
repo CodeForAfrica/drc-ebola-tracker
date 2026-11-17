@@ -1,0 +1,52 @@
+# .github/workflows/pages.yml
+# Builds the React site from site/ and publishes it with the existing tracker kept unchanged
+# under /explore/. The site's data step runs on every build, so a SitRep update to the config
+# reaches the site without a second edit.
+name: Deploy site
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Install
+        working-directory: site
+        run: npm ci
+      - name: Copy figures from the tracker config (no value is edited)
+        working-directory: site
+        run: npm run data
+      - name: Build
+        working-directory: site
+        run: npm run build
+      - name: Keep the existing tracker under /explore/
+        run: |
+          mkdir -p site/dist/explore
+          cp index.html app.js styles.css config.*.js site/dist/explore/
+          cp -r vendor data site/dist/explore/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

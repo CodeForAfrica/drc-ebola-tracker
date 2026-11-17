@@ -1,0 +1,38 @@
+{
+  "name": "bundibugyo-2026-site",
+  "version": "1.0.0",
+  "description": "Code for Africa Bundibugyo 2026 outbreak site (React + Vite), reading the tracker config unchanged",
+  "scripts": {
+    "data": "node scripts/extract.cjs ../config.drc-bvd-2026.js src/data/tracker.json && node scripts/first_listed.cjs ../data/zones_timeseries_full.csv src/data/tracker.json src/data/firstListed.json",
+    "dev": "vite",
+    "typecheck": "tsc -p .",
+    "build": "tsc -p . && vite build",
+    "build:single": "tsc -p . && SINGLE=1 vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.460.0",
+    "motion": "^11.11.17",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.13.3",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.14",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-singlefile": "^2.0.3"
+  },
+  "type": "module",
+  "private": true
+}

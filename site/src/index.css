@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens. Layout: an editorial column (42rem) for reading, a wide frame
+   (72.5rem) for exhibits, the map breaking out to full width.
+   Colour roles: accent = Code for Africa blue, used only for interaction and
+   navigation; cases = red ramp; deaths = violet; status colours are semantic
+   and never reused as the accent. Values are "R G B" so Tailwind can add alpha.
+   ------------------------------------------------------------------------- */
+:root {
+  /* Code for Africa identity (CodeForAfrica/ui, apps/codeforafrica theme):
+     primary #1020E1 · light #EFF0FD · dark #08125C · highlight #ED1C24
+     background #F6F5F5 · divider #DAD5D5 · greys #B4ABAB / #7F7272 · text black */
+  --paper: 255 255 255;
+  --paper-2: 246 245 245;
+  --paper-3: 227 223 223;
+  --ink: 0 0 0;
+  --ink-2: 64 58 58;
+  --ink-3: 127 114 114;
+  --rule: 218 213 213;
+  --accent: 16 32 225;
+  --accent-soft: 239 240 253;
+  --accent-dark: 8 18 92;
+  --case: 16 32 225;
+  --death: 237 28 36;
+  --recov: 18 128 104;
+  --st-active: 237 28 36;
+  --st-over: 150 140 140;
+  --st-none: 180 171 171;
+  --warn: 176 106 0;
+  --r1: #fde3e1; --r2: #f9aaa4; --r3: #f4716a; --r4: #ed1c24; --r5: #b3141a; --r6: #6e0b0f;
+  --map-land: #f6f5f5; --map-line: #cfc8c8; --map-water: #e6ecf5;
+  --m1: #eff0fd; --m2: #c6cafa; --m3: #8e96f2; --m4: #5160ea; --m5: #1020e1; --m6: #08125c;
+  --flow-in: 16 32 225; --flow-out: 237 28 36;
+  --t1: #08125c; --t2: #1020e1; --t3: #6b76ef; --t4: #b0b6f6; --t5: #f4716a;
+  --ew-normal: 79 134 173; --ew-alert: 217 138 11; --ew-critical: 237 28 36;
+  --zone-line: rgba(255,255,255,.8); --hover-line: #000;
+  --hatch: rgba(127,114,114,.35);
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  --paper: 8 12 40;
+  --paper-2: 14 20 56;
+  --paper-3: 24 32 74;
+  --ink: 246 245 245;
+  --ink-2: 201 197 197;
+  --ink-3: 150 143 160;
+  --rule: 38 48 96;
+  --accent: 124 134 255;
+  --accent-soft: 22 30 84;
+  --accent-dark: 200 205 255;
+  --case: 124 134 255;
+  --death: 255 90 95;
+  --recov: 64 196 160;
+  --st-active: 255 90 95;
+  --st-over: 128 124 140;
+  --st-none: 70 76 110;
+  --warn: 240 170 60;
+  --r1: #3a1420; --r2: #6b1a24; --r3: #a3202a; --r4: #e0303a; --r5: #ff6f75; --r6: #ffc0c2;
+  --map-land: #10163d; --map-line: #2a3470; --map-water: #060920;
+  --m1: #141c52; --m2: #1f2c86; --m3: #2f40c4; --m4: #5865f0; --m5: #8f98ff; --m6: #d0d4ff;
+  --flow-in: 124 134 255; --flow-out: 255 110 110;
+  --t1: #d0d4ff; --t2: #8f98ff; --t3: #5865f0; --t4: #2f40c4; --t5: #ff6f75;
+  --ew-normal: 110 160 200; --ew-alert: 240 170 60; --ew-critical: 255 90 95;
+  --zone-line: rgba(8,12,40,.75); --hover-line: #f6f5f5;
+  --hatch: rgba(150,143,160,.35);
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
+  font-family: 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.03em; }
+/* figures: Open Sans with tabular digits (CfA has no monospace face) */
+.font-mono { font-family: 'Open Sans', ui-sans-serif, sans-serif !important; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 4px; }
+
+/* Side gutter that also clears a phone's side system bar */
+.gutter { padding-left: max(1rem, env(safe-area-inset-left, 0px)); padding-right: max(1rem, env(safe-area-inset-right, 0px)); }
+@media (min-width: 768px) { .gutter { padding-left: max(2rem, env(safe-area-inset-left, 0px)); padding-right: max(2rem, env(safe-area-inset-right, 0px)); } }
+
+/* Reading text (OWID-like clarity) */
+.lede { font-family: Merriweather, Georgia, serif; font-weight: 300; font-size: 1.1875rem; line-height: 1.6; color: rgb(var(--ink-2)); }
+.prose-body { font-family: Merriweather, Georgia, serif; font-weight: 300; font-size: 1.0625rem; line-height: 1.65; color: rgb(var(--ink-2)); }
+.prose-body b, .prose-body strong { color: rgb(var(--ink)); font-weight: 600; }
+
+/* Hatched "no data" swatch */
+.hatch { background: repeating-linear-gradient(45deg, var(--hatch) 0 1.5px, transparent 1.5px 5px); }
+
+/* Leaflet */
+.leaflet-container { background: var(--map-water); font-family: 'Open Sans', ui-sans-serif, sans-serif; }
+.carto-tiles { filter: saturate(.85); }
+/* zone and county/state names: shown once zoomed in, with a halo so they read on any fill */
+.leaflet-tooltip.zlabel, .leaflet-tooltip.alabel { background: none; border: 0; box-shadow: none; padding: 0; font: 700 10.5px/1.1 'Open Sans', sans-serif; color: rgb(var(--ink)); text-shadow: 0 0 3px rgb(var(--paper)), 0 0 3px rgb(var(--paper)), 0 0 2px rgb(var(--paper)); white-space: nowrap; pointer-events: none; display: none; }
+.leaflet-tooltip.zlabel::before, .leaflet-tooltip.alabel::before { display: none; }
+.labels-on .leaflet-tooltip.zlabel { display: block; }
+/* province names: those with no confirmed case stay labelled; affected ones give way to zone names */
+.leaflet-tooltip.plabel { background: none; border: 0; box-shadow: none; padding: 0; font: 700 10.5px/1.1 'Open Sans', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: rgb(var(--ink-3)); text-shadow: 0 0 3px rgb(var(--paper)), 0 0 3px rgb(var(--paper)); white-space: nowrap; pointer-events: none; display: none; }
+.leaflet-tooltip.plabel::before { display: none; }
+.plabels-on .leaflet-tooltip.plabel { display: block; }
+.labels-on .leaflet-tooltip.plabel-aff { display: none; }
+.alabels-on .leaflet-tooltip.alabel { display: block; color: rgb(var(--ink-2)); font-weight: 500; }
+.leaflet-zones-pane, .leaflet-admin-pane { animation: fadein .5s ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .leaflet-zones-pane, .leaflet-admin-pane { animation: none; } }
+.leaflet-bar { border: 1px solid rgb(var(--rule)) !important; box-shadow: none !important; }
+.leaflet-bar a { background: rgb(var(--paper)); color: rgb(var(--ink)); border-bottom-color: rgb(var(--rule)); }
+.leaflet-control-attribution { background: rgb(var(--paper) / .85) !important; color: rgb(var(--ink-3)); font-size: 10px; }
+.leaflet-control-attribution a { color: rgb(var(--ink-2)); }
+.leaflet-tooltip.ltip { background: rgb(var(--paper)); color: rgb(var(--ink-2)); border: 1px solid rgb(var(--rule)); border-radius: 8px; font-size: 12px; box-shadow: 0 4px 14px rgb(0 0 0 / .12); }
+.leaflet-tooltip.ltip b { color: rgb(var(--ink)); }
+.zoomed-out .leaflet-overlay-pane path { transition: opacity .3s; }
+.maptip { position: fixed; z-index: 1100; pointer-events: none; max-width: 16rem; border: 1px solid rgb(var(--rule)); background: rgb(var(--paper)); color: rgb(var(--ink-2)); border-radius: 10px; padding: 8px 11px; font-size: 12px; line-height: 1.5; box-shadow: 0 6px 18px rgb(0 0 0 / .14); }
+.maptip b { color: rgb(var(--ink)); }
+.t3 { color: rgb(var(--ink-3)); font-size: 11px; }
+.chip { display: inline-block; border-radius: 99px; padding: 0 7px; font-size: 10px; font-weight: 600; }
+.chip.active { background: rgb(var(--st-active) / .12); color: rgb(var(--st-active)); }
+.chip.over { background: rgb(var(--st-over) / .18); color: rgb(var(--ink-2)); }
+.no-scrollbar { scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }
+.leaflet-marker-icon.bubble { transition: opacity .35s; }
+/* (old MapLibre rules below are unused) */
+.maplibregl-ctrl-group { background: rgb(var(--paper)) !important; border: 1px solid rgb(var(--rule)); box-shadow: none !important; }
+.maplibregl-ctrl-group button { width: 34px; height: 34px; }
+.maplibregl-ctrl-group button + button { border-top: 1px solid rgb(var(--rule)) !important; }
+:root[data-theme='dark'] .maplibregl-ctrl-icon { filter: invert(1); }
+.maplibregl-ctrl-attrib { background: rgb(var(--paper) / .85) !important; color: rgb(var(--ink-3)); font-size: 10px; }
+.maplibregl-ctrl-attrib a { color: rgb(var(--ink-2)); }
+
+/* Country bubbles: active ones carry one slow ring */
+.bubble { position: relative; border-radius: 9999px; cursor: pointer; }
+.bubble .core { position: absolute; inset: 0; border-radius: 9999px; border: 1.5px solid rgb(var(--paper)); }
+.bubble.active .core { background: rgb(var(--st-active) / .85); box-shadow: 0 1px 6px rgb(var(--st-active) / .35); }
+.bubble.over .core { background: rgb(var(--st-over) / .75); }
+.bubble.active .ring { position: absolute; inset: 0; border-radius: 9999px; border: 2px solid rgb(var(--st-active) / .55); animation: ring 2.8s cubic-bezier(.2,.6,.3,1) infinite; }
+@keyframes ring { 0% { transform: scale(1); opacity: .8; } 70%, 100% { transform: scale(1.8); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .bubble.active .ring { animation: none; transform: scale(1.35); opacity: .4; } }
+
+/* Recharts text follows the theme */
+.recharts-cartesian-axis-tick-value { fill: rgb(var(--ink-3)); font-size: 11px; font-family: 'Open Sans', sans-serif; font-variant-numeric: tabular-nums; }
+.recharts-cartesian-grid line { stroke: rgb(var(--rule)); }
+
+/* briefing */
+.sring { border: 2px solid rgb(var(--ink)); border-radius: 9999px; box-shadow: 0 0 0 2px rgb(var(--paper) / .8); }
+.sring::after { content: ''; position: absolute; inset: -2px; border-radius: 9999px; border: 2px solid rgb(var(--ink) / .6); animation: ring 2.6s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .sring::after { animation: none; opacity: 0; } }
+.leaflet-tooltip.story-label { display: block !important; font-size: 11px; }
+.leaflet-tooltip.story-plabel { display: block !important; font-size: 10px; opacity: .8; }
+
+/* briefing motion: zones fade in when first listed; flows march in their direction */
+@keyframes zone-enter { from { fill-opacity: 0; stroke-opacity: 0; } to { } }
+.zone-enter { animation: zone-enter .9s ease-out; }
+@keyframes flow-march { to { stroke-dashoffset: -32; } }
+.flow-anim { animation: flow-march 1.1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .zone-enter, .flow-anim { animation: none; } }
