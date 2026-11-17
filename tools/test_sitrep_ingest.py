@@ -90,6 +90,13 @@ CASES[176] = dict(case="Tableau 1 zone cell above 'Total 10879 5302 48,7%', new 
 CASES[177] = dict(case="Tableau 1 zone cell above 'Total 41 10 920 5 323 48,7%'; nine-column Tableau 3 under a bare "
                        "'Total' header line; investigated-columns rule (investigated 461 vs validated 457)")
 CASES[180] = dict(case="Tableau 3 province names wrap around their number lines ('Haut-' / numbers / 'Uélé', 'Nord' / numbers / 'Ubangi')")
+CASES[181] = dict(case="Watsa new but not named as new (maintainer decision, 16 Nov 2026); Haut-Uélé ND row wrapped around "
+                       "its name; single-cell rule on Tableau 3's validated cells (rows 365 + 159 = 524, Total and narrative "
+                       "525): suspects empty; Sud-Ubangi '12 0 12 0 0 11 0 1 0' (investigated-columns rule)",
+                  fails=["every zone name is already known or announced as new in this report (unknown: ['Watsa']; announced: [])"])
+CASES[182] = dict(case="short all-zero Tableau 3 row 'Haut-Uélé 0 0 0' read as 0 (Total = Σ other rows in every column)")
+CASES[183] = dict(case="Tableau 3 name halves with the first half on the number line ('Haut- 82 1 83 …' / 'Uélé')")
+CASES[184] = dict(case="short all-zero Tableau 3 row 'Nord Ubangi 0 0 0 0' read as 0 (Total = Σ other rows in every column)")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
@@ -126,6 +133,10 @@ FILENAMES = [
     ('SitRep_MVE_RDC_N178_08-11-2026_corrige.pdf', 'final', 178, D_('2026-11-08')),
     ('SitRep_N179_09-11-2026_corrige.pdf', 'final', 179, D_('2026-11-09')),
     ('SitRep_N180_10-11-2026_corrige-1.pdf', 'final', 180, D_('2026-11-10')),
+    ('SitRep_N181_11-11-2026_corrige_2.pdf', 'final', 181, D_('2026-11-11')),
+    ('SitRep_N182_12-11-2026_corrige.pdf', 'final', 182, D_('2026-11-12')),
+    ('SitRep_N183_13-11-2026_corrige-VF.pdf', 'final', 183, D_('2026-11-13')),
+    ('SitRep_N184_14-11-2026_VF.pdf', 'final', 184, D_('2026-11-14')),
 ]
 
 

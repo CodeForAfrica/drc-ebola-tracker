@@ -57,3 +57,7 @@ sitrep,report_date,figure,provinces_not_reported
 176,2026-11-06,contact_tracing_pct,Sud-Ubangi
 177,2026-11-07,suspects_today,Nord-Ubangi
 177,2026-11-07,contact_tracing_pct,Sud-Ubangi
+181,2026-11-11,suspects_today,Haut-Uele
+181,2026-11-11,contact_tracing_pct,Sud-Ubangi
+182,2026-11-12,contact_tracing_pct,Bas-Uele;Sud-Ubangi
+184,2026-11-14,contact_tracing_pct,Sud-Ubangi

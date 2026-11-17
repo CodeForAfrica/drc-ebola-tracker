@@ -395,6 +395,8 @@ inconsistent elsewhere: invalidated-alive was 630 against the 634 the Total row 
   hand for the one report a maintainer approved, and must **never** appear in a scripted,
   scheduled or looped invocation. Record the row and the reasoning in the commit message, as was
   done for N°136.
+- A short row of zeros for a province the narrative leaves out reads as 0 when the Total row proves it
+  (standing rule from N°182, below).
 - Any other short-row case is a stop.
 
 **A province that did not report (ND).** Tableau 3 prints `ND` in the cells of a province that
@@ -468,6 +470,24 @@ the lines above and below the numbers: `Haut-` / `81 4 85 19 4 62 0 23 9` / `Ué
 half joins directly, otherwise with a space), only when the two halves form a Tableau 3 province name, and before
 finding the first province row (the ND-share reader does the same). Formatting only: the same nine columns and header
 as N°177–179. Read this way N°180 passes every Tableau 3 check without the investigated-columns fallback.
+Two more forms of the wrap: **N°181** wraps a province's `ND` line (`Haut-` / `ND ND ND ND ND ND ND ND ND` /
+`Uélé`), so the middle line may also be all `ND`/`NA` cells (without this the province was skipped instead of recorded
+as ND); **N°183** puts the first half on the number line and the second half alone below (`Haut- 82 1 83 13 1 69 0
+14 6` / `Uélé`). Both are joined under the same condition (the halves must form a Tableau 3 province name).
+
+**Short all-zero row for a province the narrative leaves out (standing rule, maintainer decision 16 Nov 2026).**
+N°182 prints `Haut-Uélé 0 0 0` and N°184 `Nord Ubangi 0 0 0 0` in Tableau 3: fewer cells than the table, all zero,
+for a province the narrative's list of provinces "ayant transmis leurs données" leaves out. Such a row reads as **0,
+not ND**, and gets no `†` marker: ND is only ever what INSP prints as `ND`. It is accepted only when the Total row
+equals the sum of the other provinces' rows in **every** column (which proves the missing cells are 0); otherwise the
+run stops. `tools/sitrep_ingest.py` applies this without a flag and logs `FLAG Tableau 3 short all-zero row(s) read as 0`.
+
+**Single-cell rule on Tableau 3's validated cells (maintainer decision, N°181, 16 Nov 2026).** When the province rows
+(read under the investigated-columns rule) equal the Total row in every column except validated alive / deceased, the
+rows and the Total disagree on the one CSV cell those columns feed: `suspects_today` is left empty, as for a
+table-vs-narrative disagreement (N°138, N°162), and the disagreement counts toward the "at most one single-cell
+disagreement" gate. Both readings must be unique and every other column must match; anything else is a stop. N°181: rows
+365 + 159 = 524, Total row 365 + 160 = 525, narrative 525 (4 413 verified = 525 + 3 888).
 
 **An inconsistent Total row (first seen in N°147).** The province rows were consistent, but the
 Total row printed invalidated-alive as 1 452 against a province sum of 1 450 (its own cells add up
@@ -652,6 +672,13 @@ Do not write any file until all of these pass:
    Nord-Ubangi 2/11 and Total 67/178, Nord-Ubangi subtotal 6 / 1. Its 3 cases are not in any day's new
    cases: N°167's cumulative rises by 81 (10 193 → 10 274) while it reports 78 new (Nord-Ubangi 0). The
    next unannounced zone is again a stop for a person.
+   **Watsa, N°181 (maintainer decision, 16 Nov 2026; not a default):** Haut-Uélé, `Watsa 2 2 100,0% 2 2 0 2`. N°181
+   says only "Une nouvelle zone de santé a été touchée au cours des dernières 24 heures" without naming it. It is in no
+   earlier Tableau 2 (N°150's held PDF included), and gates 1–4 pass on 68 zones: page 1 "68 zones de santé sur 178",
+   68 Tableau 2 rows, Tableau 1 Haut-Uélé 8/13 and Total 68/178, Haut-Uélé subtotal 504 / 218; its 2 cases are in the
+   day's new cases (+83 = 83). N°181's CSVs were written from the parser's output with only this gate failing (as
+   N°167). Mapped with `tools/v1_zone.py CD5309ZS02 --write` (v1 population 168 381, centroid 2.72203, 29.72089 inside
+   the polygon, no overlap; borders Damas, Dungu, Gombari); no `D.trends` series, no Flowminder rows.
 
 Report the reconciliation table (computed vs printed, per province) in the run summary even when
 everything passes — it is the evidence that the extraction is correct.
@@ -726,9 +753,13 @@ Re-check these on every run (see step 1):
 | Earlier reports, `nd.ct` (found 21 Oct 2026) | Under the named-list rule (step 6), earlier sitreps whose contact-tracing narrative names a complete list of transmitting provinces without Sud-Kivu (or another affected province) could carry `nd.ct` for the missing ones. Not backfilled in the N°156–158 PR. | A separate pass: re-read each committed report's contact-tracing paragraph, check the named list is complete (its per-province contacts sum to the totals), add `nd.ct` with `ctn`, and mirror it in `data/not_reported_provinces.csv`. |
 | N°115 (6 Sept 2026) | Published under category `219` only (post 25533, `SitRep_MVEBDB_115_06_09_2026.pdf`); found 12 Oct 2026. Not yet ingested: the dashboard still has a break row there. Its parse needs known zones from `zones_sitrep114.csv`, which has no date suffix. | Ingest it as a follow-up, replace the break row, remove this row. |
 | N°169 (30 Oct 2026) | **In `data/` as printed, left out of the dashboard series** (maintainer decision, 2 Nov 2026; option B, like N°150): no row in `D.nat2`, `D.national` or `data/national_timeseries.csv`, one break row in the per-zone series between N°168 and N°170, Methods `mm_cov_held169`; the regression test treats it as an expected dashboard exclusion. N°169 applied an Ituri data-harmonisation exercise (29 Oct; cases moved between zones, the 493 "A ventiler" deaths assigned to named zones): Ituri 3 769 deaths (= 3 436 at N°168 + 314 harmonised + 19 that day; the narrative's "passe de 3436 à 3750" is the harmonised total before that day's 19), national 5 372 / CFR 51.6%. N°170 returned to the earlier basis without explanation (A ventiler 493 again; Ituri 3 483 = 3 436 + 19 + 28; national 5 103 = 5 026 + 32 + 45; every Ituri zone = its N°168 figure plus the two days' increments) and still prints the harmonisation footnote. | Re-check every new report's basis (A ventiler row, Ituri deaths against the previous report plus the day's deaths). **If INSP re-applies the harmonisation**, the series needs a restatement break at that point (like N°069), and N°169's place in it is reconsidered: a maintainer decision, never applied by an unattended run. |
-| N°172 (≈2 Nov 2026) | **Not published as of 12 Nov 2026** (re-checked 7, 9, 11 and 12 Nov: categories 219/307/308, post and media search, likely filenames incl. `SitRep_MVE_RDC_N172_02-11-2026_vf.pdf`) (maintainer decision, 5 Nov 2026: treated like N°142 for now). Checked 5 Nov 2026: not in category `308`, `219` or `307` (308/219 go N°171 → N°173), no post or media search hit for `172`, `N_172` or `SitRep_MVE_RDC_N_172`, no PDF uploaded since 1 Nov other than N°170, 171 and 173, likely filenames (`SitRep_MVE_RDC_N_172_02-11-2026.pdf`, `final_draft_…`) 404. No row in `D.nat2`, `D.national` or `data/national_timeseries.csv`; one break row in the per-zone series between N°171 and N°173 (`tools/sitrep_build.py append 173 --break-before 173`). Its figures are never filled in or derived from N°171 and N°173 (N°173's narrative quotes the previous day's contact tracing, 84,4 %; not used), and no one-day change is shown across the gap. | **Re-check on every run.** If it appears, ingest it with `tools/sitrep_ingest.py --title-number 172`, add its row between N°171 and N°173, replace the break row with its per-zone reading, mirror its `nd` in `data/not_reported_provinces.csv`, and remove this row. |
+| N°172 (≈2 Nov 2026) | **Not published as of 16 Nov 2026** (re-checked 7, 9, 11, 12 and 16 Nov: categories 219/307/308, post and media search, likely filenames incl. `SitRep_MVE_RDC_N172_02-11-2026_vf.pdf`) (maintainer decision, 5 Nov 2026: treated like N°142 for now). Checked 5 Nov 2026: not in category `308`, `219` or `307` (308/219 go N°171 → N°173), no post or media search hit for `172`, `N_172` or `SitRep_MVE_RDC_N_172`, no PDF uploaded since 1 Nov other than N°170, 171 and 173, likely filenames (`SitRep_MVE_RDC_N_172_02-11-2026.pdf`, `final_draft_…`) 404. No row in `D.nat2`, `D.national` or `data/national_timeseries.csv`; one break row in the per-zone series between N°171 and N°173 (`tools/sitrep_build.py append 173 --break-before 173`). Its figures are never filled in or derived from N°171 and N°173 (N°173's narrative quotes the previous day's contact tracing, 84,4 %; not used), and no one-day change is shown across the gap. | **Re-check on every run.** If it appears, ingest it with `tools/sitrep_ingest.py --title-number 172`, add its row between N°171 and N°173, replace the break row with its per-zone reading, mirror its `nd` in `data/not_reported_provinces.csv`, and remove this row. |
 | N°175 (5 Nov 2026) | `suspects_today` left empty (single-cell rule): Tableau 3 gives 559 (390 + 169), the narrative regex read `4` (a page number sits between `(14,4 %)` and `ont été validées`, as N°150's layout); the narrative itself says 559. Needs a person to decide whether it is a parser miss; not patched in an unattended run. | Re-ingest N°175 after a maintainer fix or corrected upload and fill the cell. |
 | N°176 (6 Nov 2026) | **Ingested with `--accept-t3-row-anomaly`** (maintainer decision, 11 Nov 2026): Bas-Uélé's Tableau 3 row classifies 119 alerts against 114 received; `suspects_today` 506 (347 + 159 = narrative). 321 of 4 176 alerts not yet verified; the "suspects non investigués" column (262) contradicts the narrative's 100 % investigated (investigated-columns rule). | If a corrected upload appears, re-ingest it without the flag and compare. |
 | N°177 (7 Nov 2026) | Ingested under the investigated-columns rule: suspects column 461 (the narrative's "461 cas suspects investigués") against 457 validated; `suspects_today` 457. The highlights keep an editor's note ("423 (À l'équipe : Q2) nouveaux échantillons") in a file named `…_final_corrige.pdf`; no stored field. | If a corrected upload appears, re-ingest and compare. |
 | N°179 (9 Nov 2026) | `patients_in_isolation` is 651 as printed on the banner, down from 966 in N°178 (−315 in a day); no narrative total to cross-check. Stored as printed. N°180 prints 981 again. | If a corrected upload appears, re-ingest and compare. |
+| N°181 (11 Nov 2026) | **Ingested** (maintainer decisions, 16 Nov 2026): Watsa accepted and mapped (new-zone note above). `suspects_today` **empty** under the single-cell rule: Tableau 3's province rows give validated 365 + 159 = **524**, its Total row 365 + 160 = **525** and the narrative 525; every other column agrees. Sud-Ubangi `12 0 12 0 0 11 0 1 0` (0 validated, 1 investigated) is an investigated-column mismatch only. Haut-Uélé ND (wrapped `ND` line; ND share 4.09 %). Banner isolation 1 676 (981 in N°180). | If a corrected upload appears, re-ingest and compare; fill `suspects_today` only if rows and Total agree. |
+| N°182 (12 Nov 2026) | Ingested. Haut-Uélé's short `0 0 0` Tableau 3 row read as 0 (standing rule above; Total = Σ other rows in every column); suspects 349. | — |
+| N°183 (13 Nov 2026) | Ingested (N°183 wrap layout); suspects 612. | — |
+| N°184 (14 Nov 2026) | Ingested. Nord-Ubangi's short `0 0 0 0` Tableau 3 row read as 0 (standing rule); suspects 394. | — |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |
