@@ -27,21 +27,24 @@ const ALL_ZONES = ZONES.map((z) => z.z);
 /* ---------- the scenes: an opening screen, two chapters, a close ---------- */
 type Scene =
   | { kind: 'intro'; map: MapSpec }
-  | { kind: 'chapter'; n: 1 | 2; title: string; line: string; map: MapSpec; hud: Hud; range?: [string, string] }
+  | { kind: 'chapter'; n: 1 | 2 | 3; title: string; line: string; map: MapSpec; hud: Hud; range?: [string, string] }
   | { kind: 'step'; step: Step }
   | { kind: 'outro'; map: MapSpec };
-const first = (c: 1 | 2) => STEPS.find((s) => s.chapter === c)!;
+const first = (c: 1 | 2 | 3) => STEPS.find((s) => s.chapter === c)!;
 const SCENES: Scene[] = [
   { kind: 'intro', map: { mode: 'spread', phase: 4, highlight: [], focus: ALL_ZONES } },
   { kind: 'chapter', n: 1, title: 'How it spread', line: 'Each health zone lights up on the date of the first SitRep that lists it with a confirmed case.', map: { ...first(1).map, highlight: [] }, hud: first(1).hud, range: first(1).range },
   ...STEPS.filter((s) => s.chapter === 1).map((step) => ({ kind: 'step' as const, step })),
   { kind: 'chapter', n: 2, title: 'Where people move', line: 'Estimated relocations between health zones in April 2026: where an outbreak can travel.', map: { ...first(2).map, highlight: [] }, hud: first(2).hud },
   ...STEPS.filter((s) => s.chapter === 2).map((step) => ({ kind: 'step' as const, step })),
+  { kind: 'chapter', n: 3, title: 'Across borders', line: 'The virus reached neighbouring countries. Each reports to its own health ministry — here they are, in the order they were first affected.', map: { ...first(3).map, highlight: [] }, hud: first(3).hud },
+  ...STEPS.filter((s) => s.chapter === 3).map((step) => ({ kind: 'step' as const, step })),
   { kind: 'outro', map: { mode: 'spread', phase: 4, highlight: [], focus: ALL_ZONES } },
 ];
 const sceneMap = (s: Scene) => (s.kind === 'step' ? s.step.map : s.map);
-const sceneHud = (s: Scene): { hud: Hud; chapter: 1 | 2; range?: [string, string] } | null =>
+const sceneHud = (s: Scene): { hud: Hud; chapter: 1 | 2 | 3; range?: [string, string] } | null =>
   s.kind === 'step' ? { hud: s.step.hud, chapter: s.step.chapter, range: s.step.range } : s.kind === 'chapter' ? { hud: s.hud, chapter: s.n, range: s.range } : null;
+const CHAP_LABEL: Record<1 | 2 | 3, string> = { 1: 'How it spread', 2: 'Where people move', 3: 'Across borders' };
 
 /* ---------- counting numbers ---------- */
 function useCount(target: number, ms = 900) {
@@ -157,7 +160,7 @@ function Panel({ scene }: { scene: Scene }) {
     <div className="pointer-events-auto absolute inset-x-3 top-3 z-[600] overflow-hidden rounded-2xl border border-rule bg-paper/95 shadow-xl backdrop-blur md:inset-x-auto md:right-5 md:top-5 md:w-[17rem]">
       <div className="h-1 bg-accent" />
       <div className="px-3.5 py-2.5 md:p-4">
-        <p className="hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-accent md:block">Chapter {h.chapter} · {spread ? 'How it spread' : 'Where people move'}</p>
+        <p className="hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-accent md:block">Chapter {h.chapter} · {CHAP_LABEL[h.chapter]}</p>
         <div className="grid grid-cols-2 gap-3 md:mt-2">
           <div><Count value={h.hud.a.value} className={`block font-extrabold leading-none tracking-tight text-ink ${big(h.hud.a.value)}`} /><p className="mt-1 text-[10.5px] leading-tight text-ink-3">{h.hud.a.label}</p></div>
           <div><p className="leading-none"><Count value={h.hud.b.value} className={`font-extrabold tracking-tight text-ink ${big(h.hud.b.value)}`} />{h.hud.b.of && <span className="text-sm font-semibold text-ink-3">/{h.hud.b.of}</span>}</p><p className="mt-1 text-[10.5px] leading-tight text-ink-3">{h.hud.b.label}</p></div>
@@ -178,7 +181,7 @@ function Panel({ scene }: { scene: Scene }) {
             <div className="flex justify-between text-[10px] text-ink-3"><span>{dateShort(ZONES_OVER_TIME[0].d)}</span><span>zones listed over time</span><span>{dateShort(LATEST.d)}</span></div>
           </div>
         ) : null}
-        <div className="mt-3 hidden border-t border-rule pt-2.5 text-[10.5px] text-ink-2 md:block">
+        <div className={`mt-3 hidden border-t border-rule pt-2.5 text-[10.5px] text-ink-2 ${h.chapter === 3 ? '' : 'md:block'}`}>
           {spec.mode === 'spread' ? (
             <div className="flex flex-wrap gap-x-3 gap-y-1">{PHASES.map((p, i) => <span key={p.label} className={`flex items-center gap-1.5 transition-opacity ${i > (spec.phase ?? 0) ? 'opacity-30' : ''}`}><span className="h-2.5 w-2.5 rounded-sm" style={{ background: `var(${PHASE_VARS[i]})` }} />{p.label.replace('August–September', 'Aug–Sep').replace('October–November', 'Oct–Nov')}</span>)}</div>
           ) : (
@@ -232,6 +235,7 @@ export function Briefing({ go }: { go: (r: Route) => void }) {
   const jump = (i: number) => refs.current[i]?.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
   const ch2 = SCENES.findIndex((s) => s.kind === 'chapter' && s.n === 2);
   const ch1 = SCENES.findIndex((s) => s.kind === 'chapter' && s.n === 1);
+  const ch3 = SCENES.findIndex((s) => s.kind === 'chapter' && s.n === 3);
   const countries = COUNTRIES.filter((c) => c.st === 'active').length;
 
   return (
@@ -247,7 +251,7 @@ export function Briefing({ go }: { go: (r: Route) => void }) {
         <Panel scene={scene} />
         <Timeline scene={scene} />
         <div className="absolute left-6 top-5 z-[600] hidden gap-1 rounded-full border border-rule bg-paper/95 p-1 text-[11.5px] shadow-lg lg:flex">
-          {([[ch1, 'How it spread'], [ch2, 'Where people move']] as const).map(([i, label], k) => (
+          {([[ch1, 'How it spread'], [ch2, 'Where people move'], [ch3, 'Across borders']] as const).map(([i, label], k) => (
             <button key={label} onClick={() => jump(i)} aria-pressed={sceneHud(scene)?.chapter === k + 1}
               className="rounded-full px-3 py-1 font-semibold text-ink-2 aria-pressed:bg-accent aria-pressed:text-white">{k + 1} · {label}</button>
           ))}

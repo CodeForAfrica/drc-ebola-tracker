@@ -3,7 +3,7 @@
    (tracker.json, firstListed.json); the text only frames it.
    ========================================================================== */
 import firstRaw from '@/data/firstListed.json';
-import { MOB, ZONES, PROV, LATEST, fmt, dateShort } from '@/lib/data';
+import { COUNTRIES, MOB, ZONES, PROV, LATEST, fmt, dateShort, dateLong } from '@/lib/data';
 
 type First = { d: string; src: string; after: string | null; atStart?: boolean };
 export const FIRST = firstRaw as Record<string, First>;
@@ -19,7 +19,7 @@ export type MapSpec = {
   focus: string[];             // zones the map frames
 };
 export type Hud = { a: { label: string; value: number }; b: { label: string; value: number; of?: number } };
-export type Step = { id: string; chapter: 1 | 2; kicker: string; title: string; body: string; note?: string; map: MapSpec; hud: Hud; range?: [string, string] };
+export type Step = { id: string; chapter: 1 | 2 | 3; kicker: string; title: string; body: string; note?: string; map: MapSpec; hud: Hud; range?: [string, string] };
 
 /** Cumulative number of health zones listed, by date of first listing (for the timeline chart). */
 export const ZONES_OVER_TIME = (() => {
@@ -114,4 +114,36 @@ function mobilitySteps(): Step[] {
   ];
 }
 
-export const STEPS: Step[] = [...spreadSteps(), ...mobilitySteps()];
+export const STEPS: Step[] = [...spreadSteps(), ...mobilitySteps(), ...countriesSteps()];
+
+/* ---------------- chapter 3: other affected countries, in the order they were affected ----------------
+   Figures and dates come straight from each country's own authority (COUNTRIES, from the config).
+   The backdrop stays on the DR Congo spread; the cards carry the cross-border chronology. */
+function countriesSteps(): Step[] {
+  const drc = COUNTRIES.find((c) => c.key === 'COD')!;
+  const others = COUNTRIES.filter((c) => c.key !== 'COD').sort((a, b) => a.asof.localeCompare(b.asof));
+  const regionC = COUNTRIES.reduce((a, c) => a + c.c, 0);
+  const regionD = COUNTRIES.reduce((a, c) => a + c.d, 0);
+  const backdrop: MapSpec = { mode: 'spread', phase: PHASES.length - 1, highlight: [], focus: ZONES.map((z) => z.z) };
+  const lead: Step = {
+    id: 'c0', chapter: 3, kicker: 'Across borders',
+    title: `Beyond DR Congo: ${others.length} more countries`,
+    body: `DR Congo is the epicentre — ${fmt(drc.c)} confirmed and ${fmt(drc.d)} deaths (INSP SitRep N°${LATEST.s}). ${others.map((c) => `${c.name} (${dateShort(c.asof)}, ${c.st === 'over' ? 'over' : 'active'})`).join(', ')} have each reported confirmed cases to their own health ministry. Across all ${COUNTRIES.length} countries: ${fmt(regionC)} confirmed, ${fmt(regionD)} deaths.`,
+    note: 'Each country reports to its own public-health authority on its own date; the regional total carries no single as-of date.',
+    hud: { a: { label: 'Countries with cases', value: COUNTRIES.length }, b: { label: 'Regional confirmed', value: regionC } },
+    map: backdrop,
+  };
+  const perCountry: Step[] = others.map((c, i) => ({
+    id: `c${i + 1}`, chapter: 3 as const,
+    kicker: `${i + 1} / ${others.length} · ${dateLong(c.asof)}`,
+    title: c.name,
+    body: `${c.src} reports ${fmt(c.c)} confirmed case${c.c === 1 ? '' : 's'} and ${fmt(c.d)} death${c.d === 1 ? '' : 's'}${c.r != null ? `, ${fmt(c.r)} recovered` : ''}. `
+      + (c.st === 'over'
+        ? `Its outbreak was declared over on ${dateShort(c.asof)}; these figures are final.`
+        : `Its outbreak is active as of ${dateShort(c.asof)}; the ministry publishes national figures only, so no area is shown.`),
+    note: c.st === 'active' ? 'Active — figures may change. National totals only; no sub-national breakdown is published.' : undefined,
+    hud: { a: { label: 'Confirmed cases', value: c.c }, b: { label: 'Deaths', value: c.d } },
+    map: backdrop,
+  }));
+  return [lead, ...perCountry];
+}

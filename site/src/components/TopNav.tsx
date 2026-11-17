@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Moon, Sun } from 'lucide-react';
-import { LATEST, dateShort } from '@/lib/data';
+import { LATEST, dateShort, dateLong } from '@/lib/data';
 
 export const ROUTES = [
   ['map', 'Map'],
@@ -25,7 +25,8 @@ export function TopNav({ route, go }: { route: Route; go: (r: Route) => void }) 
           {/* text lockup; swap for the official Code for Africa logo file at implementation */}
           <span className="flex flex-col leading-none">
             <span className="text-[10px] font-extrabold uppercase tracking-[.16em] text-accent">Code for Africa</span>
-            <span className="mt-1 text-[15px] font-bold tracking-tight text-ink">Bundibugyo 2026<span className="ml-2 hidden text-[12px] font-normal text-ink-3 lg:inline">DRC · Uganda · Kenya · Nigeria</span></span>
+            <span className="mt-1 text-[15px] font-bold tracking-tight text-ink">Epidemic Intelligence<span className="font-normal text-ink-3"> · Bundibugyo 2026</span></span>
+            <span className="mt-0.5 hidden text-[10px] text-ink-3 sm:block">Dashboard last updated {dateLong(LATEST.d)}</span>
           </span>
         </button>
         <nav aria-label="Sections" className="no-scrollbar ml-1 flex [mask-image:linear-gradient(90deg,#000_85%,transparent)] md:[mask-image:none] min-w-0 flex-1 items-center gap-0.5 overflow-x-auto md:ml-4">

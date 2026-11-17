@@ -24,7 +24,7 @@ A second, richer front end built with **React + TypeScript + Vite + Tailwind + L
 **Standing rules for `site/`** (keep in sync with the live tracker's ethos):
 - If a figure needs typing into `site/src`, it is in the wrong place — it belongs in the config/`data/` and the scripts.
 - Derived values (daily change, shares, rankings, first-listed dates) live in `src/lib/data.ts` / `src/lib/briefing.ts`, each with a comment on how it is derived.
-- A **daily change** is shown only between **consecutive daily reports**; missing reports are drawn **dashed** and labelled; **nothing is interpolated**.
+- A **daily change** is shown only between **consecutive daily reports**; **nothing is interpolated**. The national **Trends** chart marks missing reports with a dashed bridge; the **per-zone** cumulative chart (cases in blue, deaths in red) connects its real readings across gaps as a continuous line (no synthetic points; tooltips show only reported readings).
 - **"No data" is never drawn as zero.** Kenya / Nigeria subdivisions are **never coloured** by a value (national figures only).
 - Mobility is always labelled **Flowminder / Vodacom April 2026 estimates** — importation risk, not transmission; suppressed flows are never counted as zero.
 - **Early-warning** levels stay **empty** until the epidemiology team supplies indicators/thresholds/values — no demo values on the public site.

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Search, X, Info } from 'lucide-react';
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, ReferenceLine } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { OutbreakMap, type MapApi } from '@/components/map/OutbreakMap';
 import { LAYERS, type LayerKey, type Dir, zoneValue } from '@/components/map/layers';
 import { Badge } from '@/components/ui/badge';
@@ -215,18 +215,24 @@ function ZonePanel({ z, layer, onBack }: { z: Zone; layer: LayerKey; onBack: () 
       <p className="-mt-2 text-[11px] text-ink-3">{pct(share(z.c, LATEST.c), 1)} of national cases · population {fmt(z.pop)} (v1 shapefile)</p>
 
       <section>
-        <p className="text-[13px] font-semibold text-ink">Cumulative cases</p>
+        <p className="text-[13px] font-semibold text-ink">Cumulative cases and deaths</p>
         {s ? (
           <div className="mt-1 h-32"><ResponsiveContainer width="100%" height="100%">
             <LineChart data={s.rows} margin={{ top: 4, right: 6, bottom: 0, left: 0 }}>
               <XAxis dataKey="t" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={(t) => dateShort(new Date(t).toISOString().slice(0, 10))} minTickGap={40} tickLine={false} axisLine={false} />
               <YAxis tickLine={false} axisLine={false} width={42} tickFormatter={(v) => v.toLocaleString('en-GB')} />
-              <Tooltip content={({ active, payload }) => active && payload?.[0]?.value != null ? <div className="rounded border border-rule bg-paper px-2 py-1 text-xs"><b className="num">{fmt(payload[0].value as number)}</b> · {dateLong(payload[0].payload.d)}</div> : null} />
-              {s.gaps.map((g, i) => <ReferenceLine key={i} segment={[{ x: g.x1, y: g.y1 }, { x: g.x2, y: g.y2 }]} stroke="rgb(var(--case))" strokeWidth={1.6} strokeDasharray="4 4" />)}
-              <Line type="monotone" dataKey="c" stroke="rgb(var(--case))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
+              <Tooltip content={({ active, payload }) => active && payload?.length ? (
+                <div className="rounded border border-rule bg-paper px-2 py-1 text-xs">
+                  <div className="text-ink-3">{dateLong(payload[0].payload.d)}</div>
+                  <div><b className="num text-case">{fmt(payload[0].payload.c)}</b> cases</div>
+                  {payload[0].payload.dd != null && <div><b className="num text-death">{fmt(payload[0].payload.dd)}</b> deaths</div>}
+                </div>) : null} />
+              {/* continuous lines: real readings are connected across missing dates; nothing is interpolated */}
+              <Line type="monotone" dataKey="c" stroke="rgb(var(--case))" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
+              <Line type="monotone" dataKey="dd" stroke="rgb(var(--death))" strokeWidth={2} dot={false} connectNulls isAnimationActive={false} />
             </LineChart></ResponsiveContainer></div>
         ) : <p className="mt-1 text-xs text-ink-3">No published zone series; latest figure only.</p>}
-        {s && s.gaps.length > 0 && <p className="mt-1 text-[10.5px] text-ink-3">Dashed: reports not in the zone series.</p>}
+        {s && <div className="mt-1 flex gap-4 text-[10.5px] text-ink-3"><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-case" />Cases</span><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-death" />Deaths</span></div>}
       </section>
 
       <section className={layer === 'mob' ? 'rounded-xl ring-1 ring-flow-in/40 p-3 -mx-1' : ''}>

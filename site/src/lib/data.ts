@@ -130,20 +130,20 @@ export const COUNTRIES: Country[] = [
   ...CTRY.map((x) => ({ key: x.n.en, name: x.n.en, base: x.n.en, c: x.c, d: x.d, r: x.r, st: x.st, asof: x.asof, src: x.src, lat: x.lat, lon: x.lon })),
 ];
 
-/** Zone cumulative series from D.trends: [date, cumulative cases]; break rows become nulls. */
+/** Zone cumulative series from D.trends: cases (r[3]) and deaths (r[4]). Only real
+ *  observations are kept — break/null rows are dropped — so the lines read as
+ *  continuous across missing report dates. No value is interpolated: every point is a
+ *  reported cumulative reading and tooltips show only those. */
 export function zoneSeries(z: string) {
   const s = R.trends[z];
   if (!s) return null;
-  const rows: { t: number; d: string; c: number | null }[] = [];
-  const gaps: GapSeg[] = [];
-  let last: { t: number; d: string; c: number } | null = null, broken = false;
+  const rows: { t: number; d: string; c: number; dd: number | null }[] = [];
   s.forEach((r) => {
-    if (!r[0] || r[3] == null) { broken = true; return; }
-    const d = `2026-${r[0]}`, p = { t: Date.parse(d + 'T00:00:00Z'), d, c: r[3] };
-    if (broken && last) { rows.push({ t: last.t + 1, d: '', c: null }); gaps.push({ x1: last.t, y1: last.c, x2: p.t, y2: p.c }); }
-    rows.push(p); last = p; broken = false;
+    if (!r[0] || r[3] == null) return;                 // break row / no cumulative case figure
+    const d = `2026-${r[0]}`;
+    rows.push({ t: Date.parse(d + 'T00:00:00Z'), d, c: r[3], dd: r[4] });
   });
-  return { rows, gaps };
+  return rows.length ? { rows } : null;
 }
 
 /* ---------- formatting ---------- */

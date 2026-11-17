@@ -114,7 +114,9 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
     const max = Math.max(...COUNTRIES.map((c) => c.c));
     COUNTRIES.forEach((c) => {
       const r = Math.round(9 + 27 * Math.sqrt(c.c / max));
-      const m = L.marker([c.lat, c.lon], { keyboard: true, title: c.name, riseOnHover: true,
+      /* sit the bubble on the centre of the country's own drawn outline, not its capital —
+         capitals (Kampala, Nairobi) sit near a border and read as outside the shape */
+      const m = L.marker(COUNTRY_BOUNDS[c.key].getCenter(), { keyboard: true, title: c.name, riseOnHover: true,
         icon: L.divIcon({ className: `bubble ${c.st}`, iconSize: [r * 2, r * 2], html: `${c.st === 'active' ? '<span class="ring"></span>' : ''}<span class="core"></span>` }) }).addTo(map);
       m.on('mousemove', (e: L.LeafletMouseEvent) => onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${c.name}</b> <span class="chip ${c.st}">${c.st === 'active' ? 'Active' : 'Over'}</span><br><span class="num">${fmt(c.c)}</span> confirmed · <span class="num">${fmt(c.d)}</span> deaths<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span><br><span class="t3">${c.key === 'COD' ? 'Click to open the health-zone map' : 'Click to zoom · national figures only'}</span>` }));
       m.on('mouseout', () => onTip(null));
