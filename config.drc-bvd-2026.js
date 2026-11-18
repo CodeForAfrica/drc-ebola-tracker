@@ -7,8 +7,7 @@
 const CFG={
  view:{center:[1.35,28.6],zoom:6.5},            /* initial map view */
  defaultProv:'Ituri',                           /* province shown in the provincial snapshot on load */
- zoneRelease:{sitrep:'N°185',date:'2026-11-15'},/* release the health-zone layer is built on */
- zoneNotes:{Lubunga:'zn_harmonising'},          /* zones the live SitRep footnotes; update every release (N°185: Lubunga '**En cours d’harmonisation') */
+ zoneRelease:{sitrep:'N°185',date:'2026-11-15'}, zoneNotes:{Lubunga:'zn_harmonising'},/* release the health-zone layer is built on; zones its SitRep footnotes (N°185: Lubunga '**En cours d’harmonisation'), update every release */
  months:{                                       /* time-filter chips, one per month in D.tl */
   short:{'2026-05':'May','2026-06':'Jun','2026-07':'Jul','2026-08':'Aug'},
   long:{en:['May','Jun','Jul','Aug'],fr:['Mai','Juin','Juil','Août']}},
