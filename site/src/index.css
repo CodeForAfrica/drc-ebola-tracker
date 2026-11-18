@@ -125,7 +125,6 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.03em; }
 .chip.active { background: rgb(var(--st-active) / .12); color: rgb(var(--st-active)); }
 .chip.over { background: rgb(var(--st-over) / .18); color: rgb(var(--ink-2)); }
 .no-scrollbar { scrollbar-width: none; } .no-scrollbar::-webkit-scrollbar { display: none; }
-.leaflet-marker-icon.bubble { transition: opacity .35s; }
 /* (old MapLibre rules below are unused) */
 .maplibregl-ctrl-group { background: rgb(var(--paper)) !important; border: 1px solid rgb(var(--rule)); box-shadow: none !important; }
 .maplibregl-ctrl-group button { width: 34px; height: 34px; }
@@ -134,14 +133,15 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.03em; }
 .maplibregl-ctrl-attrib { background: rgb(var(--paper) / .85) !important; color: rgb(var(--ink-3)); font-size: 10px; }
 .maplibregl-ctrl-attrib a { color: rgb(var(--ink-2)); }
 
-/* Country bubbles: active ones carry one slow ring */
-.bubble { position: relative; border-radius: 9999px; cursor: pointer; }
-.bubble .core { position: absolute; inset: 0; border-radius: 9999px; border: 1.5px solid rgb(var(--paper)); }
-.bubble.active .core { background: rgb(var(--st-active) / .85); box-shadow: 0 1px 6px rgb(var(--st-active) / .35); }
-.bubble.over .core { background: rgb(var(--st-over) / .75); }
-.bubble.active .ring { position: absolute; inset: 0; border-radius: 9999px; border: 2px solid rgb(var(--st-active) / .55); animation: ring 2.8s cubic-bezier(.2,.6,.3,1) infinite; }
-@keyframes ring { 0% { transform: scale(1); opacity: .8; } 70%, 100% { transform: scale(1.8); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .bubble.active .ring { animation: none; transform: scale(1.35); opacity: .4; } }
+/* Country bubbles are geographic circles drawn in the map's own SVG renderer, so they stay
+   locked to the country on zoom. Active ones breathe via stroke-opacity (no geometry change,
+   so the circle never drifts off the shape). */
+/* colours live in CSS (not the Leaflet options) so the bubbles re-theme on light/dark toggle */
+.cbubble { cursor: pointer; stroke: rgb(var(--paper)); transition: fill-opacity .25s; }
+.cbubble.active { fill: rgb(var(--st-active)); fill-opacity: .85; animation: cbubble-pulse 2.8s ease-in-out infinite; }
+.cbubble.over { fill: rgb(var(--st-over)); fill-opacity: .72; }
+@keyframes cbubble-pulse { 0%, 100% { stroke-opacity: .95; stroke-width: 1.5; } 50% { stroke-opacity: .4; stroke-width: 2.4; } }
+@media (prefers-reduced-motion: reduce) { .cbubble.active { animation: none; } }
 
 /* Recharts text follows the theme */
 .recharts-cartesian-axis-tick-value { fill: rgb(var(--ink-3)); font-size: 11px; font-family: 'Open Sans', sans-serif; font-variant-numeric: tabular-nums; }

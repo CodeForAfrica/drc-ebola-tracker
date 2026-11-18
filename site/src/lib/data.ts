@@ -27,6 +27,7 @@ const R = raw as unknown as {
   trends: Record<string, TrendRow[]>;
   mob: Record<string, Mob>;
   strings: Record<string, string>;
+  ctryHist: Record<string, { d: string; c: number | null; dd: number | null; r: number | null; src: string | null }[]>;
 };
 
 export const SOURCE = R.source;
@@ -129,6 +130,18 @@ export const COUNTRIES: Country[] = [
   { key: 'COD', name: 'DR Congo', base: 'Dem. Rep. Congo', c: LATEST.c, d: LATEST.dd, r: LATEST.rec, st: 'active', asof: LATEST.d, src: `INSP SitRep N°${LATEST.s}`, lat: -2.9, lon: 23.6 },
   ...CTRY.map((x) => ({ key: x.n.en, name: x.n.en, base: x.n.en, c: x.c, d: x.d, r: x.r, st: x.st, asof: x.asof, src: x.src, lat: x.lat, lon: x.lon })),
 ];
+
+/** A country's reported history, one point per public-health statement, for the Trends view.
+ *  DR Congo's daily series is the national SitRep series (see DAILY); every other country is
+ *  read from `ctryHist` — Kenya and Nigeria from their ministry CSVs (one row per statement),
+ *  Uganda's single final figure from its country row. Nothing is interpolated: ministries
+ *  publish periodic statements, so these are discrete reported points, never a daily line. */
+export type CtryPoint = { d: string; t: number; c: number | null; dd: number | null; r: number | null; src: string | null };
+export function countryHistory(key: string): CtryPoint[] {
+  const h = R.ctryHist?.[key];
+  if (!h) return [];
+  return h.map((p) => ({ ...p, t: Date.parse(p.d + 'T00:00:00Z') })).sort((a, b) => a.t - b.t);
+}
 
 /** Zone cumulative series from D.trends: cases (r[3]) and deaths (r[4]). Only real
  *  observations are kept — break/null rows are dropped — so the lines read as
