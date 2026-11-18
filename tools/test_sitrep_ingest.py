@@ -97,6 +97,9 @@ CASES[181] = dict(case="Watsa new but not named as new (maintainer decision, 16 
 CASES[182] = dict(case="short all-zero Tableau 3 row 'Haut-Uélé 0 0 0' read as 0 (Total = Σ other rows in every column)")
 CASES[183] = dict(case="Tableau 3 name halves with the first half on the number line ('Haut- 82 1 83 …' / 'Uélé')")
 CASES[184] = dict(case="short all-zero Tableau 3 row 'Nord Ubangi 0 0 0 0' read as 0 (Total = Σ other rows in every column)")
+CASES[185] = dict(case="Tableau 2 zone footnote marker 'Lubunga 1 2** 200,0% 0 0 2 2' ('**En cours d’harmonisation'): "
+                       "deaths > cases accepted while footnoted (standing rule, 18 Nov 2026); Haut-Uélé short all-zero row")
+CASES[186] = dict(case="no contact-tracing sentence in the narrative: banner 81.6 kept, not cross-checked (maintainer decision, 18 Nov 2026); Lubunga 2 -> 0 deaths without the footnote, a correction (Tshopo 35 -> 33)")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
@@ -137,6 +140,8 @@ FILENAMES = [
     ('SitRep_N182_12-11-2026_corrige.pdf', 'final', 182, D_('2026-11-12')),
     ('SitRep_N183_13-11-2026_corrige-VF.pdf', 'final', 183, D_('2026-11-13')),
     ('SitRep_N184_14-11-2026_VF.pdf', 'final', 184, D_('2026-11-14')),
+    ('SitRep_N185_15-11-2026_VF-2.pdf', 'final', 185, D_('2026-11-15')),
+    ('SitRep_N186_16-11-2026_VF-1.pdf', 'final', 186, D_('2026-11-16')),
 ]
 
 
