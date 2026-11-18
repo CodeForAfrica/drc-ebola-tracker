@@ -43,7 +43,9 @@ D.zones.forEach(z=>{const m=D.mob[z.z];z.tin=m?m.tin:null;z.tout=m?m.tout:null;z
 
 let S={ind:'c',dir:'all',sel:null,prov:CFG.defaultProv,t:null,month:null,playing:false};
 /* keep the latest-release snapshot so "Latest" can always be restored */
-D.zones.forEach(z=>{z.c0=z.c;z.d0=z.d;z.cfr0=z.cfr;z.k0=z.k;});
+/* no fatality rate for a zone whose deaths exceed its cases (figures are shown as printed; see CFG.zoneNotes) */
+const cfrOk=(c,d)=>c!=null&&d!=null&&c>0&&d<=c;
+D.zones.forEach(z=>{if(!cfrOk(z.c,z.d))z.cfr=null;z.c0=z.c;z.d0=z.d;z.cfr0=z.cfr;z.k0=z.k;});
 const TL=D.tl, MONTHS=[...new Set(TL.map(t=>t.d.slice(0,7)))];
 const MN=CFG.months.short;
 const monthIdx=m=>TL.map((t,i)=>[t,i]).filter(([t])=>t.d.startsWith(m)).map(([,i])=>i);
@@ -67,7 +69,7 @@ function applyTime(){
   const v=zoneAt(z.z,t.d);
   if(!v){z.c=null;z.d=null;z.cfr=null;z.k=null;return;}
   z.c=v.c; z.d=v.d;
-  z.cfr=(v.c&&v.d!=null)?v.d/v.c*100:null;
+  z.cfr=cfrOk(v.c,v.d)?v.d/v.c*100:null;
   z.k=(z.pop&&v.c)?v.c/z.pop*1e5:null;});}
 const value=z=>S.ind==='mob'
  ?(S.dir==='in'?z.tin:S.dir==='out'?z.tout:(z.tin==null&&z.tout==null?null:(z.tin||0)+(z.tout||0)))
@@ -421,7 +423,8 @@ function renderZone(){
    `<div class="si"><div class="sl">${tx('z_per100k')}</div><div class="sv">${z.k==null?'—':z.k.toFixed(0)}</div></div>
     <div class="div"></div>
     <div class="si"><div class="sl">${tx('n_recovered')}</div><div class="sv" style="color:var(--dim)">${tx('n_na')}</div></div>`)
-  +`<p class="note">${tx('z_risk_word')} <span class="badge ${lv[1]}">${lv[0]}</span> · ${z.k==null?'':tx('z_per100k_mid')+' '+z.k.toFixed(0)+' · '}${tx('z_note_recov')}</p>`;
+  +`<p class="note">${tx('z_risk_word')} <span class="badge ${lv[1]}">${lv[0]}</span> · ${z.k==null?'':tx('z_per100k_mid')+' '+z.k.toFixed(0)+' · '}${tx('z_note_recov')}</p>`
+  +((CFG.zoneNotes||{})[z.z]&&S.t==null?`<p class="note znote">${tx(CFG.zoneNotes[z.z])}</p>`:'');
  drawZoneChart(z.z);
  renderZoneMob(z);}
 

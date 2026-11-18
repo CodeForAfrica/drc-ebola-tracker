@@ -210,6 +210,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     subtot, zones, total, pending, leftovers = {}, [], None, '', []
     cur = None
     i = start
+    zmarks, footnotes = {}, {}   # zone -> footnote marker on its row; marker -> footnote text under Tableau 2
     while i < t3:
         l = L[i]; i += 1
         if not l or l.startswith('*') or l.startswith('NA :'): continue
@@ -228,6 +229,12 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         line = re.sub(r'^[AÀ] ventiler\s*\*?\s*', 'A ventiler ', line)
         line = re.sub(r'^A ventiler AN ', 'A ventiler NA ', line)   # 'AN' typo for 'NA' (N°140)
         line = re.sub(r'^(A ventiler NA \d+) NA! ', r'\1 NA ', line)   # 'NA!' for the CFR cell (N°148)
+        # N°185: a footnote marker after a zone's deaths ('Lubunga 1 2** 200,0% 0 0 2 2', footnote '**En cours
+        # d'harmonisation'), as after Ituri's deaths in N°169's Tableau 1. Read the row as printed, keep the marker.
+        mk = re.match(r'^(.+?\s+(?:\d+(?: \d{3})*|NA)\s+\d+(?: \d{3})*)\s*(\*+)(\s+.*)?$', line)
+        zmark = None
+        if mk and not line.startswith('A ventiler'):
+            line, zmark = mk.group(1) + (mk.group(3) or ''), mk.group(2)
         mm = ROW.match(line)
         if not mm: leftovers.append(line); continue
         name, c, d, cf, rest = mm.groups()
@@ -242,10 +249,25 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         zones.append(dict(zone=name.replace('Boma\nMangbetu', 'Boma Mangbetu'), province=cur,
                           cases=None if c == 'NA' else num(c), deaths=num(d),
                           cfr=None if cf in (None, 'NA') else pct(cf)))
+        if zmark: zmarks[zones[-1]['zone']] = zmark
     if pending: leftovers.append(pending)
+    for l in L[start:t3]:   # footnotes are printed under Tableau 2, after its Total row
+        mf = re.match(r'^(\*+)\s*(\S.*)$', l or '')
+        if mf: footnotes.setdefault(mf.group(1), mf.group(2))
     need(total, 'Total row found in Tableau 2')
     gate(not leftovers, f'no unmatched/leftover text in zone table {leftovers}')
     gate(all(not re.search(r'[\d%]', z['zone']) for z in zones), 'no zone name contains digit or %')
+    for z, mk_ in zmarks.items():
+        log(f'FLAG Tableau 2 {z} row carries footnote marker {mk_}: {footnotes.get(mk_)!r}')
+    gate(all(mk_ in footnotes for mk_ in zmarks.values()), f'every zone footnote marker has its footnote printed {zmarks}')
+    # Standing rule (maintainer decision, N°185, 18 Nov 2026): a zone may print more deaths than cases only while INSP
+    # footnotes that zone as "en cours d'harmonisation"; every other gate still applies (zone sums, subtotal, Tableau 1).
+    harm = lambda z: bool(re.search(r"en cours d.harmonisation", footnotes.get(zmarks.get(z), '') or '', re.I))
+    over = [(z['zone'], z['cases'], z['deaths']) for z in zones
+            if z['zone'] != 'A ventiler' and z['cases'] is not None and z['deaths'] > z['cases']]
+    gate(all(harm(z) for z, _, _ in over), f'zone deaths <= cases, except a zone footnoted "en cours d\'harmonisation" ({over})')
+    for z, c_, d_ in over:
+        if harm(z): log(f'FLAG {z} prints {d_} deaths for {c_} cases, footnoted "{footnotes[zmarks[z]]}" (taken as printed)')
     unknown = sorted(z['zone'] for z in zones if z['zone'] not in KNOWN | ANNOUNCED | {'A ventiler'})
     gate(not unknown, f'every zone name is already known or announced as new in this report (unknown: {unknown}; announced: {sorted(ANNOUNCED)})')
     for z in sorted(ANNOUNCED): log(f'FLAG new affected zone announced: {z}' + ('' if z in KNOWN else ' (not in any earlier zone CSV)'))
