@@ -2,6 +2,7 @@
    subtitle saying what is measured, the chart, then source, notes and download. */
 import { Download, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { L } from '@/lib/i18n';
 
 export function Figure({ id, title, subtitle, children, source, notes, download }: {
   id?: string; title: string; subtitle?: ReactNode; children: ReactNode;
@@ -16,7 +17,7 @@ export function Figure({ id, title, subtitle, children, source, notes, download 
       {children}
       <footer className="mt-4 flex flex-col gap-2 border-t border-rule pt-3 text-xs text-ink-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 space-y-1">
-          <p><span className="font-semibold text-ink-2">Source:</span> {source}</p>
+          <p><span className="font-semibold text-ink-2">{L('Source:', 'Source :')}</span> {source}</p>
           {notes && <p className="flex gap-1.5"><Info className="mt-0.5 h-3.5 w-3.5 flex-none" aria-hidden />{notes}</p>}
         </div>
         {download && (

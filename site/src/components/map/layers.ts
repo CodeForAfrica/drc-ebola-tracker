@@ -1,6 +1,7 @@
 /* Map layers and their classes. Class breaks are a presentation choice and are
    printed in the legend; values come straight from the data module. */
 import { MOB, ZONES } from '@/lib/data';
+import { getLang } from '@/lib/i18n';
 
 export type LayerKey = 'c' | 'k' | 'd' | 'mob' | 'ews';
 export type Dir = 'in' | 'out' | 'all';
@@ -16,6 +17,19 @@ export const LAYERS: Record<LayerKey, Layer> = {
   mob: { label: 'Mobility', short: 'Mobility', breaks: [1, 250, 1000, 2500, 5000, 10000], ramp: TEAL, note: 'Flowminder / Vodacom, April 2026' },
   ews: { label: 'Early warning', short: 'Early warning', breaks: [], ramp: [], note: 'Not active yet' },
 };
+
+/* French labels/notes for the layer picker and legend (data stays in LAYERS). */
+const TXT: Record<LayerKey, { short: [string, string]; label: [string, string]; note: [string, string] }> = {
+  c: { short: ['Cases', 'Cas'], label: ['Confirmed cases', 'Cas confirmés'], note: ['Cumulative, INSP', 'Cumulé, INSP'] },
+  k: { short: ['Per 100k', 'Pour 100k'], label: ['Cases per 100,000', 'Cas pour 100 000'], note: ['v1 shapefile population', 'population shapefile v1'] },
+  d: { short: ['Deaths', 'Décès'], label: ['Deaths', 'Décès'], note: ['Zone-level; 493 Ituri deaths unassigned', 'Au niveau zone ; 493 décès de l’Ituri non attribués'] },
+  mob: { short: ['Mobility', 'Mobilité'], label: ['Mobility', 'Mobilité'], note: ['Flowminder / Vodacom, April 2026', 'Flowminder / Vodacom, avril 2026'] },
+  ews: { short: ['Early warning', 'Alerte précoce'], label: ['Early warning', 'Alerte précoce'], note: ['Not active yet', 'Pas encore actif'] },
+};
+const idx = () => (getLang() === 'fr' ? 1 : 0);
+export const layerShort = (k: LayerKey) => TXT[k].short[idx()];
+export const layerLabel = (k: LayerKey) => TXT[k].label[idx()];
+export const layerNote = (k: LayerKey) => TXT[k].note[idx()];
 
 const byZone = Object.fromEntries(ZONES.map((z) => [z.z, z]));
 

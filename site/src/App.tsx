@@ -8,6 +8,7 @@ import { Countries } from '@/sections/Countries';
 import { Methods } from '@/sections/Methods';
 import type { LayerKey, Dir } from '@/components/map/layers';
 import { MOB } from '@/lib/data';
+import { useLang } from '@/lib/i18n';
 
 /* Routing is held in state. The hash is only mirrored (for bookmarks and the back button) and is
    never relied on: some embedded viewers ignore in-page link jumps, which left the tabs inert. */
@@ -20,6 +21,7 @@ export default function App() {
   const [dir, setDir] = useState<Dir>('all');      // both directions at first glance
   const [country, setCountry] = useState('all');   // bubbles first
   const [sel, setSel] = useState<string | null>(null);
+  const { lang } = useLang();   // remount map-bound Leaflet tooltips when the language changes
 
   const go = useCallback((r: Route) => {
     setRoute(r); window.scrollTo(0, 0);
@@ -49,8 +51,8 @@ export default function App() {
       <TopNav route={route} go={go} />
       <main>
         {/* the map stays mounted so returning to it keeps its view */}
-        <div hidden={route !== 'map'}><MapView layer={layer} setLayer={chooseLayer} dir={dir} setDir={setDir} sel={sel} setSel={setSel} country={country} setCountry={setCountry} /></div>
-        {route === 'briefing' && <Briefing go={go} />}
+        <div hidden={route !== 'map'}><MapView key={lang} layer={layer} setLayer={chooseLayer} dir={dir} setDir={setDir} sel={sel} setSel={setSel} country={country} setCountry={setCountry} /></div>
+        {route === 'briefing' && <Briefing key={lang} go={go} />}
         {route === 'trends' && <Trends />}
         {route === 'countries' && <Countries />}
         {route === 'early-warning' && <EwsView onShowMap={() => { setLayer('ews'); setCountry('COD'); go('map'); }} />}

@@ -6,6 +6,7 @@
    ========================================================================== */
 import raw from '@/data/tracker.json';
 import admin1 from '@/data/admin1.json';
+import { getLang } from '@/lib/i18n';
 
 export type NatRow = {
   s: string; d: string; c: number; dd: number | null; cfr: number;
@@ -27,6 +28,7 @@ const R = raw as unknown as {
   trends: Record<string, TrendRow[]>;
   mob: Record<string, Mob>;
   strings: Record<string, string>;
+  stringsFr?: Record<string, string>;
   ctryHist: Record<string, { d: string; c: number | null; dd: number | null; r: number | null; src: string | null }[]>;
 };
 
@@ -40,6 +42,9 @@ export const ZONES = R.zones;
 export const CTRY = R.ctry;
 export const GEO = { zones: R.zgeo, africa: R.africa, provinces: R.provinces };
 export const STR = R.strings;
+const STRFR = R.stringsFr ?? R.strings;
+/** a Methods coverage/mobility string in the active language (French from the config's T.fr) */
+export const str = (k: string) => (getLang() === 'fr' ? STRFR[k] ?? STR[k] : STR[k]);
 export const MOB = R.mob;
 /** Kenya counties and Nigeria states (geoBoundaries ADM1, CC BY 4.0). Geometry only: no figure is attached. */
 export const ADMIN1 = admin1 as unknown as { source: string; KEN: GeoJSON.FeatureCollection; NGA: GeoJSON.FeatureCollection };
@@ -85,26 +90,30 @@ export const DAILY: Daily[] = NAT.map((r, i) => {
   return { d: r.d, s: r.s, cum: r.c, cumD: r.dd as number | null, nc: diff(r.c, p?.c ?? null), nd: diff(r.dd, p?.dd ?? null), gapBefore: gap };
 });
 
-/* Reasons as recorded in the repository's CLAUDE.md (coverage notes). */
-const GAP_REASON: Record<string, string> = {
-  '065-114': 'SitReps N°066–113 not ingested in the national series',
-  '114-116': 'N°115 published under Actualités only; not yet ingested',
-  '141-143': 'N°142 never published by INSP',
-  '149-151': 'N°150 held: its totals disagree with its own zone table',
-  '168-170': 'N°169 held: Ituri data harmonisation, reverted in N°170',
-  '171-173': 'N°172 not published as of 16 Nov 2026',
+/* Reasons as recorded in the repository's CLAUDE.md (coverage notes), EN / FR. */
+const GAP_REASON: Record<string, [string, string]> = {
+  '065-114': ['SitReps N°066–113 not ingested in the national series', 'SitReps N°066–113 non intégrés à la série nationale'],
+  '114-116': ['N°115 published under Actualités only; not yet ingested', 'N°115 publié uniquement sous Actualités ; pas encore intégré'],
+  '141-143': ['N°142 never published by INSP', 'N°142 jamais publié par l’INSP'],
+  '149-151': ['N°150 held: its totals disagree with its own zone table', 'N°150 retenu : ses totaux contredisent son propre tableau des zones'],
+  '168-170': ['N°169 held: Ituri data harmonisation, reverted in N°170', 'N°169 retenu : harmonisation des données de l’Ituri, annulée au N°170'],
+  '171-173': ['N°172 not published as of 16 Nov 2026', 'N°172 non publié au 16 novembre 2026'],
 };
+const NOT_IN_SERIES: [string, string] = ['Not in the series', 'Absent de la série'];
 
 /** Calendar days with no SitRep in the series, with the reason documented by the maintainer. */
-export const GAPS: { from: string; to: string; days: number; why: string }[] = DAILY
+export const GAPS: { from: string; to: string; days: number; whyEn: string; whyFr: string }[] = DAILY
   .filter((r) => r.gapBefore > 0)
   .map((r) => {
     const i = NAT.findIndex((x) => x.d === r.d);
     const prev = NAT[i - 1];
     const from = new Date(t(prev.d) + DAY).toISOString().slice(0, 10);
     const to = new Date(t(r.d) - DAY).toISOString().slice(0, 10);
-    return { from, to, days: r.gapBefore, why: GAP_REASON[`${prev.s}-${r.s}`] ?? 'Not in the series' };
+    const [whyEn, whyFr] = GAP_REASON[`${prev.s}-${r.s}`] ?? NOT_IN_SERIES;
+    return { from, to, days: r.gapBefore, whyEn, whyFr };
   });
+/** a gap's reason in the active language */
+export const gapWhy = (g: { whyEn: string; whyFr: string }) => (getLang() === 'fr' ? g.whyFr : g.whyEn);
 
 
 /** Sum over the last n consecutive daily SitReps, or null if the run is broken. */
@@ -125,11 +134,13 @@ export const UNASSIGNED_DEATHS = PROV.reduce((a, p) => a + p.u, 0);   // "A vent
 
 export const share = (part: number, whole: number) => (whole ? part / whole : 0);
 
-export type Country = { key: string; name: string; c: number; d: number; r: number | null; st: 'active' | 'over'; asof: string; src: string; lat: number; lon: number; base: string };
+export type Country = { key: string; name: string; fr: string; c: number; d: number; r: number | null; st: 'active' | 'over'; asof: string; src: string; lat: number; lon: number; base: string };
 export const COUNTRIES: Country[] = [
-  { key: 'COD', name: 'DR Congo', base: 'Dem. Rep. Congo', c: LATEST.c, d: LATEST.dd, r: LATEST.rec, st: 'active', asof: LATEST.d, src: `INSP SitRep N°${LATEST.s}`, lat: -2.9, lon: 23.6 },
-  ...CTRY.map((x) => ({ key: x.n.en, name: x.n.en, base: x.n.en, c: x.c, d: x.d, r: x.r, st: x.st, asof: x.asof, src: x.src, lat: x.lat, lon: x.lon })),
+  { key: 'COD', name: 'DR Congo', fr: 'RD Congo', base: 'Dem. Rep. Congo', c: LATEST.c, d: LATEST.dd, r: LATEST.rec, st: 'active', asof: LATEST.d, src: `INSP SitRep N°${LATEST.s}`, lat: -2.9, lon: 23.6 },
+  ...CTRY.map((x) => ({ key: x.n.en, name: x.n.en, fr: x.n.fr, base: x.n.en, c: x.c, d: x.d, r: x.r, st: x.st, asof: x.asof, src: x.src, lat: x.lat, lon: x.lon })),
 ];
+/** a country's name in the active language */
+export const cname = (c: Country) => (getLang() === 'fr' ? c.fr : c.name);
 
 /** A country's reported history, one point per public-health statement, for the Trends view.
  *  DR Congo's daily series is the national SitRep series (see DAILY); every other country is
@@ -159,8 +170,9 @@ export function zoneSeries(z: string) {
   return rows.length ? { rows } : null;
 }
 
-/* ---------- formatting ---------- */
-export const fmt = (n: number | null | undefined) => (n == null ? '—' : n.toLocaleString('en-GB'));
+/* ---------- formatting (locale follows the active language) ---------- */
+const loc = () => (getLang() === 'fr' ? 'fr-FR' : 'en-GB');
+export const fmt = (n: number | null | undefined) => (n == null ? '—' : n.toLocaleString(loc()));
 export const pct = (x: number, dp = 0) => `${(x * 100).toFixed(dp)}%`;
-export const dateLong = (d: string) => new Date(t(d)).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
-export const dateShort = (d: string) => new Date(t(d)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+export const dateLong = (d: string) => new Date(t(d)).toLocaleDateString(loc(), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+export const dateShort = (d: string) => new Date(t(d)).toLocaleDateString(loc(), { day: 'numeric', month: 'short', timeZone: 'UTC' });

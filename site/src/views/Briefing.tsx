@@ -9,9 +9,13 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Area, AreaChart, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { ArrowDown, ArrowRight, BellRing, Map as MapIcon } from 'lucide-react';
-import { COUNTRIES, GEO, LATEST, MOB, PROV, ZONES, fmt, dateShort, dateLong } from '@/lib/data';
-import { STEPS, PHASES, FIRST, ZONES_OVER_TIME, phaseOf, type Step, type MapSpec, type Hud } from '@/lib/briefing';
+import { COUNTRIES, GEO, LATEST, MOB, PROV, ZONES, cname, fmt, dateShort, dateLong } from '@/lib/data';
+import { buildSteps, PHASES, FIRST, ZONES_OVER_TIME, phaseOf, type Step, type MapSpec, type Hud } from '@/lib/briefing';
+import { L as T } from '@/lib/i18n';
 import type { Route } from '@/components/TopNav';
+
+const chapLabel = (n: 1 | 2 | 3) => (n === 1 ? T('How it spread', 'Comment elle s’est propagée') : n === 2 ? T('Where people move', 'Où les gens se déplacent') : T('Across borders', 'Au-delà des frontières'));
+const phLabel = (en: string) => T(en, ({ May: 'mai', June: 'juin', July: 'juillet', 'August–September': 'août–septembre', 'October–November': 'octobre–novembre' } as Record<string, string>)[en] ?? en);
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const rgb = (v: string) => `rgb(${css(v).split(' ').join(',')})`;
@@ -39,21 +43,23 @@ type Scene =
   | { kind: 'chapter'; n: 1 | 2 | 3; title: string; line: string; map: MapSpec; hud: Hud; range?: [string, string] }
   | { kind: 'step'; step: Step }
   | { kind: 'outro'; map: MapSpec };
-const first = (c: 1 | 2 | 3) => STEPS.find((s) => s.chapter === c)!;
-const SCENES: Scene[] = [
-  { kind: 'intro', map: { mode: 'spread', phase: 4, highlight: [], focus: ALL_ZONES } },
-  { kind: 'chapter', n: 1, title: 'How it spread', line: 'Each health zone lights up on the date of the first SitRep that lists it with a confirmed case.', map: { ...first(1).map, highlight: [] }, hud: first(1).hud, range: first(1).range },
-  ...STEPS.filter((s) => s.chapter === 1).map((step) => ({ kind: 'step' as const, step })),
-  { kind: 'chapter', n: 2, title: 'Where people move', line: 'Estimated relocations between health zones in April 2026: where an outbreak can travel.', map: { ...first(2).map, highlight: [] }, hud: first(2).hud },
-  ...STEPS.filter((s) => s.chapter === 2).map((step) => ({ kind: 'step' as const, step })),
-  { kind: 'chapter', n: 3, title: 'Across borders', line: 'The virus reached neighbouring countries. Each reports to its own health ministry — here they are, in the order they were first affected.', map: { ...first(3).map, highlight: [] }, hud: first(3).hud },
-  ...STEPS.filter((s) => s.chapter === 3).map((step) => ({ kind: 'step' as const, step })),
-  { kind: 'outro', map: { mode: 'spread', phase: 4, highlight: [], focus: ALL_ZONES } },
-];
+/* built fresh per language inside the view (which remounts on a language change) */
+function buildScenes(STEPS: Step[]): Scene[] {
+  const f = (c: 1 | 2 | 3) => STEPS.find((s) => s.chapter === c)!;
+  return [
+    { kind: 'intro', map: { mode: 'spread', phase: 4, highlight: [], focus: ALL_ZONES } },
+    { kind: 'chapter', n: 1, title: chapLabel(1), line: T('Each health zone lights up on the date of the first SitRep that lists it with a confirmed case.', 'Chaque zone de santé s’allume à la date du premier SitRep qui la mentionne avec un cas confirmé.'), map: { ...f(1).map, highlight: [] }, hud: f(1).hud, range: f(1).range },
+    ...STEPS.filter((s) => s.chapter === 1).map((step) => ({ kind: 'step' as const, step })),
+    { kind: 'chapter', n: 2, title: chapLabel(2), line: T('Estimated relocations between health zones in April 2026: where an outbreak can travel.', 'Déplacements estimés entre zones de santé en avril 2026 : par où une épidémie peut voyager.'), map: { ...f(2).map, highlight: [] }, hud: f(2).hud },
+    ...STEPS.filter((s) => s.chapter === 2).map((step) => ({ kind: 'step' as const, step })),
+    { kind: 'chapter', n: 3, title: chapLabel(3), line: T('The virus reached neighbouring countries. Each reports to its own health ministry — here they are, in the order they were first affected.', 'Le virus a atteint des pays voisins. Chacun déclare à son propre ministère de la santé — les voici, dans l’ordre où ils ont été touchés.'), map: { ...f(3).map, highlight: [] }, hud: f(3).hud },
+    ...STEPS.filter((s) => s.chapter === 3).map((step) => ({ kind: 'step' as const, step })),
+    { kind: 'outro', map: { mode: 'spread', phase: 4, highlight: [], focus: ALL_ZONES } },
+  ];
+}
 const sceneMap = (s: Scene) => (s.kind === 'step' ? s.step.map : s.map);
 const sceneHud = (s: Scene): { hud: Hud; chapter: 1 | 2 | 3; range?: [string, string] } | null =>
   s.kind === 'step' ? { hud: s.step.hud, chapter: s.step.chapter, range: s.step.range } : s.kind === 'chapter' ? { hud: s.hud, chapter: s.n, range: s.range } : null;
-const CHAP_LABEL: Record<1 | 2 | 3, string> = { 1: 'How it spread', 2: 'Where people move', 3: 'Across borders' };
 
 /* ---------- counting numbers ---------- */
 function useCount(target: number, ms = 900) {
@@ -110,11 +116,11 @@ function StoryMap({ spec }: { spec: MapSpec }) {
         const c = CTRY_BY_KEY[key], center = CTRY_CENTER[key]; if (!c || !center) return;
         const active = c.st === 'active', hi = s.highlight.includes(key), named = hi || s.highlight.length === 0;
         const rad = ctryRadius(c.c) + (hi ? 2 : 0);
-        if (active) L.circleMarker(center, { radius: rad, className: 'cring', interactive: false, stroke: false }).addTo(r.countries);
+        if (active) L.circleMarker(center, { radius: Math.max(rad, 10), className: 'cring', interactive: false, stroke: false }).addTo(r.countries);
         L.circleMarker(center, { radius: rad, className: `cbubble ${c.st}`, color: rgb('--paper'), weight: hi ? 2 : 1.5, fillColor: rgb(active ? '--st-active' : '--st-over'), fillOpacity: active ? 0.9 : 0.8, opacity: named ? 1 : 0.55 })
-          .bindTooltip(`<b>${c.name}</b><br><span class="num">${fmt(c.c)}</span> confirmed · <span class="num">${fmt(c.d)}</span> deaths<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span>`, { sticky: true, className: 'ltip' }).addTo(r.countries);
+          .bindTooltip(`<b>${cname(c)}</b><br><span class="num">${fmt(c.c)}</span> ${T('confirmed', 'confirmés')} · <span class="num">${fmt(c.d)}</span> ${T('deaths', 'décès')}<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span>`, { sticky: true, className: 'ltip' }).addTo(r.countries);
         if (named) L.marker(center, { interactive: false, keyboard: false, icon: L.divIcon({ className: 'ctry-anchor', iconSize: [0, 0] }) })
-          .bindTooltip(c.name, { permanent: true, direction: 'top', offset: [0, -rad - 3], className: 'zlabel story-label' }).addTo(r.countries);
+          .bindTooltip(cname(c), { permanent: true, direction: 'top', offset: [0, -rad - 3], className: 'zlabel story-label' }).addTo(r.countries);
       });
       const pts = (s.focus ?? []).map((k) => CTRY_CENTER[k]).filter(Boolean) as L.LatLng[];
       if (pts.length && el.current && el.current.clientWidth > 0) {
@@ -152,7 +158,7 @@ function StoryMap({ spec }: { spec: MapSpec }) {
       const pts = arc(r.map, [a.lat, a.lon], [b.lat, b.lon], f.kind === 'in' ? 1 : -1);
       L.polyline(pts, { color: col, weight: 5, opacity: 0.18, interactive: false }).addTo(r.flows);
       L.polyline(pts, { color: col, weight: 2.8, opacity: 0.95, className: 'flow-anim', dashArray: '7 9' })
-        .bindTooltip(`<b>${f.from}</b> → <b>${f.to}</b><br>${fmt(f.v)} estimated relocations`, { sticky: true, className: 'ltip' }).addTo(r.flows);
+        .bindTooltip(`<b>${f.from}</b> → <b>${f.to}</b><br>${fmt(f.v)} ${T('estimated relocations', 'déplacements estimés')}`, { sticky: true, className: 'ltip' }).addTo(r.flows);
       L.circleMarker(f.kind === 'in' ? [a.lat, a.lon] : [b.lat, b.lon], { radius: 3.5, color: col, fillColor: col, fillOpacity: 1, weight: 1, interactive: false }).addTo(r.flows);
     });
     [...s.highlight].filter((n) => byZone[n]).sort((a, b) => byZone[b].c - byZone[a].c).slice(0, 6).forEach((n) => {
@@ -170,14 +176,14 @@ function StoryMap({ spec }: { spec: MapSpec }) {
     }
   }, [spec]);
 
-  return <div ref={el} className="absolute inset-0" role="img" aria-label="Story map" />;
+  return <div ref={el} className="absolute inset-0" role="img" aria-label={T('Story map', 'Carte du récit')} />;
 }
 
 function zoneTip(n: string) {
   const z = byZone[n], f = FIRST[n], m = MOB[n];
   return `<b>${n}</b> <span class="t3">· ${z?.p ?? ''}</span><br>` +
-    (f ? `First listed ${f.after ? `between ${dateShort(f.after)} and ${dateShort(f.d)}` : dateShort(f.d)} <span class="t3">(${f.src})</span><br>` : '') +
-    `<span class="num">${fmt(z?.c)}</span> cases to date` + (m ? ` · <span class="num">${fmt(m.tin)}</span> in / <span class="num">${fmt(m.tout)}</span> out (Apr)` : '');
+    (f ? `${T('First listed', 'Inscrite pour la 1re fois')} ${f.after ? `${T('between', 'entre le')} ${dateShort(f.after)} ${T('and', 'et le')} ${dateShort(f.d)}` : dateShort(f.d)} <span class="t3">(${f.src})</span><br>` : '') +
+    `<span class="num">${fmt(z?.c)}</span> ${T('cases to date', 'cas à ce jour')}` + (m ? ` · <span class="num">${fmt(m.tin)}</span> ${T('in', 'ent.')} / <span class="num">${fmt(m.tout)}</span> ${T('out', 'sort.')} (${T('Apr', 'avr.')})` : '');
 }
 function arc(map: L.Map, a: L.LatLngTuple, b: L.LatLngTuple, side: number) {
   const A = map.latLngToLayerPoint(a), B = map.latLngToLayerPoint(b);
@@ -195,7 +201,7 @@ function Panel({ scene }: { scene: Scene }) {
     <div className="pointer-events-auto absolute inset-x-3 top-3 z-[600] overflow-hidden rounded-2xl border border-rule bg-paper/95 shadow-xl backdrop-blur md:inset-x-auto md:right-5 md:top-5 md:w-[17rem]">
       <div className="h-1 bg-accent" />
       <div className="px-3.5 py-2.5 md:p-4">
-        <p className="hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-accent md:block">Chapter {h.chapter} · {CHAP_LABEL[h.chapter]}</p>
+        <p className="hidden text-[10px] font-extrabold uppercase tracking-[.16em] text-accent md:block">{T('Chapter', 'Chapitre')} {h.chapter} · {chapLabel(h.chapter)}</p>
         <div className="grid grid-cols-2 gap-3 md:mt-2">
           <div><Count value={h.hud.a.value} className={`block font-extrabold leading-none tracking-tight text-ink ${big(h.hud.a.value)}`} /><p className="mt-1 text-[10.5px] leading-tight text-ink-3">{h.hud.a.label}</p></div>
           <div><p className="leading-none"><Count value={h.hud.b.value} className={`font-extrabold tracking-tight text-ink ${big(h.hud.b.value)}`} />{h.hud.b.of && <span className="text-sm font-semibold text-ink-3">/{h.hud.b.of}</span>}</p><p className="mt-1 text-[10.5px] leading-tight text-ink-3">{h.hud.b.label}</p></div>
@@ -213,17 +219,17 @@ function Panel({ scene }: { scene: Scene }) {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex justify-between text-[10px] text-ink-3"><span>{dateShort(ZONES_OVER_TIME[0].d)}</span><span>zones listed over time</span><span>{dateShort(LATEST.d)}</span></div>
+            <div className="flex justify-between text-[10px] text-ink-3"><span>{dateShort(ZONES_OVER_TIME[0].d)}</span><span>{T('zones listed over time', 'zones inscrites au fil du temps')}</span><span>{dateShort(LATEST.d)}</span></div>
           </div>
         ) : null}
         <div className={`mt-3 hidden border-t border-rule pt-2.5 text-[10.5px] text-ink-2 ${h.chapter === 3 ? '' : 'md:block'}`}>
           {spec.mode === 'spread' ? (
-            <div className="flex flex-wrap gap-x-3 gap-y-1">{PHASES.map((p, i) => <span key={p.label} className={`flex items-center gap-1.5 transition-opacity ${i > (spec.phase ?? 0) ? 'opacity-30' : ''}`}><span className="h-2.5 w-2.5 rounded-sm" style={{ background: `var(${PHASE_VARS[i]})` }} />{p.label.replace('August–September', 'Aug–Sep').replace('October–November', 'Oct–Nov')}</span>)}</div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1">{PHASES.map((p, i) => <span key={p.label} className={`flex items-center gap-1.5 transition-opacity ${i > (spec.phase ?? 0) ? 'opacity-30' : ''}`}><span className="h-2.5 w-2.5 rounded-sm" style={{ background: `var(${PHASE_VARS[i]})` }} />{phLabel(p.label).replace('August–September', 'Aug–Sep').replace('August', 'Aug').replace('October–November', 'Oct–Nov').replace('août–septembre', 'août–sept.').replace('octobre–novembre', 'oct.–nov.')}</span>)}</div>
           ) : (
             <>
               <div className="flex">{MOB_RAMP.map((r) => <span key={r} className="h-2 flex-1 first:rounded-l last:rounded-r" style={{ background: `var(${r})` }} />)}</div>
               <div className="num mt-1 flex justify-between text-[9.5px] text-ink-3">{MOB_BREAKS.map((b) => <span key={b}>{b >= 1000 ? `${b / 1000}k` : b}</span>)}</div>
-              {spec.flows && <div className="mt-1.5 flex gap-3"><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-flow-in" />Arrivals</span><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-flow-out" />Departures</span></div>}
+              {spec.flows && <div className="mt-1.5 flex gap-3"><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-flow-in" />{T('Arrivals', 'Arrivées')}</span><span className="flex items-center gap-1.5"><span className="h-0.5 w-4 bg-flow-out" />{T('Departures', 'Départs')}</span></div>}
             </>
           )}
         </div>
@@ -242,7 +248,7 @@ function Timeline({ scene }: { scene: Scene }) {
         {PHASES.map((ph, i) => (
           <li key={ph.label} className="flex items-center gap-1">
             <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold transition-colors duration-500 ${i === p ? 'bg-accent text-white' : i < p ? 'text-ink' : 'text-ink-3'}`}>
-              <span className="h-2 w-2 rounded-full" style={{ background: `var(${PHASE_VARS[i]})` }} />{ph.label.replace('August–September', 'Aug–Sep').replace('October–November', 'Oct–Nov')}
+              <span className="h-2 w-2 rounded-full" style={{ background: `var(${PHASE_VARS[i]})` }} />{phLabel(ph.label).replace('August–September', 'Aug–Sep').replace('October–November', 'Oct–Nov').replace('août–septembre', 'août–sept.').replace('octobre–novembre', 'oct.–nov.')}
             </span>
             {i < PHASES.length - 1 && <span className={`h-px w-4 transition-colors duration-500 ${i < p ? 'bg-accent' : 'bg-rule'}`} />}
           </li>
@@ -254,6 +260,7 @@ function Timeline({ scene }: { scene: Scene }) {
 
 /* ---------- page ---------- */
 export function Briefing({ go }: { go: (r: Route) => void }) {
+  const SCENES = useMemo(() => buildScenes(buildSteps()), []);   // rebuilt on remount (App keys Briefing by language)
   const [cur, setCur] = useState(0);
   const [progress, setProgress] = useState(0);
   const refs = useRef<(HTMLElement | null)[]>([]);
@@ -286,9 +293,9 @@ export function Briefing({ go }: { go: (r: Route) => void }) {
         <Panel scene={scene} />
         <Timeline scene={scene} />
         <div className="absolute left-6 top-5 z-[600] hidden gap-1 rounded-full border border-rule bg-paper/95 p-1 text-[11.5px] shadow-lg lg:flex">
-          {([[ch1, 'How it spread'], [ch2, 'Where people move'], [ch3, 'Across borders']] as const).map(([i, label], k) => (
-            <button key={label} onClick={() => jump(i)} aria-pressed={sceneHud(scene)?.chapter === k + 1}
-              className="rounded-full px-3 py-1 font-semibold text-ink-2 aria-pressed:bg-accent aria-pressed:text-white">{k + 1} · {label}</button>
+          {([ch1, ch2, ch3] as const).map((i, k) => (
+            <button key={k} onClick={() => jump(i)} aria-pressed={sceneHud(scene)?.chapter === k + 1}
+              className="rounded-full px-3 py-1 font-semibold text-ink-2 aria-pressed:bg-accent aria-pressed:text-white">{k + 1} · {chapLabel((k + 1) as 1 | 2 | 3)}</button>
           ))}
         </div>
       </div>
@@ -319,18 +326,18 @@ function Intro({ countries, onStart }: { countries: number; onStart: () => void 
   const zones = Object.keys(FIRST).length;
   return (
     <div className="pointer-events-auto max-w-[40rem] py-10 lg:ml-6">
-      <p className="text-[11px] font-extrabold uppercase tracking-[.18em] text-accent">Code for Africa · Briefing · SitRep N°{LATEST.s}</p>
-      <h1 className="mt-4 text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-ink md:text-[4rem]">How Bundibugyo spread across DR Congo, and where people move</h1>
-      <p className="mt-5 max-w-[34rem] font-serif text-[16px] font-light leading-relaxed text-ink-2 md:text-[17px]">Six months of situation reports, zone by zone, and the movement between them. Scroll: the map follows the story.</p>
+      <p className="text-[11px] font-extrabold uppercase tracking-[.18em] text-accent">Code for Africa · {T('Briefing', 'Récit')} · SitRep N°{LATEST.s}</p>
+      <h1 className="mt-4 text-[2.6rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-ink md:text-[4rem]">{T('How Bundibugyo spread across DR Congo, and where people move', 'Comment Bundibugyo s’est propagée en RD Congo, et où les gens se déplacent')}</h1>
+      <p className="mt-5 max-w-[34rem] font-serif text-[16px] font-light leading-relaxed text-ink-2 md:text-[17px]">{T('Six months of situation reports, zone by zone, and the movement between them. Scroll: the map follows the story.', 'Six mois de rapports de situation, zone par zone, et les déplacements entre elles. Faites défiler : la carte suit le récit.')}</p>
       <dl className="mt-8 grid max-w-[34rem] grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-        {([['Confirmed cases', LATEST.c, 'text-case'], ['Health zones', zones, 'text-ink'], ['Provinces', PROV.length, 'text-ink'], ['Active countries', countries, 'text-death']] as const).map(([l, v, c]) => (
+        {([[T('Confirmed cases', 'Cas confirmés'), LATEST.c, 'text-case'], [T('Health zones', 'Zones de santé'), zones, 'text-ink'], [T('Provinces', 'Provinces'), PROV.length, 'text-ink'], [T('Active countries', 'Pays actifs'), countries, 'text-death']] as const).map(([l, v, c]) => (
           <div key={l} className="border-l-[3px] border-accent pl-3"><dd><Count value={v} className={`text-[1.75rem] font-extrabold leading-none tracking-tight ${c}`} /></dd><dt className="mt-1 text-[11px] font-semibold text-ink-3">{l}</dt></div>
         ))}
       </dl>
       <button onClick={onStart} className="mt-10 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-white shadow-lg transition-transform hover:translate-y-0.5">
-        Start the briefing <ArrowDown className="h-4 w-4 motion-safe:animate-bounce" />
+        {T('Start the briefing', 'Commencer le récit')} <ArrowDown className="h-4 w-4 motion-safe:animate-bounce" />
       </button>
-      <p className="mt-6 text-[11px] text-ink-3">INSP SitRep N°{LATEST.s}, {dateLong(LATEST.d)} · Flowminder / Vodacom, April 2026 · Verify against WHO before publishing.</p>
+      <p className="mt-6 text-[11px] text-ink-3">INSP SitRep N°{LATEST.s}, {dateLong(LATEST.d)} · Flowminder / Vodacom, {T('April 2026', 'avril 2026')} · {T('Verify against WHO before publishing.', 'Vérifier auprès de l’OMS avant publication.')}</p>
     </div>
   );
 }
@@ -354,12 +361,12 @@ function StepCard({ step, active }: { step: Step; active: boolean }) {
 function Outro({ go }: { go: (r: Route) => void }) {
   return (
     <div className="pointer-events-auto max-w-[36rem] lg:ml-6">
-      <p className="text-[11px] font-extrabold uppercase tracking-[.18em] text-accent">What next</p>
-      <h2 className="mt-3 text-[2.2rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink md:text-[3rem]">Explore every zone, or follow the early-warning work</h2>
-      <p className="mt-4 font-serif text-[15.5px] font-light leading-relaxed text-ink-2">The map has cases, rates, deaths and the full mobility flows for each zone. Early-warning levels appear once the epidemiology team sets indicators and thresholds.</p>
+      <p className="text-[11px] font-extrabold uppercase tracking-[.18em] text-accent">{T('What next', 'Et ensuite')}</p>
+      <h2 className="mt-3 text-[2.2rem] font-extrabold leading-[1.05] tracking-[-0.04em] text-ink md:text-[3rem]">{T('Explore every zone, or follow the early-warning work', 'Explorez chaque zone, ou suivez les travaux d’alerte précoce')}</h2>
+      <p className="mt-4 font-serif text-[15.5px] font-light leading-relaxed text-ink-2">{T('The map has cases, rates, deaths and the full mobility flows for each zone. Early-warning levels appear once the epidemiology team sets indicators and thresholds.', 'La carte présente les cas, les taux, les décès et l’ensemble des flux de mobilité pour chaque zone. Les niveaux d’alerte précoce apparaîtront une fois les indicateurs et les seuils définis par l’équipe d’épidémiologie.')}</p>
       <div className="mt-7 flex flex-wrap gap-3">
-        <button onClick={() => go('map')} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-white shadow-lg"><MapIcon className="h-4 w-4" />Explore the map<ArrowRight className="h-4 w-4" /></button>
-        <button onClick={() => go('early-warning')} className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-5 py-3 text-sm font-bold text-ink"><BellRing className="h-4 w-4" />Early warning (in preparation)</button>
+        <button onClick={() => go('map')} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-white shadow-lg"><MapIcon className="h-4 w-4" />{T('Explore the map', 'Explorer la carte')}<ArrowRight className="h-4 w-4" /></button>
+        <button onClick={() => go('early-warning')} className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-5 py-3 text-sm font-bold text-ink"><BellRing className="h-4 w-4" />{T('Early warning (in preparation)', 'Alerte précoce (en préparation)')}</button>
       </div>
     </div>
   );

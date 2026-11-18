@@ -28,7 +28,8 @@ const data={
  africa:simp(g.BASE.africa,3), provinces:simp(g.BASE.provinces,3),
  trends:g.D.trends,
  mob:g.D.mob,
- strings:{mm_cov2:g.T.en.mm_cov2,mm_cov_dakwa:g.T.en.mm_cov_dakwa,mm_cov_held:g.T.en.mm_cov_held,mm_cov_held169:g.T.en.mm_cov_held169,mob_note:g.T.en.mob_note,leg_note_mob:g.T.en.leg_note_mob,mob_none_post:g.T.en.mob_none_post}
+ strings:{mm_cov2:g.T.en.mm_cov2,mm_cov_dakwa:g.T.en.mm_cov_dakwa,mm_cov_held:g.T.en.mm_cov_held,mm_cov_held169:g.T.en.mm_cov_held169,mob_note:g.T.en.mob_note,leg_note_mob:g.T.en.leg_note_mob,mob_none_post:g.T.en.mob_none_post},
+ stringsFr:{mm_cov2:g.T.fr.mm_cov2,mm_cov_dakwa:g.T.fr.mm_cov_dakwa,mm_cov_held:g.T.fr.mm_cov_held,mm_cov_held169:g.T.fr.mm_cov_held169,mob_note:g.T.fr.mob_note,leg_note_mob:g.T.fr.leg_note_mob,mob_none_post:g.T.fr.mob_none_post}
 };
 fs.writeFileSync(out,JSON.stringify(data));
 console.log('wrote',out,(fs.statSync(out).size/1024).toFixed(0)+' KB','zones',data.zones.length,'nat rows',data.nat.length,'last',JSON.stringify(data.nat[data.nat.length-1]));

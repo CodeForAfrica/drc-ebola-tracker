@@ -13,8 +13,9 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { COUNTRIES, GEO, MOB, PROV, ZONES, ADMIN1, fmt, dateShort, type Zone } from '@/lib/data';
+import { COUNTRIES, GEO, MOB, PROV, ZONES, ADMIN1, cname, fmt, dateShort, type Zone } from '@/lib/data';
 import { LAYERS, type LayerKey, type Dir, zoneValue, classOf } from './layers';
+import { L as TR } from '@/lib/i18n';
 
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const rgb = (v: string) => `rgb(${css(v).split(' ').join(',')})`;
@@ -76,7 +77,7 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
       onEachFeature: (f, l) => {
         const n = (f.properties as { n: string }).n;
         l.bindTooltip(n, { permanent: true, direction: 'center', className: affected.has(n) ? 'plabel plabel-aff' : 'plabel', opacity: 1 });
-        l.on('mousemove', (e: L.LeafletMouseEvent) => onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${n}</b> <span class="t3">· province</span><br>${affected.has(n) ? 'Affected · unshaded zones have no confirmed case' : 'No confirmed case reported'}` }));
+        l.on('mousemove', (e: L.LeafletMouseEvent) => onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${n}</b> <span class="t3">· ${TR('province', 'province')}</span><br>${affected.has(n) ? TR('Affected · unshaded zones have no confirmed case', 'Touchée · les zones non ombrées n’ont aucun cas confirmé') : TR('No confirmed case reported', 'Aucun cas confirmé déclaré')}` }));
         l.on('mouseout', () => onTip(null));
       },
     });
@@ -101,7 +102,7 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
         onEachFeature: (f, l) => {
           const n = (f.properties as { shapeName: string }).shapeName;
           l.bindTooltip(n, { permanent: true, direction: 'center', className: 'alabel', opacity: 1 });
-          l.on('mousemove', (e: L.LeafletMouseEvent) => { (l as L.Path).setStyle({ weight: 2, dashArray: '' }); onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${n}</b> <span class="t3">· ${code === 'KEN' ? 'county' : 'state'}</span><br>No sub-national figures published<br><span class="t3">${c.name}: ${fmt(c.c)} confirmed nationally (${c.src}, ${dateShort(c.asof)})</span>` }); });
+          l.on('mousemove', (e: L.LeafletMouseEvent) => { (l as L.Path).setStyle({ weight: 2, dashArray: '' }); onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${n}</b> <span class="t3">· ${code === 'KEN' ? TR('county', 'comté') : TR('state', 'État')}</span><br>${TR('No sub-national figures published', 'Aucun chiffre infranational publié')}<br><span class="t3">${cname(c)}: ${fmt(c.c)} ${TR('confirmed nationally', 'confirmés au niveau national')} (${c.src}, ${dateShort(c.asof)})</span>` }); });
           l.on('mouseout', () => { admin[key].resetStyle(l); onTip(null); });
         },
       });
@@ -122,13 +123,13 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
       const r = 6 + 16 * Math.sqrt(c.c / max);         // small proportional pixel radius
       const active = c.st === 'active';
       const center = COUNTRY_BOUNDS[c.key].getCenter();
-      if (active) rings[c.key] = L.circleMarker(center, { renderer: bubbleRenderer, radius: r, className: 'cring', interactive: false, stroke: false }).addTo(map);
+      if (active) rings[c.key] = L.circleMarker(center, { renderer: bubbleRenderer, radius: Math.max(r, 10), className: 'cring', interactive: false, stroke: false }).addTo(map);
       const m = L.circleMarker(center, {
         renderer: bubbleRenderer, radius: r, className: `cbubble ${c.st}`,
         color: rgb('--paper'), weight: 1.5, fillColor: rgb(active ? '--st-active' : '--st-over'),
         fillOpacity: active ? 0.9 : 0.8, interactive: true, bubblingMouseEvents: false,
       }).addTo(map);
-      m.on('mousemove', (e: L.LeafletMouseEvent) => onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${c.name}</b> <span class="chip ${c.st}">${c.st === 'active' ? 'Active' : 'Over'}</span><br><span class="num">${fmt(c.c)}</span> confirmed · <span class="num">${fmt(c.d)}</span> deaths<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span><br><span class="t3">${c.key === 'COD' ? 'Click to open the health-zone map' : 'Click to zoom · national figures only'}</span>` }));
+      m.on('mousemove', (e: L.LeafletMouseEvent) => onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${cname(c)}</b> <span class="chip ${c.st}">${c.st === 'active' ? TR('Active', 'Active') : TR('Over', 'Terminée')}</span><br><span class="num">${fmt(c.c)}</span> ${TR('confirmed', 'confirmés')} · <span class="num">${fmt(c.d)}</span> ${TR('deaths', 'décès')}<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span><br><span class="t3">${c.key === 'COD' ? TR('Click to open the health-zone map', 'Cliquer pour ouvrir la carte des zones de santé') : TR('Click to zoom · national figures only', 'Cliquer pour zoomer · chiffres nationaux uniquement')}</span>` }));
       m.on('mouseout', () => onTip(null));
       m.on('click', () => { onTip(null); onCountry(c.key); });
       markers[c.key] = m;
@@ -213,7 +214,7 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
       const pts = curve(m.map, a, b, inbound ? 1 : -1);
       const col = inbound ? rgb('--flow-in') : rgb('--flow-out');
       L.polyline(pts, { pane: 'flows', color: col, weight: 2.6, opacity: 0.92, lineCap: 'round' })
-        .bindTooltip(`<b>${inbound ? name : s}</b> → <b>${inbound ? s : name}</b><br><span class="num">${fmt(v)}</span> estimated relocations${lo != null && hi != null ? `<br><span class="t3">range ${fmt(lo)}–${fmt(hi)}</span>` : ''}`, { sticky: true, className: 'ltip' })
+        .bindTooltip(`<b>${inbound ? name : s}</b> → <b>${inbound ? s : name}</b><br><span class="num">${fmt(v)}</span> ${TR('estimated relocations', 'déplacements estimés')}${lo != null && hi != null ? `<br><span class="t3">${TR('range', 'plage')} ${fmt(lo)}–${fmt(hi)}</span>` : ''}`, { sticky: true, className: 'ltip' })
         .addTo(m.flows);
       m.flows.addLayer(arrowHead(m.map, pts, col));
       L.circleMarker(inbound ? a : b, { pane: 'flows', radius: 3.5, color: col, weight: 1.5, fillColor: col, fillOpacity: 1, interactive: false }).addTo(m.flows);
@@ -254,8 +255,8 @@ function tipHtml(z: Zone, ly: LayerKey, d: Dir) {
   const head = `<b>${z.z}</b> <span class="t3">· ${z.p}</span><br>`;
   if (ly === 'mob') {
     const m = MOB[z.z];
-    return head + (m ? `<span class="num">${fmt(m.tin)}</span> arrivals · <span class="num">${fmt(m.tout)}</span> departures<br><span class="t3">April 2026 estimates · click for flows</span>` : '<span class="t3">No Flowminder coverage</span>');
+    return head + (m ? `<span class="num">${fmt(m.tin)}</span> ${TR('arrivals', 'arrivées')} · <span class="num">${fmt(m.tout)}</span> ${TR('departures', 'départs')}<br><span class="t3">${TR('April 2026 estimates · click for flows', 'estimations avril 2026 · cliquer pour les flux')}</span>` : `<span class="t3">${TR('No Flowminder coverage', 'Pas de couverture Flowminder')}</span>`);
   }
-  if (ly === 'ews') return head + '<span class="t3">Early warning not active yet · not assessed</span>';
-  return head + `<span class="num">${fmt(zoneValue('c', d, z.z))}</span> cases · <span class="num">${fmt(zoneValue('d', d, z.z))}</span> deaths · <span class="num">${zoneValue('k', d, z.z)?.toLocaleString('en-GB')}</span>/100k<br><span class="t3">Click for details</span>`;
+  if (ly === 'ews') return head + `<span class="t3">${TR('Early warning not active yet · not assessed', 'Alerte précoce pas encore active · non évaluée')}</span>`;
+  return head + `<span class="num">${fmt(zoneValue('c', d, z.z))}</span> ${TR('cases', 'cas')} · <span class="num">${fmt(zoneValue('d', d, z.z))}</span> ${TR('deaths', 'décès')} · <span class="num">${fmt(zoneValue('k', d, z.z))}</span>/100k<br><span class="t3">${TR('Click for details', 'Cliquer pour les détails')}</span>`;
 }
