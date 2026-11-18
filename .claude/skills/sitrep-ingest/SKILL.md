@@ -524,6 +524,12 @@ suivre"), so the named-list rule below does not apply and no other province is m
 contacts under follow-up) is not ND. N°179's Tableau 4 appears to swap the Nord-Ubangi and Bas-Uélé labels against
 N°178 (`Nord Ubangi 267 263 98,5%`, `Bas Uélé 0 0 NA`); it feeds no field and was not acted on.
 
+**No contact-tracing sentence at all (maintainer decision, N°186, 18 Nov 2026).** When the narrative has no
+contact-tracing sentence (no `proportion/taux de suivi de|au décours …` anywhere and no key-messages restatement), the
+banner's `contact_tracing_pct` is kept and logged as `not cross-checked: no narrative sentence`. A sentence that is
+present but unreadable or different still goes to the gate / single-cell rule. N°186: banner 81,6 % (= its Tableau 4
+Total, 29 015 / 35 570); Tableau 4's `Sud Ubangi ND ND NA` still marks `nd.ct` (maintainer decision).
+
 **Contact tracing: a named list counts as explicit (maintainer decision, 21 Oct 2026).** When the
 contact-tracing narrative *names* the provinces that transmitted, and that list is complete (its
 per-province contacts add up to the narrative's own totals), the affected provinces not on it go in
@@ -774,5 +780,5 @@ Re-check these on every run (see step 1):
 | N°183 (13 Nov 2026) | Ingested (N°183 wrap layout); suspects 612. | — |
 | N°184 (14 Nov 2026) | Ingested. Nord-Ubangi's short `0 0 0 0` Tableau 3 row read as 0 (standing rule); suspects 394. | — |
 | N°185 (15 Nov 2026) | Ingested. Lubunga (Tshopo) prints `1 2** 200,0% 0 0 2 2` with the footnote "**En cours d’harmonisation": 2 deaths for 1 case, accepted under the harmonisation rule and stored as printed; the 2 deaths are in the day's figures (Lubunga's 24 h cells `0 0 2 2`, narrative: "1 confirmé transféré de Lubunga décédé 5 minutes après son arrivée"). | Watch each release: the dashboard note goes with the footnote. |
-| N°186 (16 Nov 2026) | **Not ingested; stopped for a maintainer decision (18 Nov 2026).** (1) No contact-tracing sentence in the narrative, so the banner's 81,6 % has nothing to be checked against (gate "contact tracing banner == narrative"); Tableau 4 is printed (its rows sum to the banner's totals). (2) Lubunga prints `1 0 0,0% 0` without the footnote: its 2 deaths from N°185 are gone, Tshopo 108 / 35 → 108 / 33 while its 24 h cells print `0 0 0 0`, and national deaths rise 37 (5 593 → 5 630) against 39 printed for the day. Not explained in the report. | Maintainer decides both (e.g. accept the decrease as the end of the harmonisation; contact tracing from the banner or empty). |
+| N°186 (16 Nov 2026) | **Ingested** (maintainer decisions, 18 Nov 2026). Contact tracing 81,6 % from the banner, not cross-checked: no narrative sentence (equal to Tableau 4's Total); `nd.ct` Sud-Ubangi (Tableau 4 ND). Lubunga prints `1 0 0,0% 0` without the footnote: a **correction** (as Adja at N°151). The 2 deaths moved to no other zone: every other zone's rise totals the day's 39 printed deaths, so Tshopo goes 35 → 33 and national deaths rise 37 (5 593 → 5 630). No negative daily figure is shown (the dashboard stores no daily deltas). The dashboard's Lubunga note is removed with the footnote. | If the footnote returns, restore the note. |
 | N°063 (16 July 2026) | Uploaded as a media file with no post (`SitRep_MVE_RDC_N_63_16-07-2026_Final.pdf`); found 12 Oct 2026. `data/national_timeseries.csv` lists it as `missing` with a 404 filename. | Maintainer decision whether to ingest. Report only so far. |

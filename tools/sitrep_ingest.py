@@ -568,8 +568,16 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     # characters after 'suivi des contacts'. Every printing must agree with the banner.
     km_ct = [pct(m.group(1)) for m in re.finditer(r'suivi des contacts\b.{0,160}?\bà (\d+,\d) ?%', flat)]
     others = sorted({v for v in km_ct if v != contact})
+    # Maintainer decision (N°186, 18 Nov 2026): a report whose narrative has no contact-tracing sentence at all (no
+    # 'proportion/taux de suivi de|au décours …' anywhere, no key-messages restatement) keeps the banner figure, flagged
+    # as not cross-checked. A sentence that is present but unreadable or different is still the gate / single-cell rule.
+    ct_silent = (narr_ct is None and not km_ct
+                 and not re.search(r'(?:proportion|taux) de suivi (?:de|au décours)', flat))
     if narr_ct is not None and (narr_ct != contact or others):
         soft.append(('contact_tracing_pct', f'banner gives {contact}, narrative gives {narr_ct}' + (f', key messages give {others}' if others else '')))
+    elif ct_silent and contact is not None:
+        log(f'FLAG contact_tracing_pct {contact} from the banner, not cross-checked: no narrative sentence')
+        gate(True, f'contact tracing banner {contact} (no narrative sentence to check against)')
     else:
         gate(narr_ct == contact, f'contact tracing banner {contact} == narrative {narr_ct}' + (f' == key messages {sorted(set(km_ct))}' if km_ct else ''))
     gate(len(soft) <= 1, f'at most one single-cell table/narrative disagreement ({len(soft)}: {soft})')

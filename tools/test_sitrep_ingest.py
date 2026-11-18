@@ -99,15 +99,13 @@ CASES[183] = dict(case="Tableau 3 name halves with the first half on the number 
 CASES[184] = dict(case="short all-zero Tableau 3 row 'Nord Ubangi 0 0 0 0' read as 0 (Total = Σ other rows in every column)")
 CASES[185] = dict(case="Tableau 2 zone footnote marker 'Lubunga 1 2** 200,0% 0 0 2 2' ('**En cours d’harmonisation'): "
                        "deaths > cases accepted while footnoted (standing rule, 18 Nov 2026); Haut-Uélé short all-zero row")
-CASES[186] = dict(case="held (maintainer decision pending, 18 Nov 2026): no contact-tracing sentence in the narrative; Lubunga "
-                       "2 -> 0 deaths without the footnote (Tshopo 35 -> 33 while the day prints 0)", held=True,
-                  fails=['contact tracing banner 81.6 == narrative None'])
+CASES[186] = dict(case="no contact-tracing sentence in the narrative: banner 81.6 kept, not cross-checked (maintainer decision, 18 Nov 2026); Lubunga 2 -> 0 deaths without the footnote, a correction (Tshopo 35 -> 33)")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
 DASHBOARD_EXCLUDED = {169: 'Ituri harmonisation not carried forward by N°170 (maintainer decision, 2 Nov 2026)'}
-HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf', 186: 'SitRep_N186_16-11-2026_VF-1.pdf'}
-HELD_DATES = {150: '2026-10-14', 186: '2026-11-17'}
+HELD_PDF = {150: 'SitRep_MVEBDB_150_11_10_2026.pdf'}
+HELD_DATES = {150: '2026-10-14'}
 
 # File names: the skill's step-3 table, other forms seen on insp.cd, and N°168 / N°169 (status, number, date).
 D_ = lambda s: dt.date.fromisoformat(s)
