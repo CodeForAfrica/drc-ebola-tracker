@@ -46,7 +46,7 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
   const el = useRef<HTMLDivElement>(null);
   const S = useRef({ layer, dir, sel, country });
   S.current = { layer, dir, sel, country };
-  const M = useRef<{ map: L.Map; tiles: L.TileLayer; zones: L.GeoJSON; prov: L.GeoJSON; ctry: L.GeoJSON; land: L.GeoJSON; admin: Record<string, L.GeoJSON>; flows: L.LayerGroup; markers: Record<string, L.Circle> } | null>(null);
+  const M = useRef<{ map: L.Map; tiles: L.TileLayer; zones: L.GeoJSON; prov: L.GeoJSON; ctry: L.GeoJSON; land: L.GeoJSON; admin: Record<string, L.GeoJSON>; flows: L.LayerGroup; markers: Record<string, L.CircleMarker>; rings: Record<string, L.CircleMarker> } | null>(null);
 
   /* ---------- build once ---------- */
   useEffect(() => {
@@ -109,20 +109,24 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
 
     const flows = L.layerGroup([], { pane: 'flows' }).addTo(map);
 
-    /* proportional bubbles — geographic circles (metres), so each one is part of the map
-       itself: it sits exactly on the country and scales with it on zoom, never floating as a
-       fixed-size screen overlay. Centred on the country's own drawn outline, not its capital
-       (Kampala, Nairobi sit near a border and read as outside the shape). */
+    /* proportional bubbles — small fixed-size circleMarkers drawn in the map's own SVG
+       renderer (same renderer as the country polygons), so they track the map exactly on
+       zoom instead of floating like an HTML overlay, while staying small. Sized by cases
+       (√ scale); active countries carry one slow expanding ring, as before. Centred on the
+       country's own drawn outline, not its capital (Kampala, Nairobi read as outside the shape). */
     const bubbleRenderer = L.svg({ pane: 'bubbles' });
-    const markers: Record<string, L.Circle> = {};
+    const markers: Record<string, L.CircleMarker> = {};
+    const rings: Record<string, L.CircleMarker> = {};
     const max = Math.max(...COUNTRIES.map((c) => c.c));
     COUNTRIES.forEach((c) => {
-      const km = 9 + 27 * Math.sqrt(c.c / max);        // same proportional scale as the former pixel radius
+      const r = 6 + 16 * Math.sqrt(c.c / max);         // small proportional pixel radius
       const active = c.st === 'active';
-      const m = L.circle(COUNTRY_BOUNDS[c.key].getCenter(), {
-        renderer: bubbleRenderer, radius: km * 12000, className: `cbubble ${c.st}`,
+      const center = COUNTRY_BOUNDS[c.key].getCenter();
+      if (active) rings[c.key] = L.circleMarker(center, { renderer: bubbleRenderer, radius: r, className: 'cring', interactive: false, stroke: false }).addTo(map);
+      const m = L.circleMarker(center, {
+        renderer: bubbleRenderer, radius: r, className: `cbubble ${c.st}`,
         color: rgb('--paper'), weight: 1.5, fillColor: rgb(active ? '--st-active' : '--st-over'),
-        fillOpacity: active ? 0.85 : 0.72, interactive: true, bubblingMouseEvents: false,
+        fillOpacity: active ? 0.9 : 0.8, interactive: true, bubblingMouseEvents: false,
       }).addTo(map);
       m.on('mousemove', (e: L.LeafletMouseEvent) => onTip({ x: e.originalEvent.clientX, y: e.originalEvent.clientY, html: `<b>${c.name}</b> <span class="chip ${c.st}">${c.st === 'active' ? 'Active' : 'Over'}</span><br><span class="num">${fmt(c.c)}</span> confirmed · <span class="num">${fmt(c.d)}</span> deaths<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span><br><span class="t3">${c.key === 'COD' ? 'Click to open the health-zone map' : 'Click to zoom · national figures only'}</span>` }));
       m.on('mouseout', () => onTip(null));
@@ -130,7 +134,7 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
       markers[c.key] = m;
     });
 
-    M.current = { map, tiles, zones, prov, ctry, land, admin, flows, markers };
+    M.current = { map, tiles, zones, prov, ctry, land, admin, flows, markers, rings };
 
     const onZoom = () => {
       const z = map.getZoom();
@@ -157,7 +161,7 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
     for (const l of [m.prov, m.zones]) { if (showDrc && !map.hasLayer(l)) l.addTo(map); if (!showDrc && map.hasLayer(l)) map.removeLayer(l); }
     for (const [k, l] of Object.entries(m.admin)) { const on = country === k; if (on && !map.hasLayer(l)) l.addTo(map); if (!on && map.hasLayer(l)) map.removeLayer(l); }
     /* the selected country's bubble gives way to its map; Kenya and Nigeria keep theirs, as their only figure is national */
-    Object.entries(m.markers).forEach(([k, mk]) => { const e = mk.getElement() as SVGElement | null; if (e) { const hide = k === 'COD' && showDrc; e.style.opacity = hide ? '0' : '1'; e.style.pointerEvents = hide ? 'none' : ''; } });
+    Object.entries(m.markers).forEach(([k, mk]) => { const hide = k === 'COD' && showDrc; [mk.getElement(), m.rings[k]?.getElement()].forEach((el) => { const e = el as SVGElement | null; if (e) { e.style.opacity = hide ? '0' : '1'; e.style.pointerEvents = hide ? 'none' : ''; } }); });
     el.current!.dataset.country = country;
     fitCountry(true);
     paintAll();

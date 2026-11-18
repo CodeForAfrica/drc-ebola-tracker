@@ -12,11 +12,12 @@ const list = (xs: string[], n = 6) => (xs.length <= n ? xs.join(', ') : `${xs.sl
 
 export type FlowSpec = { from: string; to: string; v: number; kind: 'in' | 'out' };
 export type MapSpec = {
-  mode: 'spread' | 'mob';
+  mode: 'spread' | 'mob' | 'countries';
   phase?: number;              // spread: zones listed up to this phase are coloured
-  highlight: string[];         // ringed and labelled
+  highlight: string[];         // ringed and labelled (in 'countries' mode: the country key to emphasise)
   flows?: FlowSpec[];
-  focus: string[];             // zones the map frames
+  focus: string[];             // zones the map frames (in 'countries' mode: country keys to frame)
+  countries?: string[];        // 'countries' mode: country keys to draw as bubbles
 };
 export type Hud = { a: { label: string; value: number }; b: { label: string; value: number; of?: number } };
 export type Step = { id: string; chapter: 1 | 2 | 3; kicker: string; title: string; body: string; note?: string; map: MapSpec; hud: Hud; range?: [string, string] };
@@ -118,13 +119,15 @@ export const STEPS: Step[] = [...spreadSteps(), ...mobilitySteps(), ...countries
 
 /* ---------------- chapter 3: other affected countries, in the order they were affected ----------------
    Figures and dates come straight from each country's own authority (COUNTRIES, from the config).
-   The backdrop stays on the DR Congo spread; the cards carry the cross-border chronology. */
+   The backdrop shows every affected country as a bubble, framed across the region, so the countries
+   are on screen while the cards tell the cross-border chronology; each card lights up its own country. */
 function countriesSteps(): Step[] {
   const drc = COUNTRIES.find((c) => c.key === 'COD')!;
   const others = COUNTRIES.filter((c) => c.key !== 'COD').sort((a, b) => a.asof.localeCompare(b.asof));
   const regionC = COUNTRIES.reduce((a, c) => a + c.c, 0);
   const regionD = COUNTRIES.reduce((a, c) => a + c.d, 0);
-  const backdrop: MapSpec = { mode: 'spread', phase: PHASES.length - 1, highlight: [], focus: ZONES.map((z) => z.z) };
+  const allKeys = COUNTRIES.map((c) => c.key);
+  const backdrop: MapSpec = { mode: 'countries', highlight: [], focus: allKeys, countries: allKeys };
   const lead: Step = {
     id: 'c0', chapter: 3, kicker: 'Across borders',
     title: `Beyond DR Congo: ${others.length} more countries`,
@@ -143,7 +146,7 @@ function countriesSteps(): Step[] {
         : `Its outbreak is active as of ${dateShort(c.asof)}; the ministry publishes national figures only, so no area is shown.`),
     note: c.st === 'active' ? 'Active — figures may change. National totals only; no sub-national breakdown is published.' : undefined,
     hud: { a: { label: 'Confirmed cases', value: c.c }, b: { label: 'Deaths', value: c.d } },
-    map: backdrop,
+    map: { ...backdrop, highlight: [c.key] },
   }));
   return [lead, ...perCountry];
 }

@@ -19,6 +19,15 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const desktop = () => matchMedia('(min-width: 1024px)').matches;
 const byZone = Object.fromEntries(ZONES.map((z) => [z.z, z]));
 const affected = new Set(PROV.map((p) => p.p));
+/* country centres (from each country's own drawn outline) and the √-scaled bubble radius,
+   for the cross-border chapter's map */
+const CTRY_BY_KEY = Object.fromEntries(COUNTRIES.map((c) => [c.key, c]));
+const CTRY_CENTER: Record<string, L.LatLng> = Object.fromEntries(COUNTRIES.map((c) => {
+  const f = GEO.africa.features.find((x) => (x.properties as { n: string }).n === c.base);
+  return [c.key, f ? L.geoJSON(f).getBounds().getCenter() : L.latLng(c.lat, c.lon)];
+}));
+const CMAX = Math.max(...COUNTRIES.map((c) => c.c));
+const ctryRadius = (cases: number) => 6 + 16 * Math.sqrt(cases / CMAX);
 const PHASE_VARS = ['--t1', '--t2', '--t3', '--t4', '--t5'];
 const MOB_RAMP = ['--m1', '--m2', '--m3', '--m4', '--m5', '--m6'];
 const MOB_BREAKS = [1, 250, 1000, 2500, 5000, 10000];
@@ -65,7 +74,7 @@ const big = (v: number) => (v >= 10000 ? 'text-[1.35rem] md:text-[1.6rem]' : 'te
 /* ---------- the map ---------- */
 function StoryMap({ spec }: { spec: MapSpec }) {
   const el = useRef<HTMLDivElement>(null);
-  const R = useRef<{ map: L.Map; zones: L.GeoJSON; flows: L.LayerGroup; rings: L.LayerGroup } | null>(null);
+  const R = useRef<{ map: L.Map; zones: L.GeoJSON; flows: L.LayerGroup; rings: L.LayerGroup; countries: L.LayerGroup } | null>(null);
   const shown = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -81,8 +90,8 @@ function StoryMap({ spec }: { spec: MapSpec }) {
       onEachFeature: (f, l) => l.bindTooltip((f.properties as { n: string }).n, { permanent: true, direction: 'center', className: 'plabel story-plabel' }),
     }).addTo(map);
     const zones = L.geoJSON(GEO.zones, { onEachFeature: (f, l) => { const n = (f.properties as { z: string }).z; l.bindTooltip(() => zoneTip(n), { sticky: true, className: 'ltip' }); } }).addTo(map);
-    const flows = L.layerGroup().addTo(map), rings = L.layerGroup().addTo(map);
-    R.current = { map, zones, flows, rings };
+    const flows = L.layerGroup().addTo(map), rings = L.layerGroup().addTo(map), countries = L.layerGroup().addTo(map);
+    R.current = { map, zones, flows, rings, countries };
     const ro = new ResizeObserver(() => map.invalidateSize()); ro.observe(el.current!);
     return () => { ro.disconnect(); map.remove(); };
   }, []);
@@ -90,6 +99,32 @@ function StoryMap({ spec }: { spec: MapSpec }) {
   useEffect(() => {
     const r = R.current; if (!r) return;
     const s = spec, now = new Set<string>();
+    el.current?.classList.toggle('ctry-mode', s.mode === 'countries');
+    /* cross-border chapter: DR Congo's zones recede to a faint shape and every affected
+       country is drawn as a bubble, so the countries are visible while the cards scroll */
+    if (s.mode === 'countries') {
+      r.zones.eachLayer((layer) => (layer as L.Path).setStyle({ color: css('--zone-line'), weight: 0.4, opacity: 0.5, fillColor: rgb('--st-active'), fillOpacity: 0.1, dashArray: '' }));
+      shown.current = new Set();
+      r.flows.clearLayers(); r.rings.clearLayers(); r.countries.clearLayers();
+      (s.countries ?? []).forEach((key) => {
+        const c = CTRY_BY_KEY[key], center = CTRY_CENTER[key]; if (!c || !center) return;
+        const active = c.st === 'active', hi = s.highlight.includes(key), named = hi || s.highlight.length === 0;
+        const rad = ctryRadius(c.c) + (hi ? 2 : 0);
+        if (active) L.circleMarker(center, { radius: rad, className: 'cring', interactive: false, stroke: false }).addTo(r.countries);
+        L.circleMarker(center, { radius: rad, className: `cbubble ${c.st}`, color: rgb('--paper'), weight: hi ? 2 : 1.5, fillColor: rgb(active ? '--st-active' : '--st-over'), fillOpacity: active ? 0.9 : 0.8, opacity: named ? 1 : 0.55 })
+          .bindTooltip(`<b>${c.name}</b><br><span class="num">${fmt(c.c)}</span> confirmed · <span class="num">${fmt(c.d)}</span> deaths<br><span class="t3">${c.src}, ${dateShort(c.asof)}</span>`, { sticky: true, className: 'ltip' }).addTo(r.countries);
+        if (named) L.marker(center, { interactive: false, keyboard: false, icon: L.divIcon({ className: 'ctry-anchor', iconSize: [0, 0] }) })
+          .bindTooltip(c.name, { permanent: true, direction: 'top', offset: [0, -rad - 3], className: 'zlabel story-label' }).addTo(r.countries);
+      });
+      const pts = (s.focus ?? []).map((k) => CTRY_CENTER[k]).filter(Boolean) as L.LatLng[];
+      if (pts.length && el.current && el.current.clientWidth > 0) {
+        const pad = desktop() ? { paddingTopLeft: [500, 70] as L.PointTuple, paddingBottomRight: [60, 70] as L.PointTuple } : { paddingTopLeft: [16, 100] as L.PointTuple, paddingBottomRight: [16, Math.round(el.current.clientHeight * 0.5)] as L.PointTuple };
+        const b = L.latLngBounds(pts).pad(0.15);
+        if (reduced()) r.map.fitBounds(b, { ...pad, maxZoom: 6 }); else r.map.flyToBounds(b, { ...pad, maxZoom: 6, duration: 1.2 });
+      }
+      return;
+    }
+    r.countries.clearLayers();
     r.zones.eachLayer((layer) => {
       const l = layer as L.Path & { feature: GeoJSON.Feature; _path?: SVGPathElement };
       const n = (l.feature.properties as { z: string }).z, hi = s.highlight.includes(n);

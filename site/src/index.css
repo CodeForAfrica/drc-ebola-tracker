@@ -136,12 +136,18 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.03em; }
 /* Country bubbles are geographic circles drawn in the map's own SVG renderer, so they stay
    locked to the country on zoom. Active ones breathe via stroke-opacity (no geometry change,
    so the circle never drifts off the shape). */
-/* colours live in CSS (not the Leaflet options) so the bubbles re-theme on light/dark toggle */
-.cbubble { cursor: pointer; stroke: rgb(var(--paper)); transition: fill-opacity .25s; }
-.cbubble.active { fill: rgb(var(--st-active)); fill-opacity: .85; animation: cbubble-pulse 2.8s ease-in-out infinite; }
-.cbubble.over { fill: rgb(var(--st-over)); fill-opacity: .72; }
-@keyframes cbubble-pulse { 0%, 100% { stroke-opacity: .95; stroke-width: 1.5; } 50% { stroke-opacity: .4; stroke-width: 2.4; } }
-@media (prefers-reduced-motion: reduce) { .cbubble.active { animation: none; } }
+/* Small proportional country bubbles (SVG circleMarkers). Colours live in CSS (not the
+   Leaflet options) so they re-theme on light/dark toggle. Active countries carry one slow
+   expanding ring behind the core, as before — a halo that scales from the circle's centre. */
+.cbubble { cursor: pointer; stroke: rgb(var(--paper)); stroke-width: 1.5px; transition: fill-opacity .25s; }
+.cbubble.active { fill: rgb(var(--st-active)); fill-opacity: .9; }
+.cbubble.over { fill: rgb(var(--st-over)); fill-opacity: .8; }
+.cring { fill: rgb(var(--st-active)); transform-box: fill-box; transform-origin: center; animation: cring-pulse 2.8s cubic-bezier(.2, .6, .3, 1) infinite; pointer-events: none; }
+@keyframes cring-pulse { 0% { transform: scale(1); opacity: .6; } 70%, 100% { transform: scale(2.3); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cring { animation: none; opacity: 0; } }
+.ctry-anchor { background: none; border: 0; }
+/* cross-border chapter: the DR Congo province labels would clutter the zoomed-out region view */
+.ctry-mode .leaflet-tooltip.story-plabel { display: none !important; }
 
 /* Recharts text follows the theme */
 .recharts-cartesian-axis-tick-value { fill: rgb(var(--ink-3)); font-size: 11px; font-family: 'Open Sans', sans-serif; font-variant-numeric: tabular-nums; }
