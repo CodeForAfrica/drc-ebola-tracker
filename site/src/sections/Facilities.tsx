@@ -31,8 +31,8 @@ export function Facilities() {
   const [busy, setBusy] = useState(false);
   const last = useRef<{ lat: number; lon: number; origin: string } | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([{ role: 'bot', text: L(
-    'Hi — I can point you to the nearest health facilities. Share your location, or type a town or health zone, and pick a type if you like.',
-    'Bonjour — je peux vous indiquer les établissements de santé les plus proches. Partagez votre position, ou tapez une ville ou une zone de santé, et choisissez un type si vous le souhaitez.') }]);
+    'Hi, I can point you to the nearest health facilities. Share your location, or type a town or health zone, and pick a type if you like.',
+    'Bonjour, je peux vous indiquer les établissements de santé les plus proches. Partagez votre position, ou tapez une ville ou une zone de santé, et choisissez un type si vous le souhaitez.') }]);
 
   const run = (lat: number, lon: number, origin: string, nextCats = cats) => {
     last.current = { lat, lon, origin };
@@ -140,7 +140,7 @@ export function Facilities() {
             </div>
             <div className="rounded-2xl border border-rule p-4">
               <p className="flex items-center gap-2 font-semibold text-ink"><Hospital className="h-4 w-4 text-accent" />{L('How it works', 'Comment ça marche')}</p>
-              <p className="mt-1.5">{L('Your location is used only in your browser to measure distance — it is never sent anywhere. Distances are straight-line (“as the crow flies”), so road distance will be longer.', 'Votre position n’est utilisée que dans votre navigateur pour calculer la distance — elle n’est jamais transmise. Les distances sont à vol d’oiseau ; la distance par la route sera plus longue.')}</p>
+              <p className="mt-1.5">{L('Your location is used only in your browser to measure distance; it is never sent anywhere. Distances are straight-line (“as the crow flies”), so road distance will be longer.', 'Votre position n’est utilisée que dans votre navigateur pour calculer la distance ; elle n’est jamais transmise. Les distances sont à vol d’oiseau ; la distance par la route sera plus longue.')}</p>
             </div>
             <p className="text-[11px] text-ink-3">{L('Source:', 'Source :')} {FACILITY_SOURCE}</p>
           </aside>
