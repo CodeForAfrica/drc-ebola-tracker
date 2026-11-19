@@ -19,7 +19,7 @@ const NAV: Record<Route, [string, string]> = {
   briefing: ['Briefing', 'Récit'],
   trends: ['Trends', 'Tendances'],
   countries: ['Countries', 'Pays'],
-  facilities: ['Facilities', 'Établissements'],
+  facilities: ['Health facilities', 'Établissements de santé'],
   'early-warning': ['Early warning', 'Alerte précoce'],
   methods: ['Data & methods', 'Données et méthodes'],
 };

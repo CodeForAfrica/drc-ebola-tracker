@@ -4,7 +4,7 @@
    — not an LLM — since the site has no backend. Facilities are community OSM data (ODbL);
    the UI says so and never presents them as an official registry. */
 import { useMemo, useRef, useState } from 'react';
-import { LocateFixed, Navigation, Search, MapPin, Hospital, AlertTriangle } from 'lucide-react';
+import { LocateFixed, Navigation, Search, MapPin, Hospital, AlertTriangle, RotateCcw } from 'lucide-react';
 import { PageHead } from '@/components/Figure';
 import {
   COUNTRIES, ZONES, cname, FACILITY_CATS, FACILITY_SOURCE, ISO3_TO_KEY,
@@ -25,14 +25,17 @@ const PLACES: Place[] = [
 
 const catColor: Record<string, string> = { hospital: 'bg-death', clinic: 'bg-case', pharmacy: 'bg-recov', other: 'bg-ink-3' };
 
+const intro = (): Msg[] => [{ role: 'bot', text: L(
+  'Hi, I can point you to the nearest health facilities. Share your location, or type a town or health zone, and pick a type if you like.',
+  'Bonjour, je peux vous indiquer les établissements de santé les plus proches. Partagez votre position, ou tapez une ville ou une zone de santé, et choisissez un type si vous le souhaitez.') }];
+
 export function Facilities() {
   const [cats, setCats] = useState<Set<string>>(new Set());
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState(false);
   const last = useRef<{ lat: number; lon: number; origin: string } | null>(null);
-  const [msgs, setMsgs] = useState<Msg[]>([{ role: 'bot', text: L(
-    'Hi, I can point you to the nearest health facilities. Share your location, or type a town or health zone, and pick a type if you like.',
-    'Bonjour, je peux vous indiquer les établissements de santé les plus proches. Partagez votre position, ou tapez une ville ou une zone de santé, et choisissez un type si vous le souhaitez.') }]);
+  const [msgs, setMsgs] = useState<Msg[]>(intro);
+  const reset = () => { setMsgs(intro()); setQ(''); setCats(new Set()); setBusy(false); last.current = null; };
 
   const run = (lat: number, lon: number, origin: string, nextCats = cats) => {
     last.current = { lat, lon, origin };
@@ -73,6 +76,12 @@ export function Facilities() {
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_17rem]">
           {/* chat column */}
           <div className="flex min-h-[26rem] flex-col rounded-2xl border border-rule bg-paper">
+            <div className="flex items-center justify-between border-b border-rule px-4 py-2.5">
+              <p className="text-[12px] font-semibold text-ink-2">{L('Facility finder', 'Localisateur d’établissements')}</p>
+              <button onClick={reset} aria-label={L('Start over', 'Recommencer')} className="inline-flex items-center gap-1.5 rounded-full border border-rule px-2.5 py-1 text-[11.5px] font-medium text-ink-2 transition-colors hover:border-accent hover:text-ink">
+                <RotateCcw className="h-3.5 w-3.5" />{L('New search', 'Nouvelle recherche')}
+              </button>
+            </div>
             <div className="flex-1 space-y-3 overflow-y-auto p-4 md:p-5">
               {msgs.map((m, i) => (
                 <div key={i} className={m.role === 'user' ? 'flex justify-end' : ''}>
