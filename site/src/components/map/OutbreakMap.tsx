@@ -1,7 +1,6 @@
 /* ============================================================================
-   The outbreak map. Leaflet with CARTO basemap tiles (OpenStreetMap data, the
-   tiles INRB-UMIE uses) over a vector outline that keeps the map readable if
-   tiles cannot load.
+   The outbreak map. Leaflet with the keyless Esri Gray Canvas basemap (OpenStreetMap
+   data) over a vector outline that keeps the map readable if tiles cannot load.
 
    Two levels:
    - all countries: one bubble per country, nothing sub-national drawn;
@@ -20,7 +19,9 @@ import { L as TR } from '@/lib/i18n';
 const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const rgb = (v: string) => `rgb(${css(v).split(' ').join(',')})`;
 const dark = () => document.documentElement.dataset.theme === 'dark';
-const tileUrl = () => `https://{s}.basemaps.cartocdn.com/${dark() ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`;
+/* Esri Gray Canvas: keyless, no-label light/dark grey base (good under a choropleth).
+   Esri tiles are addressed /tile/{z}/{y}/{x} (row before column), unlike the usual {z}/{x}/{y}. */
+const tileUrl = () => `https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark() ? 'Dark' : 'Light'}_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
 
 const byZone = Object.fromEntries(ZONES.map((z) => [z.z, z]));
 const affected = new Set(PROV.map((p) => p.p));
@@ -57,8 +58,8 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
     for (const [name, z] of [['base', 150], ['ctry', 360], ['zones', 400], ['admin', 405], ['flows', 450], ['bubbles', 460]] as const) map.createPane(name).style.zIndex = String(z);
 
     const land = L.geoJSON(GEO.africa, { pane: 'base', interactive: false, style: () => ({ color: css('--map-line'), weight: 0.6, fillColor: css('--map-land'), fillOpacity: 1 }) }).addTo(map);
-    const tiles = L.tileLayer(tileUrl(), { subdomains: 'abcd', maxZoom: 19, className: 'carto-tiles',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>' + (small() ? '' : ' · zones: INRB-UMIE v1 · KE/NG: geoBoundaries') }).addTo(map);
+    const tiles = L.tileLayer(tileUrl(), { maxZoom: 16, className: 'base-tiles',
+      attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' + (small() ? '' : ' · zones: INRB-UMIE v1 · KE/NG: geoBoundaries') }).addTo(map);
 
     /* countries: tinted by status, click to open */
     const ctry = L.geoJSON(GEO.africa, {
