@@ -213,7 +213,9 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
       const b: L.LatLngTuple = inbound ? [home.lat, home.lon] : [o.lat, o.lon];
       const pts = curve(m.map, a, b, inbound ? 1 : -1);
       const col = inbound ? rgb('--flow-in') : rgb('--flow-out');
-      L.polyline(pts, { pane: 'flows', color: col, weight: 2.6, opacity: 0.92, lineCap: 'round' })
+      /* soft underlay + an animated marching-dash line on top, as in the Briefing's story map */
+      L.polyline(pts, { pane: 'flows', color: col, weight: 5, opacity: 0.18, lineCap: 'round', interactive: false }).addTo(m.flows);
+      L.polyline(pts, { pane: 'flows', color: col, weight: 2.8, opacity: 0.95, lineCap: 'round', className: 'flow-anim', dashArray: '7 9' })
         .bindTooltip(`<b>${inbound ? name : s}</b> → <b>${inbound ? s : name}</b><br><span class="num">${fmt(v)}</span> ${TR('estimated relocations', 'déplacements estimés')}${lo != null && hi != null ? `<br><span class="t3">${TR('range', 'plage')} ${fmt(lo)}–${fmt(hi)}</span>` : ''}`, { sticky: true, className: 'ltip' })
         .addTo(m.flows);
       m.flows.addLayer(arrowHead(m.map, pts, col));
