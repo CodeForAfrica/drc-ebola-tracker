@@ -89,7 +89,7 @@ function StoryMap({ spec }: { spec: MapSpec }) {
     map.createPane('base').style.zIndex = '150';
     L.geoJSON(GEO.africa, { pane: 'base', interactive: false, style: () => ({ color: css('--map-line'), weight: 0.6, fillColor: css('--map-land'), fillOpacity: 1 }) }).addTo(map);
     const dark = document.documentElement.dataset.theme === 'dark';
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/${dark ? 'dark_nolabels' : 'light_nolabels'}/{z}/{x}/{y}{r}.png`, { subdomains: 'abcd', attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(map);
+    L.tileLayer(`https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark ? 'Dark' : 'Light'}_Gray_Base/MapServer/tile/{z}/{y}/{x}`, { maxZoom: 16, attribution: 'Tiles &copy; Esri &copy; OpenStreetMap contributors' }).addTo(map);
     L.geoJSON(GEO.provinces, {
       interactive: false,
       style: (f) => ({ color: css('--map-line'), weight: 1.1, fillColor: rgb('--st-none'), fillOpacity: affected.has((f!.properties as { n: string }).n) ? 0 : 0.22 }),
