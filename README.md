@@ -12,6 +12,30 @@ No build step and no server required — just open `index.html` in any modern we
 - **As of:** DRC figures 10 June 2026; Uganda figures 11 June 2026.
 - The six CSVs in `data/` are transcribed from DON607 (cases by health zone, province and country summaries, contact tracing, cumulative trend, and WHO risk levels). Each row carries its own source attribution.
 
+> **Note:** the sections above describe the original WHO DON607 build. The live dashboard now tracks **INSP situation reports** (the current snapshot and figures live in `config.drc-bvd-2026.js` and the dated files in `data/`); see [CLAUDE.md](CLAUDE.md) for the authoritative current state. The figures above are not updated here to avoid a second, drifting copy.
+
+## React site (`site/`)
+
+A second front end (React + TypeScript + Vite + Tailwind + Leaflet + Recharts) in Code for Africa's visual identity lives in `site/`. It is a **read-only view of this repo's data** — it holds no figures of its own.
+
+```bash
+cd site
+npm install
+npm run data     # copies figures from ../config.drc-bvd-2026.js and ../data/ into src/data/*.json (no value edited)
+npm run build    # type-check + Vite build → site/dist/
+npm run dev      # local dev server
+```
+
+Deployed by `.github/workflows/pages.yml` (GitHub Pages): it runs `npm run data` on every build — so a SitRep update to the config reaches the site automatically — and copies the **unchanged** vanilla tracker to **`/explore/`** in the published output. See the "Site (React)" section of [CLAUDE.md](CLAUDE.md) for the data-flow rules.
+
+> This front end and its build step, the Code for Africa visual identity, the CARTO basemap tiles, and the geoBoundaries ADM1 outlines (Kenya/Nigeria; CC BY 4.0, geometry only) **amend standing project rules and require maintainer approval before merge** (see CLAUDE.md). Until the new site reaches feature parity (EN/FR, time filter, CFR & Risk indicators, contact-tracing/suspect markers, full Methods text, zone search), the vanilla tracker is kept under `/explore/`.
+
+### Open items (site)
+- Swap the Code for Africa text lockup in `src/components/TopNav.tsx` for the official logo file.
+- Create the social card `og-card.png` referenced by `site/index.html`.
+- Health-facilities layer and early-warning thresholds await upstream inputs (epidemiology team / shared data).
+- Bundle is ~1.9 MB JS (the config geometry is bundled) — acceptable, can be split later.
+
 ## Structure
 
 ```
