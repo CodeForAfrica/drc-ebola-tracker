@@ -8,6 +8,7 @@ export const ROUTES = [
   ['briefing', 'Briefing'],
   ['trends', 'Trends'],
   ['countries', 'Countries'],
+  ['facilities', 'Facilities'],
   ['early-warning', 'Early warning'],
   ['methods', 'Data & methods'],
 ] as const;
@@ -18,6 +19,7 @@ const NAV: Record<Route, [string, string]> = {
   briefing: ['Briefing', 'Récit'],
   trends: ['Trends', 'Tendances'],
   countries: ['Countries', 'Pays'],
+  facilities: ['Facilities', 'Établissements'],
   'early-warning': ['Early warning', 'Alerte précoce'],
   methods: ['Data & methods', 'Données et méthodes'],
 };

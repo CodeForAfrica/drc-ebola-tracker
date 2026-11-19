@@ -5,6 +5,7 @@ import { Briefing } from '@/views/Briefing';
 import { EwsView } from '@/components/Ews';
 import { Trends } from '@/sections/Trends';
 import { Countries } from '@/sections/Countries';
+import { Facilities } from '@/sections/Facilities';
 import { Methods } from '@/sections/Methods';
 import type { LayerKey, Dir } from '@/components/map/layers';
 import { MOB } from '@/lib/data';
@@ -55,6 +56,7 @@ export default function App() {
         {route === 'briefing' && <Briefing key={lang} go={go} />}
         {route === 'trends' && <Trends />}
         {route === 'countries' && <Countries />}
+        {route === 'facilities' && <Facilities key={lang} />}
         {route === 'early-warning' && <EwsView onShowMap={() => { setLayer('ews'); setCountry('COD'); go('map'); }} />}
         {route === 'methods' && <Methods />}
       </main>

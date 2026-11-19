@@ -6,7 +6,8 @@
    ========================================================================== */
 import raw from '@/data/tracker.json';
 import admin1 from '@/data/admin1.json';
-import { getLang } from '@/lib/i18n';
+import facilitiesRaw from '@/data/facilities.json';
+import { getLang, L } from '@/lib/i18n';
 
 export type NatRow = {
   s: string; d: string; c: number; dd: number | null; cfr: number;
@@ -169,6 +170,48 @@ export function zoneSeries(z: string) {
   });
   return rows.length ? { rows } : null;
 }
+
+/* ---------- health facilities (HOT OpenStreetMap, ODbL) for the finder ----------
+ *  Read-only: every facility is a named, located OSM point (polygons reduced to their
+ *  centroid in the mirror). Nothing is invented; OSM is community-maintained, so the UI
+ *  labels it as such and never presents it as an official registry. */
+export type Facility = { c: string; n: string; k: string; la: number; lo: number; p: string };
+type FacilityRaw = { source: string; note: string; f: Facility[] };
+export const FACILITIES = (facilitiesRaw as unknown as FacilityRaw).f;
+export const FACILITY_SOURCE = (facilitiesRaw as unknown as FacilityRaw).source;
+/** ISO3 → the country key used elsewhere (COUNTRIES[].key) */
+export const ISO3_TO_KEY: Record<string, string> = { COD: 'COD', UGA: 'Uganda', KEN: 'Kenya', NGA: 'Nigeria' };
+export const FACILITY_CATS = ['hospital', 'clinic', 'pharmacy', 'other'] as const;
+export type FacilityCat = (typeof FACILITY_CATS)[number];
+/** a facility category's label in the active language */
+export const facilityCatLabel = (k: string) => {
+  switch (k) {
+    case 'hospital': return L('Hospital', 'Hôpital');
+    case 'clinic': return L('Clinic / health centre', 'Clinique / centre de santé');
+    case 'pharmacy': return L('Pharmacy', 'Pharmacie');
+    default: return L('Other', 'Autre');
+  }
+};
+
+/** Great-circle distance in km (Haversine). */
+export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371, r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r, dLon = (lon2 - lon1) * r;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+/** The nearest facilities to a point, computed client-side; nothing is sent anywhere. */
+export function nearestFacilities(lat: number, lon: number, opts: { cats?: Set<string>; limit?: number } = {}) {
+  const { cats, limit = 8 } = opts;
+  const scored: (Facility & { dist: number })[] = [];
+  for (const f of FACILITIES) {
+    if (cats && cats.size && !cats.has(f.k)) continue;
+    scored.push({ ...f, dist: haversineKm(lat, lon, f.la, f.lo) });
+  }
+  scored.sort((a, b) => a.dist - b.dist);
+  return scored.slice(0, limit);
+}
+export const facilityDist = (km: number) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(km < 10 ? 1 : 0)} km`);
 
 /* ---------- formatting (locale follows the active language) ---------- */
 const loc = () => (getLang() === 'fr' ? 'fr-FR' : 'en-GB');
