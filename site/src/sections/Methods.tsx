@@ -60,10 +60,6 @@ export function Methods() {
           </div>
         </div>
       </div>
-      <footer className="gutter mx-auto mt-14 flex max-w-wide flex-wrap items-center justify-between gap-3 border-t border-rule pt-6 text-xs text-ink-3">
-        <span>{L('A Code for Africa project. Figures from INSP and national ministries of health.', 'Un projet de Code for Africa. Chiffres de l’INSP et des ministères nationaux de la santé.')}</span>
-        <span>{L('Data: SitRep N°', 'Données : SitRep N°')}{LATEST.s}, {LATEST.d}</span>
-      </footer>
     </section>
   );
 }

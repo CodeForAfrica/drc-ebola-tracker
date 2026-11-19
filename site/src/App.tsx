@@ -7,6 +7,7 @@ import { Trends } from '@/sections/Trends';
 import { Countries } from '@/sections/Countries';
 import { Facilities } from '@/sections/Facilities';
 import { Methods } from '@/sections/Methods';
+import { SiteFooter } from '@/components/Brand';
 import type { LayerKey, Dir } from '@/components/map/layers';
 import { MOB } from '@/lib/data';
 import { useLang } from '@/lib/i18n';
@@ -60,6 +61,8 @@ export default function App() {
         {route === 'early-warning' && <EwsView onShowMap={() => { setLayer('ews'); setCountry('COD'); go('map'); }} />}
         {route === 'methods' && <Methods />}
       </main>
+      {/* the map is full-bleed; every other page gets the site footer */}
+      {route !== 'map' && <SiteFooter />}
     </>
   );
 }
