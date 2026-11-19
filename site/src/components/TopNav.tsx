@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, Moon, Sun } from 'lucide-react';
 import { LATEST, dateShort, dateLong } from '@/lib/data';
 import { L, useLang, type Lang } from '@/lib/i18n';
+import { Microbe } from '@/components/Brand';
 
 export const ROUTES = [
   ['map', 'Map'],
@@ -34,8 +35,9 @@ export function TopNav({ route, go }: { route: Route; go: (r: Route) => void }) 
   return (
     <header className="sticky z-[1000] border-b border-rule bg-paper/95 backdrop-blur" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
       <div className="gutter flex h-14 items-center gap-3">
-        <button onClick={() => go('map')} aria-label={L('Map, home', 'Carte, accueil')} className="flex flex-none items-center gap-2.5 text-left">
-          {/* text lockup; swap for the official Code for Africa logo file at implementation */}
+        {/* The brand reloads the app to the map from a clean slate (full refresh). */}
+        <button onClick={() => { try { location.hash = 'map'; } catch { /* viewer may refuse */ } location.reload(); }} aria-label={L('Reload the dashboard', 'Recharger le tableau de bord')} title={L('Reload the dashboard', 'Recharger le tableau de bord')} className="flex flex-none items-center gap-2.5 text-left">
+          <span className="grid h-9 w-9 flex-none place-items-center rounded-lg bg-accent-soft text-accent"><Microbe className="h-6 w-6" /></span>
           <span className="flex flex-col leading-none">
             <span className="text-[10px] font-extrabold uppercase tracking-[.16em] text-accent">Code for Africa</span>
             <span className="mt-1 text-[15px] font-bold tracking-tight text-ink">{L('Epidemic Intelligence', 'Veille épidémique')}<span className="font-normal text-ink-3"> · Bundibugyo 2026</span></span>

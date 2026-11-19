@@ -133,6 +133,10 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.03em; }
 .maplibregl-ctrl-attrib { background: rgb(var(--paper) / .85) !important; color: rgb(var(--ink-3)); font-size: 10px; }
 .maplibregl-ctrl-attrib a { color: rgb(var(--ink-2)); }
 
+/* Code for Africa credit lockup is a black-on-transparent PNG; flip it to light on the dark theme. */
+.cfa-logo { filter: none; }
+:root[data-theme='dark'] .cfa-logo { filter: invert(1) brightness(1.7); }
+
 /* Country bubbles are geographic circles drawn in the map's own SVG renderer, so they stay
    locked to the country on zoom. Active ones breathe via stroke-opacity (no geometry change,
    so the circle never drifts off the shape). */
