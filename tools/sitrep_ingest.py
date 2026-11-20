@@ -334,7 +334,10 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     gate(cfr_nat == tcf, f'banner CFR {cfr_nat} == Tableau 2 Total CFR {tcf}')
 
     # Tableau 3 suspects
-    t3end = first((i for i in range(t3, len(L)) if L[i].startswith('Figure 1')), 'end of Tableau 3 ("Figure 1") found')
+    # Tableau 3 ends at the first 'Figure 1' or 'Tableau 4' after it (N°187: the figures moved above Tableau 3, which now runs
+    # straight into the alerts paragraph and Tableau 4)
+    T3_END = lambda l: l.startswith('Figure 1') or l.startswith('Tableau 4')
+    t3end = first((i for i in range(t3, len(L)) if T3_END(L[i])), 'end of Tableau 3 ("Figure 1" or "Tableau 4") found')
     prow, tot_tokens, in_total, nd_provs, zero_rows = [], [], False, [], []
     T3L = L[t3:t3end]
     def t3_ncols(lines):
@@ -380,6 +383,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     for l in T3L:
         if re.match(r'^Total(\s+\d|$)', l): in_total = True
         if in_total and l.startswith('Figure'): break
+        # N°187: prose follows the Total block before Tableau 4; the block is only number lines and 'Total' / 'Général'
+        if in_total and re.search(r'[A-Za-zÀ-ÿ]', re.sub(r'\b(?:Total|Général)\b', '', l)): break
         if in_total:
             if re.fullmatch(r'\d{1,2}', l): continue   # page number between the Total row and 'Figure 1' (N°157)
             tot_tokens += re.findall(r'\d+', l); continue
@@ -562,6 +567,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     else:
         gate(narr == suspects, f'suspects Tableau 3 {suspects} == narrative {narr}')
     mc = re.search(r'(?:proportion|taux) de suivi (?:de|au décours du [^,]*? était de) (\d+,\d)\s*%', flat)   # 'taux de suivi' from N°151
+    if not mc:   # N°187: below Tableau 4, 'Le taux de suivi des contacts s’établit à 82,6 % dans les cinq provinces …'
+        mc = re.search(r"[Tt]aux de suivi des contacts s['’]établit à (\d+,\d)\s*%", flat)
     narr_ct = pct(mc.group(1)) if mc else None
     # The key-messages box restates it ('Le taux de suivi des contacts recule à 88,1 % (31 923/36 218)', N°162; 'progresse,
     # passant de 79,7 % la veille à 84,8 %', N°160). Its two columns interleave, so take the first 'à nn,n %' within 160
@@ -572,7 +579,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     # 'proportion/taux de suivi de|au décours …' anywhere, no key-messages restatement) keeps the banner figure, flagged
     # as not cross-checked. A sentence that is present but unreadable or different is still the gate / single-cell rule.
     ct_silent = (narr_ct is None and not km_ct
-                 and not re.search(r'(?:proportion|taux) de suivi (?:de|au décours)', flat))
+                 and not re.search(r"(?:proportion|taux) de suivi (?:de|au décours)|taux de suivi des contacts s['’]établit", flat))
     if narr_ct is not None and (narr_ct != contact or others):
         soft.append(('contact_tracing_pct', f'banner gives {contact}, narrative gives {narr_ct}' + (f', key messages give {others}' if others else '')))
     elif ct_silent and contact is not None:
@@ -596,7 +603,7 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         tx = '\n'.join(pg.extract_text() or '' for pg in pdfplumber.open(path).pages).replace('\u202f', ' ').replace('\xa0', ' ')
         LL = [l.strip() for l in tx.split('\n')]
         a = next(i for i, l in enumerate(LL) if l.startswith('Tableau 3'))
-        b = next(i for i in range(a, len(LL)) if LL[i].startswith('Figure 1'))
+        b = next(i for i in range(a, len(LL)) if T3_END(LL[i]))
         TL = LL[a:b]
         nc = t3_ncols(TL)
         t3_total_above(TL)
@@ -605,7 +612,11 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         out, tot = {}, []
         for k, l in enumerate(TL):
             if re.match(r'^Total(\s+\d|$)', l):
-                tot = re.findall(r'\d+', ' '.join(x for x in TL[k:] if not re.fullmatch(r'\d{1,2}', x))); break
+                blk = []
+                for x in TL[k:]:   # the Total block: number lines and 'Total' / 'Général' only (N°187: prose follows it)
+                    if blk and re.search(r'[A-Za-zÀ-ÿ]', re.sub(r'\b(?:Total|Général)\b', '', x)): break
+                    if not re.fullmatch(r'\d{1,2}', x): blk.append(x)
+                tot = re.findall(r'\d+', ' '.join(blk)); break
             mm = re.match(rf'^({T3NAMES})\s+(.*)$', l)
             if not mm: continue
             pv, tk = PROV[mm.group(1)], mm.group(2).split()
