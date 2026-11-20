@@ -100,6 +100,9 @@ CASES[184] = dict(case="short all-zero Tableau 3 row 'Nord Ubangi 0 0 0 0' read 
 CASES[185] = dict(case="Tableau 2 zone footnote marker 'Lubunga 1 2** 200,0% 0 0 2 2' ('**En cours d’harmonisation'): "
                        "deaths > cases accepted while footnoted (standing rule, 18 Nov 2026); Haut-Uélé short all-zero row")
 CASES[186] = dict(case="no contact-tracing sentence in the narrative: banner 81.6 kept, not cross-checked (maintainer decision, 18 Nov 2026); Lubunga 2 -> 0 deaths without the footnote, a correction (Tshopo 35 -> 33)")
+CASES[187] = dict(case="Tableau 3 runs straight into the alerts paragraph and Tableau 4 (figures moved above it); contact "
+                       "tracing reworded below Tableau 4 ('Le taux de suivi des contacts s’établit à 82,6 %'); Haut-Uélé short all-zero row")
+CASES[188] = dict(case="Tableau 3 ends at 'Tableau 4'; 'taux de suivi des contacts s’établit à 79,2 %'")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
@@ -142,6 +145,8 @@ FILENAMES = [
     ('SitRep_N184_14-11-2026_VF.pdf', 'final', 184, D_('2026-11-14')),
     ('SitRep_N185_15-11-2026_VF-2.pdf', 'final', 185, D_('2026-11-15')),
     ('SitRep_N186_16-11-2026_VF-1.pdf', 'final', 186, D_('2026-11-16')),
+    ('SitRep_N187_17-11-2026_corrige_VF.pdf', 'final', 187, D_('2026-11-17')),
+    ('SitRep_N188_18-11-2026_corrige_VF.pdf', 'final', 188, D_('2026-11-18')),
 ]
 
 
