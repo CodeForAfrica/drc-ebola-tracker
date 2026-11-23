@@ -1,0 +1,14 @@
+zone,province,report_date,sitrep,field,from,to
+Rwampara,Ituri,2026-09-30,139,confirmed_deaths,369,366
+Nia-Nia,Ituri,2026-07-11,058,confirmed_deaths,13,12
+Nia-Nia,Ituri,2026-07-13,060,confirmed_deaths,12,7
+Beni,Nord-Kivu,2026-10-21,160,confirmed_cases,553,552
+Musienene,Nord-Kivu,2026-07-17,064,confirmed_deaths,4,3
+Kambala,Ituri,2026-08-04,082,confirmed_deaths,2,0
+Lubunga,Tshopo,2026-07-17,064,confirmed_deaths,1,0
+Lubunga,Tshopo,2026-11-16,186,confirmed_deaths,2,0
+Wamba,Haut-Uélé,2026-07-18,065,confirmed_cases,16,6
+Wamba,Haut-Uélé,2026-07-18,065,confirmed_deaths,8,3
+Adja,Ituri,2026-10-12,151,confirmed_cases,12,11
+Biena,Nord-Kivu,2026-11-04,174,confirmed_cases,48,26
+Biena,Nord-Kivu,2026-11-04,174,confirmed_deaths,19,9

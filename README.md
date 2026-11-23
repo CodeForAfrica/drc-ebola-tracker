@@ -36,12 +36,31 @@ Deployed by `.github/workflows/pages.yml` (GitHub Pages): it runs `npm run data`
 - Health-facilities layer and early-warning thresholds await upstream inputs (epidemiology team / shared data).
 - Bundle is ~1.9 MB JS (the config geometry is bundled) — acceptable, can be split later.
 
+## Early-warning alerts (`early_warning/`)
+
+A reusable Python alert system over the per-zone cumulative series
+(`data/zones_timeseries_full.csv`): first case in a new zone, first case in a new
+province, a 7-day rolling rise beyond a threshold, and resurgence after ≥ 42 quiet
+days. It reads the committed data (never modifies it) and writes an Excel workbook
+plus CSVs to `early_warning/`.
+
+```bash
+uv run --with openpyxl --python 3.12 python -I tools/ebola_early_warning.py --scan
+uv run --python 3.12 python -I tools/test_ebola_early_warning.py   # edge-case tests
+```
+
+See [`early_warning/README.md`](early_warning/README.md) for the parameters, the
+alert logic and what each output contains.
+
 ## Structure
 
 ```
 drc-ebola-tracker/
-├── index.html   # the dashboard
-├── data/        # six CSV datasets (WHO DON607)
+├── index.html         # the dashboard
+├── data/              # CSV / GeoJSON datasets (INSP SitReps; see CLAUDE.md)
+├── tools/             # offline data scripts: SitRep ingest + early-warning alerts
+├── early_warning/     # early-warning alert outputs (alerts.xlsx + CSVs)
+├── site/              # React front end (read-only view of the data)
 └── README.md
 ```
 
