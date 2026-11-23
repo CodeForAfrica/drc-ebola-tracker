@@ -1,0 +1,143 @@
+Alert,Date,Province,Health Zone,New cases,Quiet days,Post-gap / date uncertain,Reversed by correction,Status,Note
+A1 new zone,2026-07-08,Ituri,Aru,3,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Aungba,6,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Bambu,29,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Beni,29,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Boga,1,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Bunia,487,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Butembo,42,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Damas,5,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Drodro,3,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Fataki,4,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Gety,1,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Goma,1,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Kalunguta,2,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Kambala,2,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Katwa,61,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Kilo,9,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Komanda,23,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Kyondo,4,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Lita,41,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Logo,7,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Lolwa,1,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Mabalako,1,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Mambasa,4,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Mandima,5,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Mangala,43,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Masereka,3,,N,N,Confirmed,
+A1 new zone,2026-07-08,Sud-Kivu,Miti-Murhesa,3,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Mongbwalu,315,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Musienene,8,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Nia-Nia,35,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Nizi,104,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Nyankunde,97,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Oicha,3,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Rimba,4,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Rwampara,370,,N,N,Confirmed,
+A1 new zone,2026-07-08,Ituri,Tchomia,15,,N,N,Confirmed,
+A1 new zone,2026-07-08,Nord-Kivu,Vuhovi,1,,N,N,Confirmed,
+A1 new zone,2026-07-10,Tshopo,Lubunga,1,,N,N,Confirmed,
+A1 new zone,2026-07-10,Tshopo,Makiso-Kisangani,2,,N,N,Confirmed,
+A1 new zone,2026-07-10,Tshopo,Mangobo,1,,N,N,Confirmed,
+A1 new zone,2026-07-10,Haut-Uélé,Wamba,1,,N,N,Confirmed,
+A1 new zone,2026-07-11,Ituri,Ariwara,1,,N,N,Confirmed,
+A1 new zone,2026-07-13,Haut-Uélé,Boma Mangbetu,2,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 2-day gap
+A1 new zone,2026-07-13,Haut-Uélé,Isiro,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 2-day gap
+A1 new zone,2026-07-13,Haut-Uélé,Pawa,3,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 2-day gap
+A1 new zone,2026-07-15,Ituri,Mahagi,1,,N,N,Confirmed,
+A1 new zone,2026-08-04,Ituri,Adja,11,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 17-day gap
+A1 new zone,2026-08-04,Tshopo,Kabondo,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 17-day gap
+A1 new zone,2026-08-04,Nord-Kivu,Lubero,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 17-day gap
+A1 new zone,2026-08-04,Haut-Uélé,Rungu,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 17-day gap
+A1 new zone,2026-08-04,Tshopo,Wanie-Rukula,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 17-day gap
+A1 new zone,2026-09-05,Tshopo,Bafwasende,2,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Nord-Kivu,Biena,7,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Bas-Uélé,Buta,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Bas-Uélé,Ganga,2,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Haut-Uélé,Gombari,3,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Nord-Kivu,Kayna,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Nord-Kivu,Manguredjipa,3,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Nord-Kivu,Mutwanga,2,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Tshopo,Tshopo,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-05,Bas-Uélé,Viadana,1,,Y,N,Confirmed,date uncertain: first case fell somewhere in the 32-day gap
+A1 new zone,2026-09-10,Sud-Ubangi,Bulu,1,,N,N,Confirmed,
+A1 new zone,2026-09-18,Haut-Uélé,Dungu,1,,N,N,Confirmed,
+A1 new zone,2026-10-02,Nord-Kivu,Alimbongo,4,,N,N,Confirmed,
+A1 new zone,2026-10-08,Bas-Uélé,Dakwa,1,,N,N,Confirmed,
+A1 new zone,2026-10-16,Nord-Ubangi,Wapinda,2,,N,N,Confirmed,
+A1 new zone,2026-10-28,Nord-Ubangi,Yakoma,3,,N,N,Confirmed,
+A1 new zone,2026-11-11,Haut-Uélé,Watsa,2,,N,N,Confirmed,
+A2 new province,2026-07-08,Ituri,"Aru, Aungba, Bambu, Boga, Bunia, Damas, Drodro, Fataki, Gety, Kambala, Kilo, Komanda, Lita, Logo, Lolwa, Mambasa, Mandima, Mangala, Mongbwalu, Nia-Nia, Nizi, Nyankunde, Rimba, Rwampara, Tchomia",1614,,N,N,Confirmed,"triggering zones: Aru, Aungba, Bambu, Boga, Bunia, Damas, Drodro, Fataki, Gety, Kambala, Kilo, Komanda, Lita, Logo, Lolwa, Mambasa, Mandima, Mangala, Mongbwalu, Nia-Nia, Nizi, Nyankunde, Rimba, Rwampara, Tchomia"
+A2 new province,2026-07-08,Nord-Kivu,"Beni, Butembo, Goma, Kalunguta, Katwa, Kyondo, Mabalako, Masereka, Musienene, Oicha, Vuhovi",155,,N,N,Confirmed,"triggering zones: Beni, Butembo, Goma, Kalunguta, Katwa, Kyondo, Mabalako, Masereka, Musienene, Oicha, Vuhovi"
+A2 new province,2026-07-08,Sud-Kivu,Miti-Murhesa,3,,N,N,Confirmed,triggering zones: Miti-Murhesa
+A2 new province,2026-07-10,Haut-Uélé,Wamba,1,,N,N,Confirmed,triggering zones: Wamba
+A2 new province,2026-07-10,Tshopo,"Lubunga, Makiso-Kisangani, Mangobo",4,,N,N,Confirmed,"triggering zones: Lubunga, Makiso-Kisangani, Mangobo"
+A2 new province,2026-09-05,Bas-Uélé,"Buta, Ganga, Viadana",4,,Y,N,Confirmed,"date uncertain: first case fell somewhere in the 32-day gap; triggering zones: Buta, Ganga, Viadana"
+A2 new province,2026-09-10,Sud-Ubangi,Bulu,1,,N,N,Confirmed,triggering zones: Bulu
+A2 new province,2026-10-16,Nord-Ubangi,Wapinda,2,,N,N,Confirmed,triggering zones: Wapinda
+A3 rise (province),2026-07-08,Ituri,,1614,,N,N,Confirmed,province 7-day new cases >= 50
+A3 rise (province),2026-07-08,Nord-Kivu,,155,,N,N,Confirmed,province 7-day new cases >= 50
+A3 rise (zone),2026-07-08,Ituri,Bambu,29,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Bunia,487,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Lita,41,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Mangala,43,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Mongbwalu,315,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Nia-Nia,35,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Nizi,104,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Nyankunde,97,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Ituri,Rwampara,370,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Nord-Kivu,Beni,29,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Nord-Kivu,Butembo,42,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-08,Nord-Kivu,Katwa,61,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-09,Ituri,Komanda,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-07-17,Nord-Kivu,Katwa,25,,Y,N,Confirmed,7-day new cases >= 25
+A3 rise (province),2026-07-18,Nord-Kivu,,57,,N,N,Confirmed,province 7-day new cases >= 50
+A3 rise (province),2026-08-04,Haut-Uélé,,51,,Y,N,Can't be assessed,rise is only a post-gap lump (51 of 51)
+A3 rise (zone),2026-08-04,Ituri,Bambu,33,,Y,N,Can't be assessed,rise is only a post-gap lump (33 of 33 new cases after a long gap)
+A3 rise (zone),2026-08-04,Ituri,Fataki,29,,Y,N,Can't be assessed,rise is only a post-gap lump (29 of 29 new cases after a long gap)
+A3 rise (zone),2026-08-04,Ituri,Mangala,50,,Y,N,Can't be assessed,rise is only a post-gap lump (50 of 50 new cases after a long gap)
+A3 rise (zone),2026-08-04,Ituri,Mongbwalu,198,,Y,N,Can't be assessed,rise is only a post-gap lump (198 of 198 new cases after a long gap)
+A3 rise (zone),2026-08-04,Ituri,Nia-Nia,63,,Y,N,Can't be assessed,rise is only a post-gap lump (63 of 63 new cases after a long gap)
+A3 rise (zone),2026-08-04,Nord-Kivu,Beni,27,,Y,N,Can't be assessed,rise is only a post-gap lump (27 of 27 new cases after a long gap)
+A3 rise (zone),2026-08-04,Nord-Kivu,Butembo,35,,Y,N,Can't be assessed,rise is only a post-gap lump (35 of 35 new cases after a long gap)
+A3 rise (zone),2026-08-04,Nord-Kivu,Musienene,27,,Y,N,Can't be assessed,rise is only a post-gap lump (27 of 27 new cases after a long gap)
+A3 rise (zone),2026-09-05,Haut-Uélé,Isiro,67,,Y,N,Can't be assessed,rise is only a post-gap lump (67 of 67 new cases after a long gap)
+A3 rise (zone),2026-09-05,Haut-Uélé,Pawa,28,,Y,N,Can't be assessed,rise is only a post-gap lump (28 of 28 new cases after a long gap)
+A3 rise (zone),2026-09-05,Haut-Uélé,Wamba,67,,Y,N,Can't be assessed,rise is only a post-gap lump (67 of 67 new cases after a long gap)
+A3 rise (zone),2026-09-05,Ituri,Komanda,69,,Y,N,Can't be assessed,rise is only a post-gap lump (69 of 69 new cases after a long gap)
+A3 rise (zone),2026-09-07,Ituri,Mandima,26,,Y,N,Can't be assessed,rise is only a post-gap lump (22 of 26 new cases after a long gap)
+A3 rise (zone),2026-09-13,Ituri,Lita,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-15,Ituri,Mangala,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-18,Ituri,Nia-Nia,30,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-19,Ituri,Nizi,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-21,Ituri,Mangala,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-24,Ituri,Mandima,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-28,Ituri,Nia-Nia,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-09-30,Ituri,Rwampara,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-02,Nord-Kivu,Katwa,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-05,Nord-Kivu,Butembo,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-10,Ituri,Nizi,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-10,Ituri,Rwampara,27,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-10,Nord-Kivu,Butembo,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-15,Ituri,Rwampara,30,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-16,Haut-Uélé,Wamba,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-16,Ituri,Mambasa,27,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-25,Nord-Kivu,Mabalako,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-29,Nord-Kivu,Mabalako,27,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-10-29,Nord-Kivu,Oicha,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-03,Ituri,Mambasa,30,,Y,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-03,Nord-Kivu,Mutwanga,31,,Y,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-11,Ituri,Mangala,30,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-14,Ituri,Mambasa,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-15,Nord-Kivu,Oicha,25,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-17,Nord-Kivu,Mutwanga,26,,N,N,Confirmed,7-day new cases >= 25
+A3 rise (zone),2026-11-20,Nord-Kivu,Mutwanga,25,,N,N,Confirmed,7-day new cases >= 25
+A4 resurgence,2026-09-05,Ituri,Boga,1,59,Y,N,Can't be assessed,quiet span overlaps a 17-day reporting gap (2026-07-18..2026-08-04)
+A4 resurgence,2026-09-05,Ituri,Gety,5,59,Y,N,Can't be assessed,quiet span overlaps a 17-day reporting gap (2026-07-18..2026-08-04)
+A4 resurgence,2026-09-05,Nord-Kivu,Mabalako,7,59,Y,N,Can't be assessed,quiet span overlaps a 17-day reporting gap (2026-07-18..2026-08-04)
+A4 resurgence,2026-09-05,Tshopo,Makiso-Kisangani,7,50,Y,N,Can't be assessed,quiet span overlaps a 17-day reporting gap (2026-07-18..2026-08-04)
+A4 resurgence,2026-09-05,Tshopo,Mangobo,2,57,Y,N,Can't be assessed,quiet span overlaps a 17-day reporting gap (2026-07-18..2026-08-04)
+A4 resurgence,2026-10-06,Ituri,Adja,1,63,N,N,Can't be assessed,quiet span overlaps a 32-day reporting gap (2026-08-04..2026-09-05)
+A4 resurgence,2026-10-21,Ituri,Mahagi,1,78,N,N,Can't be assessed,quiet span overlaps a 32-day reporting gap (2026-08-04..2026-09-05)
+A4 resurgence,2026-11-08,Ituri,Drodro,1,64,N,N,Confirmed,still present 7 days later
+A4 resurgence,2026-11-12,Ituri,Kambala,1,127,N,N,Can't be assessed,quiet span overlaps a 17-day reporting gap (2026-07-18..2026-08-04)
