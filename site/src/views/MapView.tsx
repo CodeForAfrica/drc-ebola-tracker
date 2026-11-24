@@ -5,7 +5,7 @@ import { OutbreakMap, type MapApi } from '@/components/map/OutbreakMap';
 import { LAYERS, layerShort, layerLabel, layerNote, type LayerKey, type Dir, zoneValue } from '@/components/map/layers';
 import { Badge } from '@/components/ui/badge';
 import { EwsLevels } from '@/components/Ews';
-import { ADMIN1, COUNTRIES, DAILY, LATEST, MOB, PROV, ZONES, UNASSIGNED_DEATHS, cname, str, fmt, pct, share, zoneSeries, dateShort, dateLong, type Zone } from '@/lib/data';
+import { ADMIN1, COUNTRIES, DAILY, EWS, LATEST, MOB, PROV, ZONES, UNASSIGNED_DEATHS, cname, str, fmt, pct, share, zoneSeries, dateShort, dateLong, type Zone } from '@/lib/data';
 import { L } from '@/lib/i18n';
 
 const byZone = Object.fromEntries(ZONES.map((z) => [z.z, z]));
@@ -97,7 +97,7 @@ function Legend({ layer, dir, country, sel }: { layer: LayerKey; dir: Dir; count
           <p className="mt-2 text-ink-3">{country === 'all' ? L('Click a bubble to open a country', 'Cliquer sur une bulle pour ouvrir un pays') : L('National total only', 'Total national uniquement')}</p>
         </>
       ) : layer === 'ews' ? (
-        <><p className="font-semibold text-ink">{L('Early-warning level', 'Niveau d’alerte précoce')}</p><EwsLevels compact /><p className="mt-2 text-warn">{L('Not active: thresholds pending', 'Inactif : seuils en attente')}</p></>
+        <><p className="font-semibold text-ink">{L('Early-warning level', 'Niveau d’alerte précoce')}</p><EwsLevels compact /><p className="mt-2 text-ink-3">{L('Automated signals · provisional thresholds', 'Signaux automatisés · seuils provisoires')}</p></>
       ) : (
         <>
           <p className="font-semibold text-ink">{layerLabel(layer)}{layer === 'mob' ? ` · ${dir === 'in' ? L('arrivals', 'arrivées') : dir === 'out' ? L('departures', 'départs') : L('arrivals + departures', 'arrivées + départs')}` : ''}</p>
@@ -139,11 +139,15 @@ function Overview({ layer, dir, onPick, onBack }: { layer: LayerKey; dir: Dir; o
       <Insight layer={layer} dir={dir} />
 
       {layer === 'ews' ? (
-        <div className="rounded-xl border border-dashed border-ink-3/40 p-4">
-          <p className="text-sm font-semibold text-ink">{L('Early warning', 'Alerte précoce')}</p>
-          <p className="mt-1 text-xs text-ink-2">{L('No indicators or thresholds yet. Zones will be classed normal, alert or critical once they are set.', 'Pas encore d’indicateurs ni de seuils. Les zones seront classées normales, en alerte ou critiques une fois ceux-ci définis.')}</p>
-          <div className="mt-3"><EwsLevels /></div>
-          <a href="#early-warning" className="mt-3 inline-block text-xs font-medium text-accent hover:underline">{L('About the early-warning system →', 'À propos du système d’alerte précoce →')}</a>
+        <div className="rounded-xl border border-ink-3/40 p-4">
+          <p className="text-sm font-semibold text-ink">{L('Early warning', 'Alerte précoce')} <span className="font-normal text-ink-3">· N°{EWS.sitrep}</span></p>
+          <p className="mt-1 text-xs text-ink-2">{L('Automated signals from reported counts, with provisional thresholds.', 'Signaux automatisés issus des chiffres rapportés, avec des seuils provisoires.')}</p>
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[12px]">
+            <span className="text-ew-critical">◆ {EWS.counts.critical} {L('critical', 'critique')}</span>
+            <span className="text-ew-alert">▲ {EWS.counts.alert} {L('alert', 'alerte')}</span>
+            <span className="text-ew-normal">● {EWS.counts.normal} {L('normal', 'normal')}</span>
+          </div>
+          <a href="#early-warning" className="mt-3 inline-block text-xs font-medium text-accent hover:underline">{L('Open early warning →', 'Ouvrir l’alerte précoce →')}</a>
         </div>
       ) : (
         <div>
@@ -193,7 +197,8 @@ function Insight({ layer, dir }: { layer: LayerKey; dir: Dir }) {
     if (layer === 'k') { const t = [...ZONES].sort((a, b) => b.k - a.k)[0]; return L(`Relative to population, ${t.z} is hardest hit: ${fmt(t.k)} cases per 100,000.`, `Rapporté à la population, ${t.z} est la plus touchée : ${fmt(t.k)} cas pour 100 000.`); }
     if (layer === 'd') return L(`${fmt(UNASSIGNED_DEATHS)} Ituri deaths are not yet assigned to a zone, so zone deaths add to ${fmt(LATEST.dd - UNASSIGNED_DEATHS)}, not ${fmt(LATEST.dd)}.`, `${fmt(UNASSIGNED_DEATHS)} décès de l’Ituri ne sont pas encore attribués à une zone ; les décès par zone totalisent donc ${fmt(LATEST.dd - UNASSIGNED_DEATHS)}, et non ${fmt(LATEST.dd)}.`);
     if (layer === 'mob') { const k = dir === 'out' ? 'tout' : 'tin'; const t = Object.entries(MOB).sort((a, b) => b[1][k] - a[1][k])[0]; return L(`${t[0]} ${dir === 'out' ? 'sends' : 'receives'} the most movement: ${fmt(t[1][k])} estimated ${dir === 'out' ? 'departures' : 'arrivals'} in April 2026. Click a zone to draw its flows.`, `${t[0]} ${dir === 'out' ? 'émet' : 'reçoit'} le plus de mouvement : ${fmt(t[1][k])} ${dir === 'out' ? 'départs' : 'arrivées'} estimés en avril 2026. Cliquez sur une zone pour tracer ses flux.`); }
-    return L('No zone carries a warning level until the epidemiology team sets indicators and thresholds.', 'Aucune zone ne porte de niveau d’alerte tant que l’équipe d’épidémiologie n’a pas défini d’indicateurs et de seuils.');
+    const top = EWS.zones.find((z) => z.level === 'critical') || EWS.zones.find((z) => z.level === 'alert');
+    return L(`${EWS.counts.critical} critical and ${EWS.counts.alert} alert zones on the latest report${top ? `, led by ${top.z}` : ''}. Automated signals with provisional thresholds; verify against WHO.`, `${EWS.counts.critical} zones critiques et ${EWS.counts.alert} en alerte au dernier rapport${top ? `, en tête ${top.z}` : ''}. Signaux automatisés à seuils provisoires ; vérifier auprès de l’OMS.`);
   }, [layer, dir]);
   return <p className="flex gap-2 rounded-xl bg-accent-soft px-3 py-2.5 text-[12.5px] leading-snug text-ink"><Info className="mt-0.5 h-4 w-4 flex-none text-accent" aria-hidden />{text}</p>;
 }

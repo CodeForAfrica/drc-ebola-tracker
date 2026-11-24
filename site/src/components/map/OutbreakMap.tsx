@@ -12,7 +12,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { COUNTRIES, GEO, MOB, PROV, ZONES, ADMIN1, cname, fmt, dateShort, type Zone } from '@/lib/data';
+import { COUNTRIES, GEO, MOB, PROV, ZONES, ADMIN1, EWS_LEVEL, EWS_ZONE, cname, fmt, dateShort, type Zone } from '@/lib/data';
 import { LAYERS, type LayerKey, type Dir, zoneValue, classOf } from './layers';
 import { L as TR } from '@/lib/i18n';
 
@@ -188,9 +188,15 @@ export function OutbreakMap({ layer, dir, sel, country, onSelect, onCountry, onT
   function paintZone(l: L.Path) {
     const { layer: ly, dir: d, sel: s } = S.current;
     const n = ((l as unknown as { feature: GeoJSON.Feature }).feature.properties as { z: string }).z, on = n === s;
-    const k = classOf(ly, d, n);
     const base = { color: on ? rgb('--accent') : css('--zone-line'), weight: on ? 2.8 : 0.7, dashArray: '' };
-    if (k === 'na') l.setStyle({ ...base, fillColor: rgb('--ink-3'), fillOpacity: ly === 'ews' ? 0.14 : 0, dashArray: '3 3', color: on ? rgb('--accent') : rgb('--ink-3'), weight: on ? 2.8 : 0.9 });
+    if (ly === 'ews') {
+      const lvl = EWS_LEVEL[n] || 'na';
+      if (lvl === 'na') l.setStyle({ ...base, fillColor: rgb('--ink-3'), fillOpacity: 0.14, dashArray: '3 3', color: on ? rgb('--accent') : rgb('--ink-3'), weight: on ? 2.8 : 0.9 });
+      else l.setStyle({ ...base, fillColor: rgb(lvl === 'critical' ? '--ew-critical' : lvl === 'alert' ? '--ew-alert' : '--ew-normal'), fillOpacity: lvl === 'normal' ? 0.45 : 0.82 });
+      return;
+    }
+    const k = classOf(ly, d, n);
+    if (k === 'na') l.setStyle({ ...base, fillColor: rgb('--ink-3'), fillOpacity: 0, dashArray: '3 3', color: on ? rgb('--accent') : rgb('--ink-3'), weight: on ? 2.8 : 0.9 });
     else if (k === 'zero') l.setStyle({ ...base, fillColor: css('--map-land'), fillOpacity: 0.6 });
     else l.setStyle({ ...base, fillColor: css(LAYERS[ly].ramp[k]), fillOpacity: 0.82 });
   }
@@ -260,6 +266,15 @@ function tipHtml(z: Zone, ly: LayerKey, d: Dir) {
     const m = MOB[z.z];
     return head + (m ? `<span class="num">${fmt(m.tin)}</span> ${TR('arrivals', 'arrivées')} · <span class="num">${fmt(m.tout)}</span> ${TR('departures', 'départs')}<br><span class="t3">${TR('April 2026 estimates · click for flows', 'estimations avril 2026 · cliquer pour les flux')}</span>` : `<span class="t3">${TR('No Flowminder coverage', 'Pas de couverture Flowminder')}</span>`);
   }
-  if (ly === 'ews') return head + `<span class="t3">${TR('Early warning not active yet · not assessed', 'Alerte précoce pas encore active · non évaluée')}</span>`;
+  if (ly === 'ews') {
+    const e = EWS_ZONE[z.z];
+    const name: Record<string, [string, string]> = { critical: ['Critical', 'Critique'], alert: ['Alert', 'Alerte'], normal: ['Normal', 'Normal'], na: ['Not assessed', 'Non évalué'] };
+    const lvl = e?.level || 'na';
+    const col = lvl === 'na' ? 'var(--ink-3)' : `rgb(var(--ew-${lvl}))`;
+    const why = lvl === 'critical' || lvl === 'alert'
+      ? `<br><span class="t3">${e.flags.includes('rise') ? `${fmt(e.rolling)} ${TR('new in 7 days', 'nouveaux en 7 jours')}` : e.flags.includes('newzone') ? TR('newly affected', 'nouvellement touchée') : TR('case after a quiet period', 'cas après une période calme')}</span>`
+      : '';
+    return head + `<b style="color:${col}">${TR(name[lvl][0], name[lvl][1])}</b>${why}<br><span class="t3">${TR('automated signal · verify against WHO', 'signal automatisé · vérifier auprès de l’OMS')}</span>`;
+  }
   return head + `<span class="num">${fmt(zoneValue('c', d, z.z))}</span> ${TR('cases', 'cas')} · <span class="num">${fmt(zoneValue('d', d, z.z))}</span> ${TR('deaths', 'décès')} · <span class="num">${fmt(zoneValue('k', d, z.z))}</span>/100k<br><span class="t3">${TR('Click for details', 'Cliquer pour les détails')}</span>`;
 }

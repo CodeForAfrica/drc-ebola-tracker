@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Code for Africa Bundibugyo 2026 outbreak site (React + Vite), reading the tracker config unchanged",
   "scripts": {
-    "data": "node scripts/extract.cjs ../config.drc-bvd-2026.js src/data/tracker.json && node scripts/first_listed.cjs ../data/zones_timeseries_full.csv src/data/tracker.json src/data/firstListed.json && node scripts/facilities.cjs ../data/health_facilities.csv src/data/facilities.json",
+    "data": "node scripts/extract.cjs ../config.drc-bvd-2026.js src/data/tracker.json && node scripts/first_listed.cjs ../data/zones_timeseries_full.csv src/data/tracker.json src/data/firstListed.json && node scripts/facilities.cjs ../data/health_facilities.csv src/data/facilities.json && node scripts/ews.cjs ../data/zones_timeseries_full.csv src/data/ews.json",
     "dev": "vite",
     "typecheck": "tsc -p .",
     "build": "tsc -p . && vite build",
