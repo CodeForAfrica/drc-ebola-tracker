@@ -366,7 +366,7 @@ function Outro({ go }: { go: (r: Route) => void }) {
       <p className="mt-4 font-serif text-[15.5px] font-light leading-relaxed text-ink-2">{T('The map has cases, rates, deaths and the full mobility flows for each zone. Early-warning levels appear once the epidemiology team sets indicators and thresholds.', 'La carte présente les cas, les taux, les décès et l’ensemble des flux de mobilité pour chaque zone. Les niveaux d’alerte précoce apparaîtront une fois les indicateurs et les seuils définis par l’équipe d’épidémiologie.')}</p>
       <div className="mt-7 flex flex-wrap gap-3">
         <button onClick={() => go('map')} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-white shadow-lg"><MapIcon className="h-4 w-4" />{T('Explore the map', 'Explorer la carte')}<ArrowRight className="h-4 w-4" /></button>
-        <button onClick={() => go('early-warning')} className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-5 py-3 text-sm font-bold text-ink"><BellRing className="h-4 w-4" />{T('Early warning (in preparation)', 'Alerte précoce (en préparation)')}</button>
+        <button onClick={() => go('early-warning')} className="inline-flex items-center gap-2 rounded-full border border-rule bg-paper px-5 py-3 text-sm font-bold text-ink"><BellRing className="h-4 w-4" />{T('Early warning', 'Alerte précoce')}</button>
       </div>
     </div>
   );
