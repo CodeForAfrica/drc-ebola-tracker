@@ -7,6 +7,7 @@
 import raw from '@/data/tracker.json';
 import admin1 from '@/data/admin1.json';
 import facilitiesRaw from '@/data/facilities.json';
+import ewsRaw from '@/data/ews.json';
 import { getLang, L } from '@/lib/i18n';
 
 export type NatRow = {
@@ -42,6 +43,15 @@ export const PROV = R.prov;
 export const ZONES = R.zones;
 export const CTRY = R.ctry;
 export const GEO = { zones: R.zgeo, africa: R.africa, provinces: R.provinces };
+/* Early-warning level per zone (automated signals; see scripts/ews.cjs). */
+export type EwsLevel = 'critical' | 'alert' | 'normal' | 'na';
+export const EWS = ewsRaw as unknown as {
+  asof: string; sitrep: string; counts: Record<EwsLevel, number>; total: number;
+  zones: { z: string; p: string; level: EwsLevel; rolling: number; since: number | null; flags: string[] }[];
+};
+export const EWS_LEVEL: Record<string, EwsLevel> = Object.fromEntries(EWS.zones.map((z) => [z.z, z.level]));
+export const EWS_ZONE: Record<string, { level: EwsLevel; rolling: number; since: number | null; flags: string[] }> =
+  Object.fromEntries(EWS.zones.map((z) => [z.z, z]));
 export const STR = R.strings;
 const STRFR = R.stringsFr ?? R.strings;
 /** a Methods coverage/mobility string in the active language (French from the config's T.fr) */

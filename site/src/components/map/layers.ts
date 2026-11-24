@@ -15,7 +15,7 @@ export const LAYERS: Record<LayerKey, Layer> = {
   k: { label: 'Cases per 100,000', short: 'Per 100k', breaks: [0.1, 10, 50, 100, 250, 500], ramp: RED, note: 'v1 shapefile population' },
   d: { label: 'Deaths', short: 'Deaths', breaks: [1, 10, 50, 100, 250, 500], ramp: RED, note: 'Zone-level; 493 Ituri deaths unassigned' },
   mob: { label: 'Mobility', short: 'Mobility', breaks: [1, 250, 1000, 2500, 5000, 10000], ramp: TEAL, note: 'Flowminder / Vodacom, April 2026' },
-  ews: { label: 'Early warning', short: 'Early warning', breaks: [], ramp: [], note: 'Not active yet' },
+  ews: { label: 'Early warning', short: 'Early warning', breaks: [], ramp: [], note: 'Automated signals · provisional thresholds' },
 };
 
 /* French labels/notes for the layer picker and legend (data stays in LAYERS). */
@@ -24,7 +24,7 @@ const TXT: Record<LayerKey, { short: [string, string]; label: [string, string]; 
   k: { short: ['Per 100k', 'Pour 100k'], label: ['Cases per 100,000', 'Cas pour 100 000'], note: ['v1 shapefile population', 'population shapefile v1'] },
   d: { short: ['Deaths', 'Décès'], label: ['Deaths', 'Décès'], note: ['Zone-level; 493 Ituri deaths unassigned', 'Au niveau zone ; 493 décès de l’Ituri non attribués'] },
   mob: { short: ['Mobility', 'Mobilité'], label: ['Mobility', 'Mobilité'], note: ['Flowminder / Vodacom, April 2026', 'Flowminder / Vodacom, avril 2026'] },
-  ews: { short: ['Early warning', 'Alerte précoce'], label: ['Early warning', 'Alerte précoce'], note: ['Not active yet', 'Pas encore actif'] },
+  ews: { short: ['Early warning', 'Alerte précoce'], label: ['Early warning', 'Alerte précoce'], note: ['Automated signals · provisional thresholds', 'Signaux automatisés · seuils provisoires'] },
 };
 const idx = () => (getLang() === 'fr' ? 1 : 0);
 export const layerShort = (k: LayerKey) => TXT[k].short[idx()];
