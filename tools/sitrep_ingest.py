@@ -229,6 +229,9 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
         line = re.sub(r'^[AÀ] ventiler\s*\*?\s*', 'A ventiler ', line)
         line = re.sub(r'^A ventiler AN ', 'A ventiler NA ', line)   # 'AN' typo for 'NA' (N°140)
         line = re.sub(r'^(A ventiler NA \d+) NA! ', r'\1 NA ', line)   # 'NA!' for the CFR cell (N°148)
+        # N°191: the spreadsheet's '#DIV/0!' in the CFR cell (cases 0, deaths 493) is that cell's NA. A ventiler row only;
+        # the deaths are still read and must reconcile with Ituri's subtotal like any zone's.
+        line = re.sub(r'^(A ventiler (?:NA|0) \d+) #DIV/0!(?= |$)', r'\1 NA', line)
         # N°185: a footnote marker after a zone's deaths ('Lubunga 1 2** 200,0% 0 0 2 2', footnote '**En cours
         # d'harmonisation'), as after Ituri's deaths in N°169's Tableau 1. Read the row as printed, keep the marker.
         mk = re.match(r'^(.+?\s+(?:\d+(?: \d{3})*|NA)\s+\d+(?: \d{3})*)\s*(\*+)(\s+.*)?$', line)
