@@ -105,6 +105,9 @@ CASES[187] = dict(case="Tableau 3 runs straight into the alerts paragraph and Ta
 CASES[188] = dict(case="Tableau 3 ends at 'Tableau 4'; 'taux de suivi des contacts s’établit à 79,2 %'")
 CASES[191] = dict(case="Tableau 2 'A ventiler 0 493 #DIV/0! 0': the '#DIV/0!' CFR cell read as NA on the A ventiler row only; "
                        "its 493 deaths reconcile with Ituri's subtotal (3804)")
+CASES[192] = dict(case="new zone announced as 'Une nouvelle zone de santé (Kibirizi, Nord-Kivu) a été touchée' "
+                       "(zone and province in brackets); Kibirizi 1 / 1, Nord-Kivu 18/34, page 1 69 sur 178")
+CASES[193] = dict(case="short all-zero Tableau 3 row 'Nord Ubangi 0 0 0 0 0' read as 0; isolation 1161 as printed (2124 in N°192)")
 FIRST = 126
 # Committed reports deliberately left out of the dashboard series (maintainer decisions): no D.nat2 / D.national /
 # national_timeseries.csv row, one break row in the per-zone series.
@@ -152,6 +155,8 @@ FILENAMES = [
     ('SitRep_N189_19-11-2026_corrige_VF.pdf', 'final', 189, D_('2026-11-19')),
     ('SitRep_N190_20-11-2026_corrige_VF-1.pdf', 'final', 190, D_('2026-11-20')),
     ('SitRep_N191_21-11-2026_corrige_VF-1-1.pdf', 'final', 191, D_('2026-11-21')),
+    ('SitRep_N192_22-11-2026_corrige_VF.pdf', 'final', 192, D_('2026-11-22')),
+    ('SitRep_N193_23-11-2026_corrige_VF.pdf', 'final', 193, D_('2026-11-23')),
 ]
 
 

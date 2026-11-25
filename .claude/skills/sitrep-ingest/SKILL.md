@@ -689,7 +689,9 @@ Do not write any file until all of these pass:
    (`Nouvelle zone de santé touchée : Alimbongo (Nord-Kivu)`, N°141; `Avec l'ajout de la zone de
    santé de Dakwa au Bas Uélé, 65 zones de santé …`, N°147, in the page-1 narrative; `une nouvelle
    province a été touchée, notamment celle Nord Ubangi à travers la zone de santé de (ZS de Wapinda)`
-   and `qui devient la huitième province touchée par l'épidémie avec la ZS de Wapinda`, N°155). Match
+   and `qui devient la huitième province touchée par l'épidémie avec la ZS de Wapinda`, N°155; `Une
+   nouvelle zone de santé (Kibirizi, Nord-Kivu) a été touchée`, N°192, zone and province in brackets,
+   read only in that form). Match
    those sentences only: a bare `(ZS de X)` also appears in ordinary narrative (`(ZS de Likati, Dakwa
    et Ganga)`, N°153) and would let unrelated names through. Older reports announce new
    zones in other words ("une nouvelle province a été touchée … à travers la zone de santé de
@@ -788,6 +790,7 @@ Re-check these on every run (see step 1):
 | N°175 (5 Nov 2026) | `suspects_today` left empty (single-cell rule): Tableau 3 gives 559 (390 + 169), the narrative regex read `4` (a page number sits between `(14,4 %)` and `ont été validées`, as N°150's layout); the narrative itself says 559. Needs a person to decide whether it is a parser miss; not patched in an unattended run. | Re-ingest N°175 after a maintainer fix or corrected upload and fill the cell. |
 | N°176 (6 Nov 2026) | **Ingested with `--accept-t3-row-anomaly`** (maintainer decision, 11 Nov 2026): Bas-Uélé's Tableau 3 row classifies 119 alerts against 114 received; `suspects_today` 506 (347 + 159 = narrative). 321 of 4 176 alerts not yet verified; the "suspects non investigués" column (262) contradicts the narrative's 100 % investigated (investigated-columns rule). | If a corrected upload appears, re-ingest it without the flag and compare. |
 | N°177 (7 Nov 2026) | Ingested under the investigated-columns rule: suspects column 461 (the narrative's "461 cas suspects investigués") against 457 validated; `suspects_today` 457. The highlights keep an editor's note ("423 (À l'équipe : Q2) nouveaux échantillons") in a file named `…_final_corrige.pdf`; no stored field. | If a corrected upload appears, re-ingest and compare. |
+| N°193 (23 Nov 2026) | `patients_in_isolation` is 1161 as printed on the banner (`1161`), down from 2124 in N°192 (−963 in a day); the narrative gives per-province hospitalised figures only (Nord-Kivu 579, Ituri 347, …), no national total to cross-check. Stored as printed, as N°179's 651. | If a corrected upload appears, re-ingest and compare; note what N°194 prints. |
 | N°179 (9 Nov 2026) | `patients_in_isolation` is 651 as printed on the banner, down from 966 in N°178 (−315 in a day); no narrative total to cross-check. Stored as printed. N°180 prints 981 again. | If a corrected upload appears, re-ingest and compare. |
 | N°181 (11 Nov 2026) | **Ingested** (maintainer decisions, 16 Nov 2026): Watsa accepted and mapped (new-zone note above). `suspects_today` **empty** under the single-cell rule: Tableau 3's province rows give validated 365 + 159 = **524**, its Total row 365 + 160 = **525** and the narrative 525; every other column agrees. Sud-Ubangi `12 0 12 0 0 11 0 1 0` (0 validated, 1 investigated) is an investigated-column mismatch only. Haut-Uélé ND (wrapped `ND` line; ND share 4.09 %). Banner isolation 1 676 (981 in N°180). | If a corrected upload appears, re-ingest and compare; fill `suspects_today` only if rows and Total agree. |
 | N°182 (12 Nov 2026) | Ingested. Haut-Uélé's short `0 0 0` Tableau 3 row read as 0 (standing rule above; Total = Σ other rows in every column); suspects 349. | — |

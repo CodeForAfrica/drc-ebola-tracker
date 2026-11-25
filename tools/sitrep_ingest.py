@@ -207,6 +207,8 @@ def _ingest(pdf, outdir, write, title_no, today, pdf_cache, accept_t3_row_anomal
     ANNOUNCED |= set(re.findall(r"[Aa]vec l['’]ajout de la zone de santé de ([A-ZÀ-Ý][\w'-]+(?: [A-ZÀ-Ý][\w'-]+)*)", re.sub(r'\s+', ' ', text)))
     # N°155: new province announced with its zone: 'à travers la zone de santé de (ZS de Wapinda)', 'avec la ZS de Wapinda'
     ANNOUNCED |= set(re.findall(r"(?:nouvelle province a été touchée[^.]{0,80}?\(ZS de|province touchée par l['’]épidémie avec la ZS de) ([A-ZÀ-Ý][\w'-]+(?: [A-ZÀ-Ý][\w'-]+)*)", re.sub(r'\s+', ' ', text)))
+    # N°192: 'Une nouvelle zone de santé (Kibirizi, Nord-Kivu) a été touchée' (zone and province in brackets)
+    ANNOUNCED |= set(re.findall(r"[Nn]ouvelle zone de santé \(([A-ZÀ-Ý][\w'-]+(?: [A-ZÀ-Ý][\w'-]+)*), [^)]{2,30}\) a été touchée", re.sub(r'\s+', ' ', text)))
     subtot, zones, total, pending, leftovers = {}, [], None, '', []
     cur = None
     i = start
